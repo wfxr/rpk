@@ -1,0 +1,6 @@
+# RPK Config File
+#
+# See the documentation for more https://github.com/wfxr/rpk#readme
+
+[pkgs.fd]
+repo = "sharkdp/fd"

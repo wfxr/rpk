@@ -1,0 +1,8 @@
+[build.env]
+passthrough = [
+    "RPK_CONFIG_DIR",
+    "RPK_CACHE_DIR",
+    "RPK_DATA_DIR",
+    "RPK_BIN_DIR",
+    "RUST_LOG",
+]

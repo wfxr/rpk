@@ -1,0 +1,54 @@
+[package]
+name = "rpk"
+version = "0.1.0"
+authors = ["Wenxuan Zhang <wenxuangm@gmail.com>"]
+description = "A lightweight, cross-platform cli package manager."
+homepage = "https://github.com/wfxr/rpk"
+repository = "https://github.com/wfxr/rpk"
+readme = "README.md"
+keywords = ["package", "manager", "github"]
+categories = ["command-line-utilities"]
+exclude = ["/completions"]
+license = "MIT OR Apache-2.0"
+
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+anyhow = "1"
+flate2 = "1"
+futures-util = "0.3"
+indicatif = "0.17"
+octocrab = "0.39"
+reqwest = { version = "0.12", features = [
+    "stream",
+    "rustls-tls",
+], default-features = false }
+serde = { version = "1", features = ["derive"] }
+tar = "0.4"
+tempfile = "3"
+tokio = { version = "1", features = ["full"] }
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+yansi = "1"
+zip = "2"
+clap = { version = "4", features = ["wrap_help", "derive", "env", "color"] }
+clap_complete = { version = "4" }
+home = "0.5"
+constcat = "0.5"
+indexmap = { version = "2", features = ["rayon", "serde"] }
+url = "2"
+futures = "0.3"
+xdg = "2"
+toml_edit = "0.22"
+inquire = "0.7"
+
+[build-dependencies]
+anyhow = "1"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+opt-level = "z"   # Optimize for size.
