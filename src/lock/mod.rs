@@ -1,0 +1,84 @@
+pub mod installer;
+
+use std::{fs, path::Path};
+
+use anyhow::{Context as ResultExt, Error, Result};
+use futures::{stream, StreamExt, TryStreamExt};
+use installer::install_package;
+use serde::{Deserialize, Serialize};
+use sha256::try_async_digest;
+
+use crate::{
+    config::{Config, Package},
+    context::Context,
+    provider::{github::Github, Provider},
+};
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub struct LockedConfig {
+    #[serde(flatten)]
+    ctx: Context,
+
+    pub pkgs: Vec<LockedPackage>,
+
+    /// Any errors that occurred while generating this `LockedConfig`.
+    #[serde(skip)]
+    pub errors: Vec<Error>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(tag = "source")]
+#[serde(rename_all = "lowercase")]
+pub struct LockedPackage {
+    #[serde(flatten)]
+    pub pkg: Package,
+
+    pub filename: String,
+    pub checksum: String,
+}
+
+// Install a package.
+pub async fn lock_package(ctx: &Context, provider: impl Provider, pkg: Package) -> Result<LockedPackage> {
+    let path = provider.download(ctx.clone(), &pkg).await?;
+
+    install_package(ctx, &pkg, &path)?;
+
+    let filename = path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .ok_or_else(|| anyhow::anyhow!("missing filename"))?
+        .to_owned();
+
+    let checksum = try_async_digest(&path).await?;
+    ctx.log_status("Checked", &format!("{}@{}", pkg.name, pkg.version));
+
+    Ok(LockedPackage { pkg, filename, checksum })
+}
+
+/// Load a [`LockedConfig`] from the given path.
+pub fn load(path: impl AsRef<Path>) -> Result<LockedConfig> {
+    let buf = fs::read_to_string(path.as_ref())?;
+    toml::from_str(&buf).context("failed to deserialize locked config")
+}
+
+/// Installs all necessary packages, and returns a [`LockedConfig`].
+pub async fn lock_packages(ctx: &Context, config: Config) -> Result<LockedConfig> {
+    let provider = Github::new()?;
+
+    let locked = stream::iter(config.pkgs.into_iter())
+        .then(|pkg| lock_package(ctx, &provider, pkg))
+        .try_collect()
+        .await?;
+
+    Ok(LockedConfig { ctx: ctx.clone(), pkgs: locked, errors: Vec::new() })
+}
+
+impl LockedConfig {
+    /// Write this `LockedConfig` to the given path.
+    pub fn save(&self) -> Result<()> {
+        let buf = toml::to_string_pretty(self)?;
+        fs::write(&self.ctx.lock_file, buf)?;
+        Ok(())
+    }
+}
