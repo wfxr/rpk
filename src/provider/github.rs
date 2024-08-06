@@ -46,7 +46,6 @@ impl Provider for Github {
         };
 
         let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
-
         let (version, release) = match &pkg.version {
             Some(version) => {
                 let release = self.crab.repos(owner, repo).releases().get_by_tag(version).await?;
@@ -74,11 +73,23 @@ impl Provider for Github {
             ctx.log_verbose_status("Downloaded", &asset.browser_download_url);
         }
 
+        // get description from the release if not provided
+        let desc = match &pkg.desc {
+            Some(desc) => desc.clone().into(),
+            None => self
+                .crab
+                .repos(owner, repo)
+                .get()
+                .await
+                .ok()
+                .and_then(|repo| repo.description),
+        };
+
         Ok(LockedPackage {
             name: pkg.name.clone(),
             version,
             source: pkg.source.clone(),
-            desc: pkg.desc.clone(),
+            desc,
             filename: asset.name.clone(),
             download_url: asset.browser_download_url.clone().into(),
         })
