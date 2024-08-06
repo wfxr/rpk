@@ -55,14 +55,18 @@ pub enum Command {
     Add(Package),
 
     /// Check and install any missing packages.
-    Check {
-        /// require that config.lock is up-to-date.
-        locked: bool,
-    },
+    Sync,
 
     /// Update the packages and regenerate the lock file.
     Update {
         /// The packages to update.
+        package: Option<String>,
+    },
+
+    /// Restore all packages to the state in the lockfile. For a single package,
+    /// restore it to the state in the lockfile.
+    Restore {
+        /// The packages to restore.
         package: Option<String>,
     },
 }
@@ -94,12 +98,13 @@ impl Opt {
 
                 Command::Add(Package { name, source, version, desc })
             }
-            RawCommand::Check { locked } => Command::Check { locked },
+            RawCommand::Sync => Command::Sync,
             RawCommand::Update { package } => Command::Update { package },
             RawCommand::Version => {
                 println!("{} {}", build::CRATE_NAME, build::CRATE_VERBOSE_VERSION);
                 process::exit(0);
             }
+            RawCommand::Restore { package } => Command::Restore { package },
         };
 
         let verbosity = if quiet {

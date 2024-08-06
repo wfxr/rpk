@@ -3,7 +3,6 @@ use std::{
         self,
         consts::{ARCH, OS},
     },
-    path::PathBuf,
     sync::LazyLock,
 };
 
@@ -41,7 +40,7 @@ impl Github {
 }
 
 impl Provider for &Github {
-    async fn download(&self, ctx: Context, pkg: &Package) -> Result<PathBuf> {
+    async fn download(&self, ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
         let repo = match &pkg.source {
             Source::Github { repo } => repo,
         };
@@ -56,47 +55,58 @@ impl Provider for &Github {
 
         let path = ctx.cache_dir.join(&asset.name);
 
-        // download the asset if not exists
+        // skip download if the asset already exists
         if path.exists() {
-            // TODO: checksum
             ctx.log_verbose_status("Skipped", &"Asset already exists");
         } else {
-            ctx.log_verbose_status("Downloading", &asset.browser_download_url);
-            self.http.download(asset.browser_download_url.clone(), &path).await?;
+            self.http
+                .download(asset.browser_download_url.clone(), &ctx.cache_dir, &asset.name)
+                .await?;
+            ctx.log_verbose_status("Downloaded", &asset.browser_download_url);
         }
 
-        Ok(path)
+        Ok(LockedPackage {
+            base:         pkg.clone(),
+            filename:     asset.name.clone(),
+            download_url: asset.browser_download_url.clone().into(),
+        })
     }
 
-    async fn download_locked(&self, ctx: Context, pkg: &LockedPackage) -> Result<PathBuf> {
+    async fn download_locked(&self, ctx: &Context, pkg: &LockedPackage) -> Result<()> {
         let path = ctx.cache_dir.join(&pkg.filename);
 
-        // download the asset if not exists
+        // skip download if the asset already exists
         if path.exists() {
-            // TODO: checksum
             ctx.log_verbose_status("Skipped", &"Asset already exists");
-            return Ok(path);
+            return Ok(());
         }
 
-        let repo = match &pkg.pkg.source {
+        let repo = match &pkg.base.source {
             Source::Github { repo } => repo,
         };
-        let version = &pkg.pkg.version;
+        let version = &pkg.base.version;
 
-        let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
-        let release = self.crab.repos(owner, repo).releases().get_by_tag(version).await?;
-        ctx.log_verbose_status("Fetched", &format!("{owner}/{repo}@{version}"));
+        let download_url = match pkg.download_url.as_ref() {
+            Some(url) => url.clone(),
+            None => {
+                let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
+                let release = self.crab.repos(owner, repo).releases().get_by_tag(version).await?;
+                ctx.log_verbose_status("Fetched", &format!("{owner}/{repo}@{version}"));
+                let asset = release
+                    .assets
+                    .iter()
+                    .find(|asset| asset.name == pkg.filename)
+                    .ok_or_else(|| anyhow::anyhow!("Asset not found"))?;
+                asset.browser_download_url.clone()
+            }
+        };
 
-        let asset = release
-            .assets
-            .iter()
-            .find(|asset| asset.name == pkg.filename)
-            .ok_or_else(|| anyhow::anyhow!("Asset not found"))?;
+        ctx.log_verbose_status("Downloading", &download_url);
+        self.http
+            .download(download_url.clone(), &ctx.cache_dir, &pkg.filename)
+            .await?;
 
-        ctx.log_verbose_status("Downloading", &asset.browser_download_url);
-        self.http.download(asset.browser_download_url.clone(), &path).await?;
-
-        Ok(path)
+        Ok(())
     }
 }
 

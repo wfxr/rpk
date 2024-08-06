@@ -2,11 +2,11 @@ pub mod installer;
 
 use std::fs;
 
-use anyhow::{anyhow, bail, Error, Result};
+use anyhow::{Error, Result};
 use futures::{stream, StreamExt, TryStreamExt};
 use installer::install_package;
 use serde::{Deserialize, Serialize};
-use sha256::try_async_digest;
+use url::Url;
 
 use crate::{
     config::{Config, Package},
@@ -32,66 +32,50 @@ pub struct LockedConfig {
 #[serde(rename_all = "lowercase")]
 pub struct LockedPackage {
     #[serde(flatten)]
-    pub pkg: Package,
+    pub base: Package,
 
-    pub filename: String,
-    pub checksum: String,
+    pub filename:     String,
+    pub download_url: Option<Url>,
 }
 
 // Install a package.
-pub async fn lock_package(ctx: &Context, provider: impl Provider, pkg: Package) -> Result<LockedPackage> {
-    let path = provider.download(ctx.clone(), &pkg).await?;
+pub async fn sync_package(ctx: &Context, provider: impl Provider, pkg: Package) -> Result<LockedPackage> {
+    let locked_package = provider.download(ctx, &pkg).await?;
 
-    install_package(ctx, &pkg, &path).await?;
-
-    let filename = path
-        .file_name()
-        .and_then(|s| s.to_str())
-        .ok_or_else(|| anyhow!("missing filename"))?
-        .to_owned();
-
-    let checksum = try_async_digest(&path).await?;
+    install_package(ctx, &locked_package).await?;
     ctx.log_status("Checked", &format!("{}@{}", pkg.name, pkg.version));
 
-    Ok(LockedPackage { pkg, filename, checksum })
+    Ok(locked_package)
 }
 
-pub async fn check_package(ctx: &Context, provider: impl Provider, pkg: LockedPackage) -> Result<()> {
-    let path = provider.download_locked(ctx.clone(), &pkg).await?;
+pub async fn restore_package(ctx: &Context, provider: impl Provider, lpkg: LockedPackage) -> Result<()> {
+    provider.download_locked(ctx, &lpkg).await?;
 
-    let locked_checksum = pkg.checksum;
-
-    let checksum = try_async_digest(&path).await?;
-    if checksum != locked_checksum {
-        ctx.log_status("Mismatch", &format!("{}@{}", pkg.pkg.name, pkg.pkg.version));
-        bail!("checksum mismatch");
-    }
-
-    install_package(ctx, &pkg.pkg, &path).await?;
-    ctx.log_status("Checked", &format!("{}@{}", pkg.pkg.name, pkg.pkg.version));
+    install_package(ctx, &lpkg).await?;
+    ctx.log_status("Checked", &format!("{}@{}", lpkg.base.name, lpkg.base.version));
 
     Ok(())
 }
 
-/// Installs all necessary packages, and returns a [`LockedConfig`].
-pub async fn lock_packages(ctx: &Context, config: Config) -> Result<LockedConfig> {
+/// Install all necessary packages, and returns a [`LockedConfig`].
+pub async fn sync_packages(ctx: &Context, config: Config) -> Result<LockedConfig> {
     let provider = Github::new()?;
 
     let locked = stream::iter(config.pkgs.into_iter())
-        .then(|pkg| lock_package(ctx, &provider, pkg))
+        .then(|pkg| sync_package(ctx, &provider, pkg))
         .try_collect()
         .await?;
 
     Ok(LockedConfig { ctx: ctx.clone(), pkgs: locked, errors: Vec::new() })
 }
 
-/// Installs all necessary packages according to the given [`LockedConfig`].
-pub async fn check_packages(ctx: &Context, config: LockedConfig) -> Result<()> {
+/// Restore packages according to the given [`LockedConfig`].
+pub async fn restore_packages(ctx: &Context, config: LockedConfig) -> Result<()> {
     let provider = Github::new()?;
 
     // TODO: refactor this
     let _: Vec<()> = stream::iter(config.pkgs.into_iter())
-        .then(|pkg| check_package(ctx, &provider, pkg))
+        .then(|pkg| restore_package(ctx, &provider, pkg))
         .try_collect()
         .await?;
 

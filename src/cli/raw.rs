@@ -74,17 +74,22 @@ pub enum RawCommand {
         desc: Option<String>,
     },
 
-    /// Check and install any missing packages.
-    Check {
-        /// require that packages.lock is up-to-date.
-        #[clap(long)]
-        locked: bool,
+    /// Restore all packages to the state in the lockfile. For a single package,
+    /// restore it to the state in the lockfile.
+    Restore {
+        /// The packages to restore.
+        #[clap(value_name = "PKG")]
+        package: Option<String>,
     },
 
-    /// Update the packages and re-generate the lock file.
+    /// Check and install any missing packages, re-generating the lock file.
+    Sync,
+
+    /// Update all packages and re-generate the lock file. For a single package,
+    /// update it and re-generate the lock file.
     Update {
         /// The packages to update.
-        #[clap(value_name = "PACKAGE")]
+        #[clap(value_name = "PKG")]
         package: Option<String>,
     },
 

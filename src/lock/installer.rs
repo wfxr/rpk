@@ -12,10 +12,11 @@ use tracing::{debug, trace};
 use zip::ZipArchive;
 
 use crate::{
-    config::Package,
     context::Context,
     util::fs_ext::{detect_common_prefix, get_file_name_utf8, mkdir_p, symlink_force},
 };
+
+use super::LockedPackage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Compression {
@@ -57,11 +58,14 @@ pub fn detect_archive(path: impl AsRef<Path>) -> anyhow::Result<ArchiveKind> {
     Ok(kind)
 }
 
-pub async fn install_package(ctx: &Context, pkg: &Package, file: impl AsRef<Path>) -> anyhow::Result<()> {
+pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()> {
+    let file = &ctx.cache_dir.join(&lpkg.filename);
+    let pkg = &lpkg.base;
+
     let install_dir = ctx.data_dir.join(format!("{}-{}", pkg.name, pkg.version));
 
-    let archive = detect_archive(file.as_ref())?;
-    let file = std::fs::File::open(file.as_ref())?;
+    let archive = detect_archive(file)?;
+    let file = std::fs::File::open(file)?;
 
     mkdir_p(&install_dir).await?;
 
