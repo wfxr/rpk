@@ -2,12 +2,16 @@
 
 use std::{fmt, str};
 
+use anyhow::{Context as _, Result};
 use serde::{
     de::{Error, MapAccess, Visitor},
     Deserialize,
     Deserializer,
     Serialize,
 };
+use tokio::fs;
+
+use crate::{context::Context, util::fs_ext::load_toml};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -99,5 +103,27 @@ impl<'de> Visitor<'de> for SourceVisitor {
         };
 
         Ok(source)
+    }
+}
+
+impl Config {
+    /// Load the configuration from the given path.
+    pub async fn load(ctx: &Context) -> Result<Self> {
+        load_toml(&ctx.config_file)
+            .await
+            .with_context(|| format!("failed to load {}", ctx.config_file.display()))
+    }
+
+    /// Write this `LockedConfig` to the given path.
+    pub async fn save(&self, ctx: &Context) -> Result<()> {
+        let buf = toml::to_string_pretty(self).context("failed to serialize `Config`")?;
+        fs::write(&ctx.config_file, buf)
+            .await
+            .with_context(|| format!("failed to save {}", ctx.config_file.display()))
+    }
+
+    /// Add a package to the configuration.
+    pub fn add_pkg(&mut self, pkg: Package) {
+        self.pkgs.push(pkg);
     }
 }

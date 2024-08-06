@@ -57,20 +57,22 @@ pub enum RawCommand {
 
     /// Add a new plugin to the config file.
     Add {
-        /// A unique name for the package.
-        #[clap(value_name = "NAME")]
-        name: Option<String>,
-
-        /// The repository hosting the package.
+        /// The github repository hosting the package
+        ///
+        /// Example: `sharkdp/fd`
         #[clap(value_name = "REPO")]
         repo: String,
 
+        /// A unique name for the package.
+        #[clap(long, value_name = "NAME")]
+        name: Option<String>,
+
         /// The version of the package.
-        #[clap(value_name = "VERSION")]
+        #[clap(long, value_name = "VERSION")]
         version: String,
 
         /// A description of the package.
-        #[clap(value_name = "DESC", long)]
+        #[clap(long, value_name = "DESC", long)]
         desc: Option<String>,
     },
 

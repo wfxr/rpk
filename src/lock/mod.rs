@@ -1,6 +1,6 @@
 pub mod installer;
 
-use anyhow::{Error, Result};
+use anyhow::{Context as _, Error, Result};
 use futures::{stream, StreamExt, TryStreamExt};
 use installer::install_package;
 use serde::{Deserialize, Serialize};
@@ -11,6 +11,7 @@ use crate::{
     config::{Config, Package},
     context::Context,
     provider::{github::Github, Provider},
+    util::fs_ext::load_toml,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,9 +39,9 @@ pub struct LockedPackage {
 }
 
 // Install a package.
-pub async fn sync_package(ctx: &Context, pkg: Package) -> Result<LockedPackage> {
+pub async fn sync_package(ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
     let provider = Github::new()?;
-    let locked_package = provider.download(ctx, &pkg).await?;
+    let locked_package = provider.download(ctx, pkg).await?;
 
     install_package(ctx, &locked_package).await?;
     ctx.log_status("Checked", &format!("{}@{}", pkg.name, pkg.version));
@@ -51,7 +52,7 @@ pub async fn sync_package(ctx: &Context, pkg: Package) -> Result<LockedPackage> 
 pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
     let provider = Github::new()?;
 
-    (&provider).download_locked(ctx, &lpkg).await?;
+    provider.download_locked(ctx, &lpkg).await?;
 
     install_package(ctx, &lpkg).await?;
     ctx.log_status("Checked", &format!("{}@{}", lpkg.base.name, lpkg.base.version));
@@ -61,35 +62,44 @@ pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
 
 /// Install all necessary packages, and returns a [`LockedConfig`].
 pub async fn sync_packages(ctx: &Context, config: Config) -> Result<LockedConfig> {
-    let locked = stream::iter(config.pkgs.into_iter())
-        .then(|pkg| sync_package(ctx, pkg))
-        .try_collect()
-        .await?;
+    let mut locked = Vec::new();
+    for pkg in config.pkgs {
+        let lpkg = sync_package(ctx, &pkg).await?;
+        locked.push(lpkg);
+    }
 
     Ok(LockedConfig { ctx: ctx.clone(), pkgs: locked, errors: Vec::new() })
 }
 
 /// Restore packages according to the given [`LockedConfig`].
-pub async fn restore_packages(ctx: &Context, config: LockedConfig) -> Result<()> {
-    let _: Vec<()> = stream::iter(config.pkgs.into_iter())
-        .then(|pkg| restore_package(ctx, pkg))
+pub async fn restore_packages(lcfg: LockedConfig) -> Result<()> {
+    let _: Vec<()> = stream::iter(lcfg.pkgs.into_iter())
+        .then(|pkg| restore_package(&lcfg.ctx, pkg))
         .try_collect()
         .await?;
 
     Ok(())
 }
 
-pub async fn add_package(ctx: &Context, pkg: Package) -> Result<LockedPackage> {
-    let locked = sync_package(ctx, pkg).await?;
-
-    Ok(locked)
-}
-
 impl LockedConfig {
+    pub async fn load(ctx: &Context) -> Result<Self> {
+        let mut lcfg: LockedConfig = load_toml(&ctx.lock_file)
+            .await
+            .with_context(|| format!("failed to load {}", ctx.lock_file.display()))?;
+        lcfg.ctx = ctx.clone();
+        Ok(lcfg)
+    }
+
     /// Write this `LockedConfig` to the given path.
     pub async fn save(&self) -> Result<()> {
-        let buf = toml::to_string_pretty(self)?;
-        fs::write(&self.ctx.lock_file, buf).await?;
-        Ok(())
+        let buf = toml::to_string_pretty(self).context("failed to serialize `LockedConfig`")?;
+        fs::write(&self.ctx.lock_file, buf)
+            .await
+            .with_context(|| format!("failed to save {}", self.ctx.lock_file.display()))
+    }
+
+    /// Add a package to the configuration.
+    pub fn add_pkg(&mut self, lpkg: LockedPackage) {
+        self.pkgs.push(lpkg);
     }
 }

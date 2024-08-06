@@ -72,8 +72,8 @@ impl Provider for Github {
         })
     }
 
-    async fn download_locked(&self, ctx: &Context, pkg: &LockedPackage) -> Result<()> {
-        let path = ctx.cache_dir.join(&pkg.filename);
+    async fn download_locked(&self, ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
+        let path = ctx.cache_dir.join(&lpkg.filename);
 
         // skip download if the asset already exists
         if path.exists() {
@@ -81,12 +81,12 @@ impl Provider for Github {
             return Ok(());
         }
 
-        let repo = match &pkg.base.source {
+        let repo = match &lpkg.base.source {
             Source::Github { repo } => repo,
         };
-        let version = &pkg.base.version;
+        let version = &lpkg.base.version;
 
-        let download_url = match pkg.download_url.as_ref() {
+        let download_url = match lpkg.download_url.as_ref() {
             Some(url) => url.clone(),
             None => {
                 let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
@@ -95,7 +95,7 @@ impl Provider for Github {
                 let asset = release
                     .assets
                     .iter()
-                    .find(|asset| asset.name == pkg.filename)
+                    .find(|asset| asset.name == lpkg.filename)
                     .ok_or_else(|| anyhow::anyhow!("Asset not found"))?;
                 asset.browser_download_url.clone()
             }
@@ -103,7 +103,7 @@ impl Provider for Github {
 
         ctx.log_verbose_status("Downloading", &download_url);
         self.http
-            .download(download_url.clone(), &ctx.cache_dir, &pkg.filename)
+            .download(download_url.clone(), &ctx.cache_dir, &lpkg.filename)
             .await?;
 
         Ok(())

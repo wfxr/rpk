@@ -10,10 +10,10 @@ use std::process;
 
 use anyhow::Context;
 use cli::Opt;
+use config::Config;
 use context::log_error;
-use lock::{restore_package, restore_packages, sync_packages, LockedConfig};
+use lock::{restore_package, restore_packages, sync_package, sync_packages, LockedConfig};
 use tracing_subscriber::EnvFilter;
-use util::fs_ext::load_toml;
 
 async fn try_main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
@@ -25,24 +25,34 @@ async fn try_main() -> anyhow::Result<()> {
 
     match command {
         cli::Command::Init => todo!(),
-        cli::Command::Add(_pkg) => todo!(),
-        cli::Command::Sync => {
-            let cfg = load_toml(&ctx.config_file)
+        cli::Command::Add(pkg) => {
+            let mut cfg = Config::load(&ctx).await?;
+            ctx.log_header("Loaded", ctx.config_file.as_path());
+
+            let lpkg = sync_package(&ctx, &pkg).await?;
+
+            cfg.add_pkg(lpkg.base.clone());
+            cfg.save(&ctx)
                 .await
-                .with_context(|| format!("failed to load {}", ctx.config_file.display()))?;
+                .with_context(|| format!("failed to save {}", ctx.config_file.display()))?;
+
+            let mut lcfg = LockedConfig::load(&ctx).await?;
+            ctx.log_verbose_header("Loaded", ctx.lock_file.as_path());
+            lcfg.add_pkg(lpkg);
+            lcfg.save().await?;
+            ctx.log_header("Locked", ctx.lock_file.as_path());
+        }
+        cli::Command::Sync => {
+            let cfg = Config::load(&ctx).await?;
             ctx.log_header("Loaded", ctx.config_file.as_path());
 
             let lcfg = sync_packages(&ctx, cfg).await?;
 
-            lcfg.save()
-                .await
-                .with_context(|| format!("failed to save {}", ctx.lock_file.display()))?;
+            lcfg.save().await?;
             ctx.log_header("Locked", ctx.lock_file.as_path());
         }
         cli::Command::Restore { package } => {
-            let lcfg: LockedConfig = load_toml(&ctx.lock_file)
-                .await
-                .with_context(|| format!("failed to load {}", ctx.lock_file.display()))?;
+            let lcfg = LockedConfig::load(&ctx).await?;
             ctx.log_header("Loaded", ctx.lock_file.as_path());
 
             match package {
@@ -54,7 +64,7 @@ async fn try_main() -> anyhow::Result<()> {
                         .with_context(|| format!("package {} not found", pkg))?;
                     restore_package(&ctx, lpkg).await?;
                 }
-                None => restore_packages(&ctx, lcfg).await?,
+                None => restore_packages(lcfg).await?,
             }
         }
         cli::Command::Update { package: _ } => todo!(),
