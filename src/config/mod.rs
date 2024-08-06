@@ -11,7 +11,7 @@ use serde::{
 };
 use tokio::fs;
 
-use crate::{context::Context, util::fs_ext::load_toml};
+use crate::{context::Context, lock::LockedPackage, util::fs_ext::load_toml};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -24,11 +24,10 @@ pub struct Config {
 #[serde(rename_all = "snake_case")]
 pub struct Package {
     pub name:    String,
-    pub version: String,
+    pub version: Option<String>,
     #[serde(flatten)]
     pub source:  Source,
-
-    pub desc: Option<String>,
+    pub desc:    Option<String>,
 }
 
 #[derive(Debug, Serialize, Clone, PartialEq, Eq)]
@@ -51,7 +50,11 @@ impl fmt::Display for Source {
 impl fmt::Display for Package {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { name, version, source, desc: _ } = self;
-        write!(f, "{name}@{version} from {source}")
+        write!(
+            f,
+            "{name}@{version} from {source}",
+            version = version.as_deref().unwrap_or("latest"),
+        )
     }
 }
 
@@ -125,5 +128,16 @@ impl Config {
     /// Add a package to the configuration.
     pub fn add_pkg(&mut self, pkg: Package) {
         self.pkgs.push(pkg);
+    }
+}
+
+impl From<LockedPackage> for Package {
+    fn from(val: LockedPackage) -> Self {
+        Package {
+            name:    val.name,
+            version: val.version.into(),
+            source:  val.source,
+            desc:    val.desc,
+        }
     }
 }

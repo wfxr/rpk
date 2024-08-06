@@ -8,7 +8,7 @@ use tokio::fs;
 use url::Url;
 
 use crate::{
-    config::{Config, Package},
+    config::{Config, Package, Source},
     context::Context,
     provider::{github::Github, Provider},
     util::fs_ext::load_toml,
@@ -20,6 +20,7 @@ pub struct LockedConfig {
     #[serde(flatten)]
     ctx: Context,
 
+    #[serde(default)]
     pub pkgs: Vec<LockedPackage>,
 
     /// Any errors that occurred while generating this `LockedConfig`.
@@ -31,9 +32,11 @@ pub struct LockedConfig {
 #[serde(tag = "source")]
 #[serde(rename_all = "lowercase")]
 pub struct LockedPackage {
+    pub name:         String,
+    pub version:      String,
     #[serde(flatten)]
-    pub base: Package,
-
+    pub source:       Source,
+    pub desc:         Option<String>,
     pub filename:     String,
     pub download_url: Option<Url>,
 }
@@ -41,12 +44,12 @@ pub struct LockedPackage {
 // Install a package.
 pub async fn sync_package(ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
     let provider = Github::new()?;
-    let locked_package = provider.download(ctx, pkg).await?;
+    let lpkg = provider.download(ctx, pkg).await?;
 
-    install_package(ctx, &locked_package).await?;
-    ctx.log_status("Checked", &format!("{}@{}", pkg.name, pkg.version));
+    install_package(ctx, &lpkg).await?;
+    ctx.log_status("Checked", &format!("{}@{}", pkg.name, lpkg.version));
 
-    Ok(locked_package)
+    Ok(lpkg)
 }
 
 pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
@@ -55,7 +58,7 @@ pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
     provider.download_locked(ctx, &lpkg).await?;
 
     install_package(ctx, &lpkg).await?;
-    ctx.log_status("Checked", &format!("{}@{}", lpkg.base.name, lpkg.base.version));
+    ctx.log_status("Checked", &format!("{}@{}", lpkg.name, lpkg.version));
 
     Ok(())
 }

@@ -69,7 +69,7 @@ pub enum RawCommand {
 
         /// The version of the package.
         #[clap(long, value_name = "VERSION")]
-        version: String,
+        version: Option<String>,
 
         /// A description of the package.
         #[clap(long, value_name = "DESC", long)]

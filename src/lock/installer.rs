@@ -60,20 +60,18 @@ pub fn detect_archive(path: impl AsRef<Path>) -> anyhow::Result<ArchiveKind> {
 
 pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()> {
     let file = &ctx.cache_dir.join(&lpkg.filename);
-    let pkg = &lpkg.base;
-
-    let install_dir = ctx.data_dir.join(format!("{}-{}", pkg.name, pkg.version));
+    let install_dir = ctx.data_dir.join(format!("{}-{}", lpkg.name, lpkg.version));
 
     let archive = detect_archive(file)?;
     let file = std::fs::File::open(file)?;
 
     mkdir_p(&install_dir).await?;
 
-    let link_path = ctx.bin_dir.join(&pkg.name);
+    let link_path = ctx.bin_dir.join(&lpkg.name);
 
     match archive {
         ArchiveKind::Plain(compression) => {
-            let install_path = install_dir.join(&pkg.name);
+            let install_path = install_dir.join(&lpkg.name);
             let install_file = fs::OpenOptions::new()
                 .write(true)
                 .create(true)
@@ -132,7 +130,7 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
                 io::copy(&mut file, &mut output)?;
 
                 let filename = get_file_name_utf8(path)?;
-                if filename == Some(&pkg.name) || nfiles == 1 {
+                if filename == Some(&lpkg.name) || nfiles == 1 {
                     let mode = mode | 0o111;
                     fs::set_permissions(&install_path, fs::Permissions::from_mode(mode))?;
                     symlink_force(install_path, &link_path).await?;
@@ -179,7 +177,7 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
                 entry.unpack(&install_path)?;
 
                 let filename = get_file_name_utf8(path)?;
-                if filename == Some(&pkg.name) {
+                if filename == Some(&lpkg.name) {
                     let mode = entry.header().mode().unwrap_or(0o644) | 0o111;
                     fs::set_permissions(&install_path, fs::Permissions::from_mode(mode))?;
                     symlink_force(install_path, &link_path).await?;

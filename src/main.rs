@@ -25,21 +25,21 @@ async fn try_main() -> anyhow::Result<()> {
 
     match command {
         cli::Command::Init => todo!(),
-        cli::Command::Add(pkg) => {
+        cli::Command::Add(mut pkg) => {
             let mut cfg = Config::load(&ctx).await?;
             ctx.log_header("Loaded", ctx.config_file.as_path());
+            let mut lcfg = LockedConfig::load(&ctx).await?;
+            ctx.log_verbose_header("Loaded", ctx.lock_file.as_path());
 
             let lpkg = sync_package(&ctx, &pkg).await?;
 
-            cfg.add_pkg(lpkg.base.clone());
-            cfg.save(&ctx)
-                .await
-                .with_context(|| format!("failed to save {}", ctx.config_file.display()))?;
-
-            let mut lcfg = LockedConfig::load(&ctx).await?;
-            ctx.log_verbose_header("Loaded", ctx.lock_file.as_path());
+            pkg.desc = lpkg.desc.clone();
+            cfg.add_pkg(pkg);
             lcfg.add_pkg(lpkg);
+
+            cfg.save(&ctx).await?;
             lcfg.save().await?;
+
             ctx.log_header("Locked", ctx.lock_file.as_path());
         }
         cli::Command::Sync => {
@@ -60,7 +60,7 @@ async fn try_main() -> anyhow::Result<()> {
                     let lpkg = lcfg
                         .pkgs
                         .into_iter()
-                        .find(|lpkg| lpkg.base.name == pkg)
+                        .find(|lpkg| lpkg.name == pkg)
                         .with_context(|| format!("package {} not found", pkg))?;
                     restore_package(&ctx, lpkg).await?;
                 }

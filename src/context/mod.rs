@@ -15,6 +15,7 @@ use crate::context::message::{Message, ToMessage};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Context {
+    /// The version of the application.
     pub version: String,
 
     /// The location of the config file.

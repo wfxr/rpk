@@ -47,8 +47,17 @@ impl Provider for Github {
 
         let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
 
-        let release = self.crab.repos(owner, repo).releases().get_by_tag(&pkg.version).await?;
-        ctx.log_verbose_status("Fetched", &format!("{owner}/{repo}@{version}", version = pkg.version));
+        let (version, release) = match &pkg.version {
+            Some(version) => {
+                let release = self.crab.repos(owner, repo).releases().get_by_tag(version).await?;
+                (version.to_owned(), release)
+            }
+            None => {
+                let release = self.crab.repos(owner, repo).releases().get_latest().await?;
+                (release.tag_name.to_owned(), release)
+            }
+        };
+        ctx.log_verbose_status("Fetched", &format!("{owner}/{repo}@{version}"));
 
         let asset = filter_assets(&release)?;
         ctx.log_verbose_status("Filtered", &asset.name);
@@ -66,8 +75,11 @@ impl Provider for Github {
         }
 
         Ok(LockedPackage {
-            base:         pkg.clone(),
-            filename:     asset.name.clone(),
+            name: pkg.name.clone(),
+            version,
+            source: pkg.source.clone(),
+            desc: pkg.desc.clone(),
+            filename: asset.name.clone(),
             download_url: asset.browser_download_url.clone().into(),
         })
     }
@@ -81,10 +93,10 @@ impl Provider for Github {
             return Ok(());
         }
 
-        let repo = match &lpkg.base.source {
+        let repo = match &lpkg.source {
             Source::Github { repo } => repo,
         };
-        let version = &lpkg.base.version;
+        let version = &lpkg.version;
 
         let download_url = match lpkg.download_url.as_ref() {
             Some(url) => url.clone(),
