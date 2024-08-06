@@ -6,16 +6,6 @@ use clap::Parser;
 
 use crate::{cli::color_choice::ColorChoice, util::build};
 
-const HELP_TEMPLATE: &str = "\
-{before-help}{bin} {version}
-{author}
-{about}
-
-{usage-heading}
-{tab}{usage}
-
-{all-args}{after-help}";
-
 #[derive(Debug, PartialEq, Eq, Parser)]
 #[clap(
     author,
@@ -23,7 +13,6 @@ const HELP_TEMPLATE: &str = "\
     long_version = build::CRATE_LONG_VERSION,
     about,
     long_about = None,
-    help_template = HELP_TEMPLATE,
     disable_help_subcommand(true),
     subcommand_required(true),
 )]
@@ -31,10 +20,6 @@ pub struct RawOpt {
     /// Suppress any informational output.
     #[clap(long, short)]
     pub quiet: bool,
-
-    /// Suppress any interactive prompts and assume "yes" as the answer.
-    #[clap(long)]
-    pub non_interactive: bool,
 
     /// Use verbose output.
     #[clap(long, short)]
@@ -48,17 +33,17 @@ pub struct RawOpt {
     #[clap(long, value_name = "PATH", env = "SHELDON_CONFIG_DIR")]
     pub config_dir: Option<PathBuf>,
 
-    /// The data directory
+    /// The data directory.
     #[clap(long, value_name = "PATH", env = "SHELDON_DATA_DIR")]
     pub data_dir: Option<PathBuf>,
 
-    /// The config file.
-    #[clap(long, value_name = "PATH", env = "SHELDON_CONFIG_FILE")]
-    pub config_file: Option<PathBuf>,
+    /// The cache directory.
+    #[clap(long, value_name = "PATH", env = "SHELDON_CACHE_DIR")]
+    pub cache_dir: Option<PathBuf>,
 
-    /// The profile used for conditional plugins.
-    #[clap(long, value_name = "PROFILE", env = "SHELDON_PROFILE")]
-    pub profile: Option<String>,
+    /// The directory installed binaries linked to.
+    #[clap(long, value_name = "PATH", env = "SHELDON_CACHE_DIR")]
+    pub bin_dir: Option<PathBuf>,
 
     /// The subcommand to run.
     #[clap(subcommand)]
@@ -71,61 +56,38 @@ pub enum RawCommand {
     Init,
 
     /// Add a new plugin to the config file.
-    Add(Box<Add>),
+    Add {
+        /// A unique name for the package.
+        #[clap(value_name = "NAME")]
+        name: Option<String>,
 
-    /// Install the plugins sources and generate the lock file.
-    Lock {
-        /// Update all plugin sources.
-        #[clap(long)]
-        update: bool,
+        /// The repository hosting the package.
+        #[clap(value_name = "REPO")]
+        repo: String,
 
-        /// Reinstall all plugin sources.
-        #[clap(long, conflicts_with = "update")]
-        reinstall: bool,
+        /// The version of the package.
+        #[clap(value_name = "VERSION")]
+        version: String,
+
+        /// A description of the package.
+        #[clap(value_name = "DESC", long)]
+        desc: Option<String>,
     },
 
-    /// Generate and print out the script.
-    Source {
-        /// Regenerate the lock file.
+    /// Check and install any missing packages.
+    Check {
+        /// require that packages.lock is up-to-date.
         #[clap(long)]
-        relock: bool,
+        locked: bool,
+    },
 
-        /// Update all plugin sources (implies --relock).
-        #[clap(long)]
-        update: bool,
-
-        /// Reinstall all plugin sources (implies --relock).
-        #[clap(long, conflicts_with = "update")]
-        reinstall: bool,
+    /// Update the packages and re-generate the lock file.
+    Update {
+        /// The packages to update.
+        #[clap(value_name = "PACKAGE")]
+        package: Option<String>,
     },
 
     /// Prints detailed version information.
     Version,
-}
-
-#[derive(Debug, PartialEq, Eq, Parser)]
-pub struct Add {
-    /// A unique name for the binary.
-    #[clap(value_name = "NAME")]
-    pub name: String,
-
-    /// The repository hosting the binary.
-    #[clap(value_name = "REPO")]
-    pub repo: String,
-
-    /// The tag to use for the binary.
-    #[clap(value_name = "TAG")]
-    pub tag: String,
-
-    /// A description of the binary.
-    /// This is used for informational purposes only.
-    #[clap(long, value_name = "DESC")]
-    pub desc: Option<String>,
-}
-
-fn key_value_parser(s: &str) -> Result<(String, String), String> {
-    match s.split_once('=') {
-        Some((k, v)) => Ok((k.to_string(), v.to_string())),
-        _ => Err(format!("{} isn't a valid key-value pair separated with =", s)),
-    }
 }

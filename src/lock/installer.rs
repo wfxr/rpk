@@ -57,13 +57,13 @@ pub fn detect_archive(path: impl AsRef<Path>) -> anyhow::Result<ArchiveKind> {
     Ok(kind)
 }
 
-pub fn install_package(ctx: &Context, pkg: &Package, file: impl AsRef<Path>) -> anyhow::Result<()> {
+pub async fn install_package(ctx: &Context, pkg: &Package, file: impl AsRef<Path>) -> anyhow::Result<()> {
     let install_dir = ctx.data_dir.join(format!("{}-{}", pkg.name, pkg.version));
 
     let archive = detect_archive(file.as_ref())?;
     let file = std::fs::File::open(file.as_ref())?;
 
-    mkdir_p(&install_dir)?;
+    mkdir_p(&install_dir).await?;
 
     let link_path = ctx.bin_dir.join(&pkg.name);
 
@@ -85,7 +85,7 @@ pub fn install_package(ctx: &Context, pkg: &Package, file: impl AsRef<Path>) -> 
 
             io::copy(&mut io::BufReader::new(decoder), &mut io::BufWriter::new(install_file))?;
 
-            symlink_force(install_path, link_path)?;
+            symlink_force(install_path, link_path).await?;
         }
         ArchiveKind::Zip => {
             let mut archive = ZipArchive::new(file)?;
@@ -114,7 +114,7 @@ pub fn install_package(ctx: &Context, pkg: &Package, file: impl AsRef<Path>) -> 
 
                 let install_path = install_dir.join(path);
                 if let Some(parent) = install_path.parent() {
-                    mkdir_p(parent)?;
+                    mkdir_p(parent).await?;
                 }
 
                 trace!("installing file to: {:?}", install_path);
@@ -131,7 +131,7 @@ pub fn install_package(ctx: &Context, pkg: &Package, file: impl AsRef<Path>) -> 
                 if filename == Some(&pkg.name) || nfiles == 1 {
                     let mode = mode | 0o111;
                     fs::set_permissions(&install_path, fs::Permissions::from_mode(mode))?;
-                    symlink_force(install_path, &link_path)?;
+                    symlink_force(install_path, &link_path).await?;
                 }
             }
         }
@@ -178,7 +178,7 @@ pub fn install_package(ctx: &Context, pkg: &Package, file: impl AsRef<Path>) -> 
                 if filename == Some(&pkg.name) {
                     let mode = entry.header().mode().unwrap_or(0o644) | 0o111;
                     fs::set_permissions(&install_path, fs::Permissions::from_mode(mode))?;
-                    symlink_force(install_path, &link_path)?;
+                    symlink_force(install_path, &link_path).await?;
                 }
             }
         }

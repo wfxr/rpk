@@ -6,15 +6,12 @@ mod tests;
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{Error, Result};
+use anyhow::Error;
 use serde::{Deserialize, Serialize};
 pub use yansi::Color;
 use yansi::Paint;
 
-use crate::{
-    context::message::{Message, ToMessage},
-    util::fs_ext::mkdir_p,
-};
+use crate::context::message::{Message, ToMessage};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Context {
@@ -70,15 +67,6 @@ impl Default for Verbosity {
 }
 
 impl Context {
-    pub fn init(&self) -> Result<()> {
-        mkdir_p(&self.config_dir)?;
-        mkdir_p(&self.cache_dir)?;
-        mkdir_p(&self.data_dir)?;
-        mkdir_p(&self.bin_dir)?;
-
-        Ok(())
-    }
-
     pub fn verbosity(&self) -> Verbosity {
         self.output.verbosity
     }

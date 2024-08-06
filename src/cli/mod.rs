@@ -3,32 +3,37 @@
 mod color_choice;
 mod raw;
 
-// #[cfg(test)]
-// mod tests;
+use std::process;
 
-use std::{
-    env,
-    path::{Path, PathBuf},
-    process,
-};
-
-use anyhow::{anyhow, Context as ResultExt, Result};
+use anyhow::{anyhow, bail, Context as ResultExt, Result};
 use clap::Parser;
+use tracing::debug;
 
 use crate::{
     cli::raw::{RawCommand, RawOpt},
-    context::{log_error, log_error_as_warning, Context, Output, Verbosity},
-    lock::LockMode,
-    util::build,
-    SpecItem, // util::build,
+    config::{Package, Source},
+    context::{log_error, Context, Output, Verbosity},
+    util::{
+        build::{self, CRATE_NAME},
+        fs_ext::mkdir_p,
+    },
 };
 
 /// Parse the command line arguments.
 ///
 /// In the event of failure it will print the error message and quit the program
 /// without returning.
-pub fn from_args() -> Opt {
-    Opt::from_raw_opt(RawOpt::parse())
+pub async fn from_args() -> Opt {
+    match Opt::from_raw_opt(RawOpt::parse()).await {
+        Ok(opt) => {
+            debug!("parsed options: {:?}", opt);
+            opt
+        }
+        Err(err) => {
+            log_error(true, &err);
+            process::exit(1);
+        }
+    }
 }
 
 /// Resolved command line options with defaults set.
@@ -45,48 +50,52 @@ pub struct Opt {
 pub enum Command {
     /// Initialize a new config file.
     Init,
+
     /// Add a new plugin to the config file.
-    Add { item: SpecItem },
-    /// Install the plugins sources and generate the lock file.
-    Lock,
-    /// Generate and print out the script.
-    Source,
+    Add(Package),
+
+    /// Check and install any missing packages.
+    Check {
+        /// require that config.lock is up-to-date.
+        locked: bool,
+    },
+
+    /// Update the packages and regenerate the lock file.
+    Update {
+        /// The packages to update.
+        package: Option<String>,
+    },
 }
 
 impl Opt {
-    fn from_raw_opt(raw_opt: RawOpt) -> Self {
+    async fn from_raw_opt(raw_opt: RawOpt) -> Result<Self> {
         let RawOpt {
             quiet,
-            non_interactive,
             verbose,
             color,
+            bin_dir,
             data_dir,
+            cache_dir,
             config_dir,
-            config_file,
-            profile,
             command,
         } = raw_opt;
 
-        let mut lock_mode = None;
-
         let command = match command {
             RawCommand::Init => Command::Init,
-            RawCommand::Add(add) => Command::Add {
-                item: SpecItem::Github {
-                    name: add.name,
-                    repo: add.repo,
-                    tag:  add.tag,
-                    desc: add.desc,
-                },
-            },
-            RawCommand::Lock { update, reinstall } => {
-                lock_mode = LockMode::from_lock_flags(update, reinstall);
-                Command::Lock
+            RawCommand::Add { name, repo, version, desc } => {
+                let name = match name {
+                    Some(name) => name,
+                    None => match repo.split_once('/') {
+                        Some((_owner, repo)) => repo.to_owned(),
+                        None => bail!("invalid repo format: `{}`", repo),
+                    },
+                };
+                let source = Source::Github { repo };
+
+                Command::Add(Package { name, source, version, desc })
             }
-            RawCommand::Source { relock, update, reinstall } => {
-                lock_mode = LockMode::from_source_flags(relock, update, reinstall);
-                Command::Source
-            }
+            RawCommand::Check { locked } => Command::Check { locked },
+            RawCommand::Update { package } => Command::Update { package },
             RawCommand::Version => {
                 println!("{} {}", build::CRATE_NAME, build::CRATE_VERBOSE_VERSION);
                 process::exit(0);
@@ -103,144 +112,37 @@ impl Opt {
 
         let output = Output { verbosity, no_color: !color.is_color() };
 
-        let home = match home::home_dir() {
-            Some(home) => home,
-            None => {
-                let err = anyhow!("failed to determine the current user's home directory");
-                log_error(output.no_color, &err);
-                process::exit(1);
-            }
-        };
+        let xdg_dirs = xdg::BaseDirectories::with_prefix(CRATE_NAME)?;
+        let home = home::home_dir().ok_or_else(|| anyhow!("failed to determine the current user's home directory"))?;
 
-        let (config_file, config_dir, data_dir) =
-            match resolve_paths(&home, config_file, config_dir, data_dir, output.no_color) {
-                Ok(paths) => paths,
-                Err(err) => {
-                    log_error(output.no_color, &err);
-                    process::exit(1);
-                }
-            };
-        let lock_file = match profile.as_deref() {
-            Some("") | None => data_dir.join("plugins.lock"),
-            Some(p) => data_dir.join(format!("plugins.{p}.lock")),
-        };
-        let download_dir = data_dir.join("downloads");
+        let config_dir = config_dir.unwrap_or_else(|| xdg_dirs.get_config_home());
+        mkdir_p(&config_dir).await.context("failed to create config dir")?;
 
+        let cache_dir = cache_dir.unwrap_or_else(|| xdg_dirs.get_cache_home());
+        mkdir_p(&cache_dir).await.context("failed to create cache dir")?;
+
+        let data_dir = data_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("packages"));
+        mkdir_p(&data_dir).await.context("failed to create data dir")?;
+
+        let bin_dir = bin_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("bin"));
+        mkdir_p(&bin_dir).await.context("failed to create binary dir")?;
+
+        let config_file = config_dir.join("packages.toml");
+        let lock_file = config_dir.join("packages.lock");
+
+        let version = build::CRATE_RELEASE.to_string();
         let ctx = Context {
-            version: build::CRATE_RELEASE.to_string(),
-            home,
-            config_dir,
-            data_dir,
+            version,
             config_file,
+            config_dir,
+            cache_dir,
+            data_dir,
+            bin_dir,
+            home,
             lock_file,
-            download_dir,
-            profile,
             output,
-            interactive: !non_interactive,
-            lock_mode,
         };
 
-        Self { ctx, command }
+        Ok(Self { ctx, command })
     }
-}
-
-impl LockMode {
-    fn from_lock_flags(update: bool, reinstall: bool) -> Option<Self> {
-        match (update, reinstall) {
-            (false, false) => Some(Self::Normal),
-            (true, false) => Some(Self::Update),
-            (false, true) => Some(Self::Reinstall),
-            (true, true) => unreachable!(),
-        }
-    }
-
-    fn from_source_flags(relock: bool, update: bool, reinstall: bool) -> Option<Self> {
-        match (relock, update, reinstall) {
-            (false, false, false) => None,
-            (true, false, false) => Some(Self::Normal),
-            (_, true, false) => Some(Self::Update),
-            (_, false, true) => Some(Self::Reinstall),
-            (_, true, true) => unreachable!(),
-        }
-    }
-}
-
-fn resolve_paths(
-    home: &Path,
-    config_file: Option<PathBuf>,
-    config_dir: Option<PathBuf>,
-    data_dir: Option<PathBuf>,
-    no_color: bool,
-) -> Result<(PathBuf, PathBuf, PathBuf)> {
-    // TODO: Remove this warning in a later release and stop falling back to
-    // the old directory.
-    let err = anyhow!(
-        r#"using deprecated config file location ~/.sheldon/plugins.toml.
-
-To use the new location move the config file to
-~/.config/sheldon/plugins.toml ($XDG_CONFIG_HOME/sheldon/plugins.toml),
-~/.sheldon can then be safely deleted.
-
-Or to instead preserve the old behaviour set the following environment variables:
-  SHELDON_CONFIG_DIR="$HOME/.sheldon"
-  SHELDON_DATA_DIR="$HOME/.sheldon"
-
-See the release notes at https://github.com/rossmacarthur/sheldon for more information.
-"#,
-    );
-    let mut using_old = false;
-    let (config_file, config_dir) = match config_file {
-        Some(file) => {
-            let dir = file
-                .parent()
-                .with_context(|| {
-                    format!(
-                        "failed to get parent directory of config file path `{}`",
-                        file.display()
-                    )
-                })?
-                .to_path_buf();
-            (file, dir)
-        }
-        None => {
-            let dir = config_dir.unwrap_or_else(|| {
-                let default = default_config_dir(home);
-                let old = home.join(".sheldon");
-                if old.exists() && !default.exists() {
-                    log_error_as_warning(no_color, &err);
-                    using_old = true;
-                    return old;
-                }
-                default
-            });
-            let file = dir.join("plugins.toml");
-            (file, dir)
-        }
-    };
-
-    let data_dir = data_dir.unwrap_or_else(|| {
-        let default = default_data_dir(home);
-        if using_old && !default.exists() {
-            return config_dir.clone();
-        }
-        default
-    });
-
-    Ok((config_file, config_dir, data_dir))
-}
-
-fn default_config_dir(home: &Path) -> PathBuf {
-    let mut p = env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| home.join(".config"));
-    p.push("sheldon");
-    p
-}
-
-fn default_data_dir(home: &Path) -> PathBuf {
-    let mut p = env::var_os("XDG_DATA_HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| home.join(".local/share"));
-    p.push("sheldon");
-    p
 }

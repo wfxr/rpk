@@ -18,6 +18,7 @@ use tracing::{trace, warn};
 use crate::{
     config::{Package, Source},
     context::Context,
+    lock::LockedPackage,
     provider::reqwest_ext::Download,
 };
 
@@ -63,6 +64,37 @@ impl Provider for &Github {
             ctx.log_verbose_status("Downloading", &asset.browser_download_url);
             self.http.download(asset.browser_download_url.clone(), &path).await?;
         }
+
+        Ok(path)
+    }
+
+    async fn download_locked(&self, ctx: Context, pkg: &LockedPackage) -> Result<PathBuf> {
+        let path = ctx.cache_dir.join(&pkg.filename);
+
+        // download the asset if not exists
+        if path.exists() {
+            // TODO: checksum
+            ctx.log_verbose_status("Skipped", &"Asset already exists");
+            return Ok(path);
+        }
+
+        let repo = match &pkg.pkg.source {
+            Source::Github { repo } => repo,
+        };
+        let version = &pkg.pkg.version;
+
+        let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
+        let release = self.crab.repos(owner, repo).releases().get_by_tag(version).await?;
+        ctx.log_verbose_status("Fetched", &format!("{owner}/{repo}@{version}"));
+
+        let asset = release
+            .assets
+            .iter()
+            .find(|asset| asset.name == pkg.filename)
+            .ok_or_else(|| anyhow::anyhow!("Asset not found"))?;
+
+        ctx.log_verbose_status("Downloading", &asset.browser_download_url);
+        self.http.download(asset.browser_download_url.clone(), &path).await?;
 
         Ok(path)
     }

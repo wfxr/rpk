@@ -1,23 +1,18 @@
 #![feature(anonymous_lifetime_in_impl_trait)]
+pub mod cli;
 pub mod config;
 pub mod context;
 pub mod lock;
 pub mod provider;
 pub mod util;
 
-use std::{
-    env::consts::{ARCH, OS},
-    fs,
-    process,
-};
+use std::process;
 
-use anyhow::anyhow;
-use config::Config;
-use context::{log_error, Context, Output};
-use lock::lock_packages;
-use tracing::debug;
+use cli::Opt;
+use context::log_error;
+use lock::{check_packages, lock_packages};
 use tracing_subscriber::EnvFilter;
-use util::build::{self, CRATE_NAME};
+use util::fs_ext::load_toml;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -26,43 +21,42 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    debug!("OS: {OS}, Arch: {ARCH}");
+    let Opt { command, ctx } = cli::from_args().await;
 
-    let output = Output::default();
-    let home = match home::home_dir() {
-        Some(home) => home,
-        None => {
-            let err = anyhow!("failed to determine the current user's home directory");
-            log_error(output.no_color, &err);
-            process::exit(1);
-        }
-    };
+    match command {
+        cli::Command::Init => todo!(),
+        cli::Command::Add(_pkg) => todo!(),
+        cli::Command::Check { locked } => match locked {
+            true => {
+                let config = match load_toml(&ctx.config_file).await {
+                    Ok(config) => config,
+                    Err(err) => {
+                        let context = format!("failed to load {}", ctx.config_file.display());
+                        log_error(true, &err.context(context));
+                        process::exit(1);
+                    }
+                };
+                ctx.log_header("Loaded", ctx.config_file.as_path());
 
-    let xdg_dirs = xdg::BaseDirectories::with_prefix(CRATE_NAME)?;
-
-    let ctx = Context {
-        version: build::CRATE_RELEASE.to_string(),
-        home,
-        config_dir: xdg_dirs.get_config_home(),
-        config_file: xdg_dirs.place_config_file("config.toml")?,
-        lock_file: xdg_dirs.place_config_file("config.lock")?,
-        cache_dir: xdg_dirs.get_cache_home(),
-        data_dir: xdg_dirs.get_data_home().join("packages"),
-        bin_dir: xdg_dirs.get_data_home().join("bin"),
-        output,
-    };
-    debug!("context: {:#?}", ctx);
-
-    ctx.init()?;
-
-    let config = fs::read_to_string(&ctx.config_file)?;
-    let config: Config = toml::from_str(&config)?;
-    ctx.log_header("Loaded", ctx.config_file.as_path());
-
-    let locked_config = lock_packages(&ctx, config).await?;
-    locked_config.save()?;
-
-    ctx.log_header("Locked", ctx.config_file.as_path());
+                let locked_config = lock_packages(&ctx, config).await?;
+                locked_config.save()?;
+                ctx.log_header("Locked", ctx.lock_file.as_path());
+            }
+            false => {
+                let config = match load_toml(&ctx.lock_file).await {
+                    Ok(config) => config,
+                    Err(err) => {
+                        let context = format!("failed to load {}", ctx.config_file.display());
+                        log_error(true, &err.context(context));
+                        process::exit(1);
+                    }
+                };
+                ctx.log_header("Loaded", ctx.lock_file.as_path());
+                check_packages(&ctx, config).await?;
+            }
+        },
+        cli::Command::Update { package: _ } => todo!(),
+    }
 
     Ok(())
 }
