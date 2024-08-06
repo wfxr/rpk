@@ -125,9 +125,12 @@ impl Config {
             .with_context(|| format!("failed to save {}", ctx.config_file.display()))
     }
 
-    /// Add a package to the configuration.
-    pub fn add_pkg(&mut self, pkg: Package) {
-        self.pkgs.push(pkg);
+    /// Update a package in the configuration. If the package does not exist, add it.
+    pub fn upsert(&mut self, pkg: Package) {
+        match self.pkgs.iter().position(|p| p.name == pkg.name) {
+            Some(i) => self.pkgs[i] = pkg,
+            None => self.pkgs.push(pkg),
+        }
     }
 }
 

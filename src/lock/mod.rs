@@ -41,15 +41,33 @@ pub struct LockedPackage {
     pub download_url: Option<Url>,
 }
 
-// Install a package.
-pub async fn sync_package(ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub enum SyncResult {
+    Updated,
+    Checked,
+}
+
+pub async fn sync_package(
+    ctx: &Context,
+    pkg: &Package,
+    lpkg: Option<&LockedPackage>,
+) -> Result<(LockedPackage, SyncResult)> {
     let provider = Github::new()?;
-    let lpkg = provider.download(ctx, pkg).await?;
+    let new_lpkg = provider.download(ctx, pkg).await?;
 
-    install_package(ctx, &lpkg).await?;
-    ctx.log_status("Checked", &format!("{}@{}", pkg.name, lpkg.version));
+    install_package(ctx, &new_lpkg).await?;
 
-    Ok(lpkg)
+    let res = match lpkg {
+        Some(old_pkg) if old_pkg != &new_lpkg => {
+            ctx.log_status("Updated", &format!("{}@{}", pkg.name, new_lpkg.version));
+            SyncResult::Updated
+        }
+        _ => {
+            ctx.log_status("Checked", &format!("{}@{}", pkg.name, new_lpkg.version));
+            SyncResult::Checked
+        }
+    };
+    Ok((new_lpkg, res))
 }
 
 pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
@@ -67,7 +85,7 @@ pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
 pub async fn sync_packages(ctx: &Context, config: Config) -> Result<LockedConfig> {
     let mut locked = Vec::new();
     for pkg in config.pkgs {
-        let lpkg = sync_package(ctx, &pkg).await?;
+        let (lpkg, _) = sync_package(ctx, &pkg, None).await?;
         locked.push(lpkg);
     }
 
@@ -101,8 +119,11 @@ impl LockedConfig {
             .with_context(|| format!("failed to save {}", self.ctx.lock_file.display()))
     }
 
-    /// Add a package to the configuration.
-    pub fn add_pkg(&mut self, lpkg: LockedPackage) {
-        self.pkgs.push(lpkg);
+    /// Update a package in the configuration. If the package does not exist, add it.
+    pub fn upsert(&mut self, lpkg: LockedPackage) {
+        match self.pkgs.iter().position(|pkg| pkg.name == lpkg.name) {
+            Some(i) => self.pkgs[i] = lpkg,
+            None => self.pkgs.push(lpkg),
+        }
     }
 }
