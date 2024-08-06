@@ -39,7 +39,7 @@ impl Github {
     }
 }
 
-impl Provider for &Github {
+impl Provider for Github {
     async fn download(&self, ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
         let repo = match &pkg.source {
             Source::Github { repo } => repo,
