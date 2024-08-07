@@ -1,8 +1,10 @@
-use std::ffi;
-use std::fs;
-use std::io;
-use std::path::{Path, PathBuf};
-use std::result;
+use std::{
+    ffi,
+    fs,
+    io,
+    path::{Path, PathBuf},
+    result,
+};
 
 use anyhow::Result;
 
