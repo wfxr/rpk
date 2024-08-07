@@ -41,6 +41,7 @@ goldie = "0.5.0"
 futures = "0.3.30"
 sha256 = "1.5.0"
 xdg = "2.5.2"
+toml_edit = "0.22.20"
 
 [dependencies.clap]
 version = "4"

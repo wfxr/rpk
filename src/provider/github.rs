@@ -15,9 +15,8 @@ use regex::Regex;
 use tracing::{trace, warn};
 
 use crate::{
-    config::{Package, Source},
+    config::{LockedPackage, Package, Source},
     context::Context,
-    lock::LockedPackage,
     provider::reqwest_ext::Download,
 };
 

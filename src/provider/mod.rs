@@ -1,6 +1,9 @@
 use anyhow::Result;
 
-use crate::{config::Package, context::Context, lock::LockedPackage};
+use crate::{
+    config::{LockedPackage, Package},
+    context::Context,
+};
 
 pub mod github;
 pub mod reqwest_ext;

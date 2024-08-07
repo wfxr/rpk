@@ -1,8 +1,8 @@
 //! The user configuration.
 
-use std::{fmt, str};
+use std::{collections::BTreeMap, fmt, str};
 
-use anyhow::{Context as _, Result};
+use anyhow::{bail, Context as _, Result};
 use serde::{
     de::{Error, MapAccess, Visitor},
     Deserialize,
@@ -10,19 +10,28 @@ use serde::{
     Serialize,
 };
 use tokio::fs;
+use url::Url;
 
-use crate::{context::Context, lock::LockedPackage, util::fs_ext::load_toml};
+use crate::{context::Context, util::fs_ext::load_toml};
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Config {
     #[serde(default)]
-    pub pkgs: Vec<Package>,
+    pub pkgs: BTreeMap<String, Package>,
+}
+
+pub struct EditableConfig {
+    ctx: Context,
+
+    /// The parsed TOML version of the config.
+    doc: toml_edit::DocumentMut,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub struct Package {
+    #[serde(skip)]
     pub name:    String,
     pub version: Option<String>,
     #[serde(flatten)]
@@ -35,6 +44,30 @@ pub struct Package {
 #[serde(rename_all = "snake_case")]
 pub enum Source {
     Github { repo: String },
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub struct LockedConfig {
+    #[serde(flatten)]
+    pub ctx: Context,
+
+    #[serde(default)]
+    pub pkgs: BTreeMap<String, LockedPackage>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(tag = "source")]
+#[serde(rename_all = "lowercase")]
+pub struct LockedPackage {
+    #[serde(skip)]
+    pub name:         String,
+    pub version:      String,
+    #[serde(flatten)]
+    pub source:       Source,
+    pub desc:         Option<String>,
+    pub filename:     String,
+    pub download_url: Option<Url>,
 }
 
 impl fmt::Display for Source {
@@ -112,25 +145,16 @@ impl<'de> Visitor<'de> for SourceVisitor {
 impl Config {
     /// Load the configuration from the given path.
     pub async fn load(ctx: &Context) -> Result<Self> {
-        load_toml(&ctx.config_file)
+        let mut cfg: Self = load_toml(&ctx.config_file)
             .await
-            .with_context(|| format!("failed to load {}", ctx.config_file.display()))
-    }
+            .with_context(|| format!("failed to load {}", ctx.config_file.display()))?;
 
-    /// Write this `LockedConfig` to the given path.
-    pub async fn save(&self, ctx: &Context) -> Result<()> {
-        let buf = toml::to_string_pretty(self).context("failed to serialize `Config`")?;
-        fs::write(&ctx.config_file, buf)
-            .await
-            .with_context(|| format!("failed to save {}", ctx.config_file.display()))
-    }
-
-    /// Update a package in the configuration. If the package does not exist, add it.
-    pub fn upsert(&mut self, pkg: Package) {
-        match self.pkgs.iter().position(|p| p.name == pkg.name) {
-            Some(i) => self.pkgs[i] = pkg,
-            None => self.pkgs.push(pkg),
+        // Set the package names for convenience.
+        for (name, pkg) in cfg.pkgs.iter_mut() {
+            pkg.name = name.clone();
         }
+
+        Ok(cfg)
     }
 }
 
@@ -142,5 +166,60 @@ impl From<LockedPackage> for Package {
             source:  val.source,
             desc:    val.desc,
         }
+    }
+}
+
+impl EditableConfig {
+    pub async fn load(ctx: &Context) -> Result<Self> {
+        let buf = fs::read_to_string(&ctx.config_file)
+            .await
+            .with_context(|| format!("failed to read {}", ctx.config_file.display()))?;
+        let ctx = ctx.clone();
+        let doc = buf.parse().context("failed to parse TOML")?;
+        Ok(Self { ctx, doc })
+    }
+
+    pub async fn save(&self) -> Result<()> {
+        fs::write(&self.ctx.config_file, self.doc.to_string())
+            .await
+            .with_context(|| format!("failed to write {}", self.ctx.config_file.display()))
+    }
+
+    pub fn upsert(&mut self, pkg: &Package) -> Result<()> {
+        let name = &pkg.name;
+
+        let mini = toml::to_string_pretty(pkg)
+            .context("failed to serialize package")?
+            .parse::<toml_edit::DocumentMut>()
+            .context("failed to serialized package")?;
+
+        match &mut self.doc["pkgs"] {
+            item @ toml_edit::Item::None => {
+                let mut pkgs = toml_edit::Table::new();
+                pkgs.set_implicit(true);
+                *item = toml_edit::Item::Table(pkgs);
+            }
+            toml_edit::Item::Table(_) => {}
+            _ => bail!("current `pkgs` entry is not a table"),
+        }
+
+        match &mut self.doc["pkgs"][&name] {
+            item @ toml_edit::Item::None => {
+                let mut table = toml_edit::table();
+                for (k, v) in mini.as_table().iter() {
+                    table[k] = v.clone();
+                }
+                *item = table;
+            }
+            _ => bail!("plugin with name `{name}` already exists"),
+        }
+
+        Ok(())
+    }
+}
+
+impl LockedConfig {
+    pub fn new(ctx: Context, pkgs: BTreeMap<String, LockedPackage>) -> Self {
+        Self { ctx, pkgs }
     }
 }

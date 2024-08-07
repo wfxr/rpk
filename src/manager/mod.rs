@@ -1,45 +1,19 @@
 pub mod installer;
 
-use anyhow::{Context as _, Error, Result};
+use std::collections::BTreeMap;
+
+use anyhow::{Context as _, Result};
 use futures::{stream, StreamExt, TryStreamExt};
 use installer::install_package;
 use serde::{Deserialize, Serialize};
 use tokio::fs;
-use url::Url;
 
 use crate::{
-    config::{Config, Package, Source},
+    config::{Config, LockedConfig, LockedPackage, Package},
     context::Context,
     provider::{github::Github, Provider},
     util::fs_ext::load_toml,
 };
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub struct LockedConfig {
-    #[serde(flatten)]
-    ctx: Context,
-
-    #[serde(default)]
-    pub pkgs: Vec<LockedPackage>,
-
-    /// Any errors that occurred while generating this `LockedConfig`.
-    #[serde(skip)]
-    pub errors: Vec<Error>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(tag = "source")]
-#[serde(rename_all = "lowercase")]
-pub struct LockedPackage {
-    pub name:         String,
-    pub version:      String,
-    #[serde(flatten)]
-    pub source:       Source,
-    pub desc:         Option<String>,
-    pub filename:     String,
-    pub download_url: Option<Url>,
-}
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum SyncResult {
@@ -70,12 +44,12 @@ pub async fn sync_package(
     Ok((new_lpkg, res))
 }
 
-pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
+pub async fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
     let provider = Github::new()?;
 
-    provider.download_locked(ctx, &lpkg).await?;
+    provider.download_locked(ctx, lpkg).await?;
 
-    install_package(ctx, &lpkg).await?;
+    install_package(ctx, lpkg).await?;
     ctx.log_status("Checked", &format!("{}@{}", lpkg.name, lpkg.version));
 
     Ok(())
@@ -83,18 +57,18 @@ pub async fn restore_package(ctx: &Context, lpkg: LockedPackage) -> Result<()> {
 
 /// Install all necessary packages, and returns a [`LockedConfig`].
 pub async fn sync_packages(ctx: &Context, config: Config) -> Result<LockedConfig> {
-    let mut locked = Vec::new();
-    for pkg in config.pkgs {
-        let (lpkg, _) = sync_package(ctx, &pkg, None).await?;
-        locked.push(lpkg);
+    let mut locked = BTreeMap::new();
+    for (name, pkg) in config.pkgs.iter() {
+        let (lpkg, _) = sync_package(ctx, pkg, None).await?;
+        locked.insert(name.clone(), lpkg);
     }
 
-    Ok(LockedConfig { ctx: ctx.clone(), pkgs: locked, errors: Vec::new() })
+    Ok(LockedConfig::new(ctx.clone(), locked))
 }
 
 /// Restore packages according to the given [`LockedConfig`].
 pub async fn restore_packages(lcfg: LockedConfig) -> Result<()> {
-    let _: Vec<()> = stream::iter(lcfg.pkgs.into_iter())
+    let _: Vec<()> = stream::iter(lcfg.pkgs.values())
         .then(|pkg| restore_package(&lcfg.ctx, pkg))
         .try_collect()
         .await?;
@@ -121,9 +95,6 @@ impl LockedConfig {
 
     /// Update a package in the configuration. If the package does not exist, add it.
     pub fn upsert(&mut self, lpkg: LockedPackage) {
-        match self.pkgs.iter().position(|pkg| pkg.name == lpkg.name) {
-            Some(i) => self.pkgs[i] = lpkg,
-            None => self.pkgs.push(lpkg),
-        }
+        self.pkgs.insert(lpkg.name.clone(), lpkg);
     }
 }
