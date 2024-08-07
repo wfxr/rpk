@@ -6,9 +6,12 @@ use std::{
     sync::LazyLock,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Context as _, Result};
 use octocrab::{
-    models::repos::{Asset, Release},
+    models::{
+        repos::{Asset, Release},
+        Repository,
+    },
     Octocrab,
 };
 use regex::Regex;
@@ -35,6 +38,17 @@ impl Github {
         };
         let http = reqwest::Client::new();
         Ok(Github { crab, http })
+    }
+
+    pub async fn search_repo(&self, query: &str, size: impl Into<u8>) -> Result<Vec<Repository>> {
+        self.crab
+            .search()
+            .repositories(query)
+            .per_page(size)
+            .send()
+            .await
+            .map(|x| x.items)
+            .context("failed to search package")
     }
 }
 

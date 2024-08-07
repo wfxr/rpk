@@ -95,6 +95,16 @@ pub enum RawCommand {
         package: Option<String>,
     },
 
+    Search {
+        /// The query to search for.
+        #[clap(value_name = "QUERY")]
+        query: String,
+
+        /// The number of results to display.
+        #[clap(long, value_name = "NUM", default_value = "10")]
+        top: u8,
+    },
+
     /// Prints detailed version information.
     Version,
 }

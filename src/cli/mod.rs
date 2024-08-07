@@ -69,6 +69,14 @@ pub enum Command {
         /// The packages to restore.
         package: Option<String>,
     },
+
+    Search {
+        /// The query to search for.
+        query: String,
+
+        /// The number of results to display.
+        top: u8,
+    },
 }
 
 impl Opt {
@@ -105,6 +113,7 @@ impl Opt {
                 process::exit(0);
             }
             RawCommand::Restore { package } => Command::Restore { package },
+            RawCommand::Search { query, top } => Command::Search { query, top },
         };
 
         let verbosity = if quiet {
