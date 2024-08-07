@@ -81,11 +81,7 @@ fn print_git_envs() -> Result<()> {
     if !dir.join(".git").exists() {
         return Ok(());
     }
-    print_git_env(
-        &dir,
-        "GIT_COMMIT_DATE",
-        "git log -1 --no-show-signature --date=short --format=%cd",
-    )?;
+    print_git_env(&dir, "GIT_COMMIT_DATE", "git log -1 --date=short --format=%cd")?;
     print_git_env(&dir, "GIT_COMMIT_HASH", "git rev-parse HEAD")?;
     print_git_env(&dir, "GIT_COMMIT_SHORT_HASH", "git rev-parse --short=9 HEAD")?;
     Ok(())
