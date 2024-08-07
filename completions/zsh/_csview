@@ -1,0 +1,55 @@
+#compdef csview
+
+autoload -U is-at-least
+
+_csview() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-d+[Specify the field delimiter]:DELIMITER: ' \
+'--delimiter=[Specify the field delimiter]:DELIMITER: ' \
+'-s+[Specify the border style]:STYLE:(none ascii ascii2 sharp rounded reinforced markdown grid)' \
+'--style=[Specify the border style]:STYLE:(none ascii ascii2 sharp rounded reinforced markdown grid)' \
+'-p+[Specify padding for table cell]:PADDING: ' \
+'--padding=[Specify padding for table cell]:PADDING: ' \
+'-i+[Specify global indent for table]:INDENT: ' \
+'--indent=[Specify global indent for table]:INDENT: ' \
+'--sniff=[Limit column widths sniffing to the specified number of rows. Specify "0" to cancel limit]:LIMIT: ' \
+'--header-align=[Specify the alignment of the table header]:HEADER_ALIGN:(left center right)' \
+'--body-align=[Specify the alignment of the table body]:BODY_ALIGN:(left center right)' \
+'-H[Specify that the input has no header row]' \
+'--no-headers[Specify that the input has no header row]' \
+'-n[Prepend a column of line numbers to the table]' \
+'--number[Prepend a column of line numbers to the table]' \
+'(-d --delimiter)-t[Use '\''\\t'\'' as delimiter for tsv]' \
+'(-d --delimiter)--tsv[Use '\''\\t'\'' as delimiter for tsv]' \
+'-P[Disable pager]' \
+'--disable-pager[Disable pager]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+'::FILE -- File to view:_files' \
+&& ret=0
+}
+
+(( $+functions[_csview_commands] )) ||
+_csview_commands() {
+    local commands; commands=()
+    _describe -t commands 'csview commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_csview" ]; then
+    _csview "$@"
+else
+    compdef _csview csview
+fi
