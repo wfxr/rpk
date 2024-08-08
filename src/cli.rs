@@ -5,6 +5,11 @@ use clap_complete::Shell;
 
 use crate::util::build;
 
+pub const ENV_CONFIG_DIR: &str = "GRM_CONFIG_DIR";
+pub const ENV_DATA_DIR: &str = "GRM_DATA_DIR";
+pub const ENV_CACHE_DIR: &str = "GRM_CACHE_DIR";
+pub const ENV_BIN_DIR: &str = "GRM_BIN_DIR";
+
 /// Resolved command line options.
 #[derive(Debug, PartialEq, Eq, Parser)]
 #[clap(
@@ -29,19 +34,19 @@ pub struct Opt {
     pub color: ColorChoice,
 
     /// The configuration directory.
-    #[clap(long, value_name = "PATH", env = "SHELDON_CONFIG_DIR")]
+    #[clap(long, value_name = "PATH", env = ENV_CONFIG_DIR)]
     pub config_dir: Option<PathBuf>,
 
     /// The directory to store package data.
-    #[clap(long, value_name = "PATH", env = "SHELDON_DATA_DIR")]
+    #[clap(long, value_name = "PATH", env = ENV_DATA_DIR)]
     pub data_dir: Option<PathBuf>,
 
     /// The directory to store downloaded packages.
-    #[clap(long, value_name = "PATH", env = "SHELDON_CACHE_DIR")]
+    #[clap(long, value_name = "PATH", env = ENV_CACHE_DIR)]
     pub cache_dir: Option<PathBuf>,
 
     /// The directory installed binaries linked to.
-    #[clap(long, value_name = "PATH", env = "SHELDON_CACHE_DIR")]
+    #[clap(long, value_name = "PATH", env = ENV_BIN_DIR)]
     pub bin_dir: Option<PathBuf>,
 
     /// The subcommand to run.
@@ -52,8 +57,8 @@ pub struct Opt {
 /// The resolved sub command.
 #[derive(Debug, PartialEq, Eq, Parser)]
 pub enum SubCommand {
-    /// Initialize a new config file.
-    Init,
+    /// print environment information
+    Env,
 
     /// install any missing packages, re-generating the lock file.
     Sync,

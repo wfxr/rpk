@@ -12,7 +12,10 @@ use serde::{
 use tokio::fs;
 use url::Url;
 
-use crate::{context::Context, util::fs_ext::load_toml};
+use crate::{
+    context::Context,
+    util::{fs_ext::load_toml, not_found_err},
+};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -145,9 +148,11 @@ impl<'de> Visitor<'de> for SourceVisitor {
 impl Config {
     /// Load the configuration from the given path.
     pub async fn load(ctx: &Context) -> Result<Self> {
-        let mut cfg: Self = load_toml(&ctx.config_file)
-            .await
-            .with_context(|| format!("failed to load {}", ctx.config_file.display()))?;
+        let mut cfg = match load_toml(&ctx.config_file).await {
+            Ok(cfg) => cfg,
+            Err(e) if not_found_err(e.root_cause()) => Config::init(ctx).await?,
+            e => return e.context(format!("failed to load {}", ctx.config_file.display())),
+        };
 
         // Set the package names for convenience.
         for (name, pkg) in cfg.pkgs.iter_mut() {
@@ -156,24 +161,59 @@ impl Config {
 
         Ok(cfg)
     }
+
+    async fn init(ctx: &Context) -> Result<Self> {
+        let default = include_str!("packages.toml");
+        fs::write(&ctx.config_file, default)
+            .await
+            .with_context(|| format!("failed to init {}", ctx.config_file.display()))?;
+        Ok(toml::from_str(default)?)
+    }
 }
 
-impl From<LockedPackage> for Package {
-    fn from(val: LockedPackage) -> Self {
-        Package {
-            name:    val.name,
-            version: val.version.into(),
-            source:  val.source,
-            desc:    val.desc,
+impl LockedConfig {
+    pub fn new(ctx: Context, pkgs: BTreeMap<String, LockedPackage>) -> Self {
+        Self { ctx, pkgs }
+    }
+
+    pub async fn load(ctx: &Context) -> Result<Self> {
+        let mut lcfg = match load_toml(&ctx.lock_file).await {
+            Ok(lcfg) => lcfg,
+            Err(e) if not_found_err(e.root_cause()) => LockedConfig::new(ctx.clone(), Default::default()),
+            e => return e.context(format!("failed to load {}", ctx.lock_file.display())),
+        };
+
+        lcfg.ctx = ctx.clone();
+
+        // Set the package names for convenience.
+        for (name, lpkg) in lcfg.pkgs.iter_mut() {
+            lpkg.name = name.clone();
         }
+        Ok(lcfg)
+    }
+
+    /// Write this `LockedConfig` to the given path.
+    pub async fn save(&self) -> Result<()> {
+        let buf = toml::to_string_pretty(self).context("failed to serialize `LockedConfig`")?;
+        fs::write(&self.ctx.lock_file, buf)
+            .await
+            .with_context(|| format!("failed to save {}", self.ctx.lock_file.display()))
+    }
+
+    /// Update a package in the configuration. If the package does not exist, add it.
+    pub fn upsert(&mut self, lpkg: LockedPackage) {
+        self.pkgs.insert(lpkg.name.clone(), lpkg);
     }
 }
 
 impl EditableConfig {
     pub async fn load(ctx: &Context) -> Result<Self> {
-        let buf = fs::read_to_string(&ctx.config_file)
-            .await
-            .with_context(|| format!("failed to read {}", ctx.config_file.display()))?;
+        let buf = match fs::read_to_string(&ctx.config_file).await {
+            Ok(buf) => buf,
+            Err(e) if not_found_err(&e) => include_str!("packages.toml").to_owned(),
+            Err(e) => return Err(e).context(format!("failed to read {}", ctx.config_file.display())),
+        };
+
         let ctx = ctx.clone();
         let doc = buf.parse().context("failed to parse TOML")?;
         Ok(Self { ctx, doc })
@@ -188,7 +228,7 @@ impl EditableConfig {
     pub fn upsert(&mut self, pkg: &Package) -> Result<()> {
         let name = &pkg.name;
 
-        let mini = toml::to_string_pretty(pkg)
+        let pkg = toml::to_string_pretty(pkg)
             .context("failed to serialize package")?
             .parse::<toml_edit::DocumentMut>()
             .context("failed to serialized package")?;
@@ -206,20 +246,25 @@ impl EditableConfig {
         match &mut self.doc["pkgs"][&name] {
             item @ toml_edit::Item::None => {
                 let mut table = toml_edit::table();
-                for (k, v) in mini.as_table().iter() {
+                for (k, v) in pkg.as_table().iter() {
                     table[k] = v.clone();
                 }
                 *item = table;
             }
-            _ => bail!("plugin with name `{name}` already exists"),
+            _ => bail!("package with name `{name}` already exists"),
         }
 
         Ok(())
     }
 }
 
-impl LockedConfig {
-    pub fn new(ctx: Context, pkgs: BTreeMap<String, LockedPackage>) -> Self {
-        Self { ctx, pkgs }
+impl From<LockedPackage> for Package {
+    fn from(val: LockedPackage) -> Self {
+        Package {
+            name:    val.name,
+            version: val.version.into(),
+            source:  val.source,
+            desc:    val.desc,
+        }
     }
 }

@@ -1,0 +1,6 @@
+# GRM Config File
+#
+# See the documentation for more https://github.com/wfxr/grm#readme
+
+[pkgs.csview]
+repo = "wfxr/csview"

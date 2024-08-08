@@ -12,7 +12,7 @@ use std::process;
 use anyhow::{anyhow, bail, Context as _};
 use clap::{CommandFactory as _, Parser as _};
 use clap_complete::{generate, generate_to};
-use cli::{Opt, SubCommand};
+use cli::{Opt, SubCommand, ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR};
 use config::{Package, Source};
 use context::{log_error, Context, Output, Verbosity};
 use tracing_subscriber::EnvFilter;
@@ -75,8 +75,11 @@ async fn try_main() -> anyhow::Result<()> {
     };
 
     match command {
-        SubCommand::Init => {
-            todo!();
+        SubCommand::Env => {
+            println!("{}='{}'", ENV_CONFIG_DIR, ctx.config_dir.display());
+            println!("{}='{}'", ENV_CACHE_DIR, ctx.cache_dir.display());
+            println!("{}='{}'", ENV_DATA_DIR, ctx.data_dir.display());
+            println!("{}='{}'", ENV_BIN_DIR, ctx.bin_dir.display());
         }
         SubCommand::Add { name, repo, version, desc } => {
             let name = match name {

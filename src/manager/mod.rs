@@ -1,16 +1,14 @@
 pub mod installer;
 
-use anyhow::{Context as _, Result};
+use anyhow::Result;
 use futures::{stream, StreamExt, TryStreamExt};
 use installer::install_package;
 use serde::{Deserialize, Serialize};
-use tokio::fs;
 
 use crate::{
     config::{Config, LockedConfig, LockedPackage, Package},
     context::Context,
     provider::{github::Github, Provider},
-    util::fs_ext::load_toml,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -86,32 +84,4 @@ pub async fn restore_packages(lcfg: LockedConfig) -> Result<()> {
         .await?;
 
     Ok(())
-}
-
-impl LockedConfig {
-    pub async fn load(ctx: &Context) -> Result<Self> {
-        let mut lcfg: LockedConfig = load_toml(&ctx.lock_file)
-            .await
-            .with_context(|| format!("failed to load {}", ctx.lock_file.display()))?;
-        lcfg.ctx = ctx.clone();
-
-        // Set the package names for convenience.
-        for (name, lpkg) in lcfg.pkgs.iter_mut() {
-            lpkg.name = name.clone();
-        }
-        Ok(lcfg)
-    }
-
-    /// Write this `LockedConfig` to the given path.
-    pub async fn save(&self) -> Result<()> {
-        let buf = toml::to_string_pretty(self).context("failed to serialize `LockedConfig`")?;
-        fs::write(&self.ctx.lock_file, buf)
-            .await
-            .with_context(|| format!("failed to save {}", self.ctx.lock_file.display()))
-    }
-
-    /// Update a package in the configuration. If the package does not exist, add it.
-    pub fn upsert(&mut self, lpkg: LockedPackage) {
-        self.pkgs.insert(lpkg.name.clone(), lpkg);
-    }
 }
