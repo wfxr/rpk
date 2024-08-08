@@ -149,9 +149,8 @@ impl Config {
     /// Load the configuration from the given path.
     pub async fn load(ctx: &Context) -> Result<Self> {
         let mut cfg = match load_toml(&ctx.config_file).await {
-            Ok(cfg) => cfg,
             Err(e) if not_found_err(e.root_cause()) => Config::init(ctx).await?,
-            e => return e.context(format!("failed to load {}", ctx.config_file.display())),
+            cfg => cfg.context(format!("failed to load {}", ctx.config_file.display()))?,
         };
 
         // Set the package names for convenience.
@@ -209,9 +208,8 @@ impl LockedConfig {
 impl EditableConfig {
     pub async fn load(ctx: &Context) -> Result<Self> {
         let buf = match fs::read_to_string(&ctx.config_file).await {
-            Ok(buf) => buf,
             Err(e) if not_found_err(&e) => include_str!("packages.toml").to_owned(),
-            Err(e) => return Err(e).context(format!("failed to read {}", ctx.config_file.display())),
+            buf => buf.context(format!("failed to read {}", ctx.config_file.display()))?,
         };
 
         let ctx = ctx.clone();

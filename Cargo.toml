@@ -32,12 +32,11 @@ constcat = "0.5.0"
 thiserror = "1.0.63"
 indexmap = { version = "2.3", features = ["rayon", "serde"] }
 url = "2.5.2"
-itertools = "0.13.0"
 rayon = "1.10.0"
 futures = "0.3.30"
 xdg = "2.5.2"
 toml_edit = "0.22.20"
-skim = "0.10.4"
+inquire = "0.7.5"
 
 [build-dependencies]
 anyhow = "1"

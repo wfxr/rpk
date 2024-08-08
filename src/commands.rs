@@ -1,6 +1,13 @@
+use std::{
+    process,
+    sync::{
+        atomic::{AtomicUsize, Ordering},
+        Arc,
+    },
+};
+
 use anyhow::{Context as _, Result};
-use itertools::Itertools as _;
-use skim::{prelude::*, SkimItemReceiver, SkimItemSender};
+use inquire::Select;
 use tracing::debug;
 
 use crate::{
@@ -124,91 +131,54 @@ pub async fn search(query: String, top: u8, ctx: Context) -> Result<(), anyhow::
     let stars_width = Arc::new(AtomicUsize::new(0));
     let fullname_width = Arc::new(AtomicUsize::new(0));
 
-    // Header line
-    let header = RepoSkimItem {
-        name:           "Name".to_string(),
-        desc:           "Description".to_string(),
-        stars:          "Stars".to_string(),
-        fullname:       "Repository".to_string(),
-        stars_width:    stars_width.clone(),
-        fullname_width: fullname_width.clone(),
-    };
-
     // Items list
-    let list = repos
+    let items: Vec<_> = repos
         .into_iter()
         .flat_map(|repo| {
-            Some(RepoSkimItem {
+            Some(RepoItem {
                 name:           repo.name,
                 desc:           repo.description.unwrap_or_default(),
-                stars:          repo.stargazers_count.map(|x| x.to_string()).unwrap_or_default(),
+                stars:          repo.stargazers_count.map(|x| format!("★ {x}")).unwrap_or_default(),
                 stars_width:    stars_width.clone(),
                 fullname:       repo.full_name?,
                 fullname_width: fullname_width.clone(),
             })
         })
-        .rev()
-        .chain(std::iter::once(header))
         .inspect(|item| {
             stars_width.fetch_max(item.stars.len(), Ordering::Relaxed);
             fullname_width.fetch_max(item.fullname.len(), Ordering::Relaxed);
         })
-        .collect_vec();
+        .collect();
 
-    let height = (list.len() + 1).min(25).to_string();
+    let page_size = items.len().min(25);
+    let answer = Select::new("Select a package ", items)
+        // .with_render_config()
+        .with_page_size(page_size)
+        .prompt();
 
-    let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
-    for item in list.into_iter().rev() {
-        tx.send(Arc::new(item))?;
-    }
-    drop(tx);
-
-    let skip_opts = SkimOptionsBuilder::default()
-        .inline_info(true)
-        .header_lines(1)
-        .prompt(Some("Select a package > "))
-        .height(Some(&height))
-        .multi(false)
-        .reverse(true)
-        .exit0(true)
-        .no_clear(true)
-        .no_clear_start(true)
-        .build()?;
-
-    let output = match Skim::run_with(&skip_opts, Some(rx)) {
-        Some(output) => match output.is_abort {
-            false => output,
-            true => std::process::exit(130),
-        },
-        None => std::process::exit(135),
+    use inquire::InquireError::*;
+    let answer = match answer {
+        Err(OperationCanceled | OperationInterrupted) => process::exit(1),
+        answer => answer?,
     };
 
-    let selected = output.selected_items.into_iter().map(|repo| {
-        let repo = (*repo)
-            .as_any()
-            .downcast_ref::<RepoSkimItem>()
-            .expect("something wrong with downcast");
-        Package {
-            name:    repo.name.clone(),
-            source:  Source::Github { repo: repo.fullname.clone() },
-            version: None,
-            desc:    if repo.desc.is_empty() {
-                None
-            } else {
-                Some(repo.desc.clone())
-            },
-        }
-    });
+    let pkg = Package {
+        name:    answer.name,
+        source:  Source::Github { repo: answer.fullname },
+        version: None,
+        desc:    match answer.desc.is_empty() {
+            false => Some(answer.desc),
+            true => None,
+        },
+    };
 
-    for pkg in selected {
-        debug!("selected: {:?}", pkg);
-        commands::add(&ctx, pkg).await?;
-    }
+    debug!("selected: {:?}", pkg);
+    commands::add(&ctx, pkg).await?;
 
     Ok(())
 }
 
-struct RepoSkimItem {
+struct RepoItem {
     name:           String,
     fullname:       String,
     desc:           String,
@@ -217,11 +187,11 @@ struct RepoSkimItem {
     fullname_width: Arc<AtomicUsize>,
 }
 
-impl SkimItem for RepoSkimItem {
-    fn text(&self) -> Cow<str> {
+impl std::fmt::Display for RepoItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self { stars, fullname, desc, .. } = self;
         let stars_width = self.stars_width.load(Ordering::Relaxed);
         let fullname_width = self.fullname_width.load(Ordering::Relaxed);
-        Cow::Owned(format!("{stars:>stars_width$}  {fullname:fullname_width$}  {desc}",))
+        f.write_fmt(format_args!("{stars:stars_width$}  {fullname:fullname_width$}  {desc}",))
     }
 }
