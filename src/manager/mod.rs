@@ -1,7 +1,5 @@
 pub mod installer;
 
-use std::collections::BTreeMap;
-
 use anyhow::{Context as _, Result};
 use futures::{stream, StreamExt, TryStreamExt};
 use installer::install_package;
@@ -25,23 +23,37 @@ pub async fn sync_package(
     ctx: &Context,
     pkg: &Package,
     lpkg: Option<&LockedPackage>,
+    update: bool,
 ) -> Result<(LockedPackage, SyncResult)> {
-    let provider = Github::new()?;
-    let new_lpkg = provider.download(ctx, pkg).await?;
-
-    install_package(ctx, &new_lpkg).await?;
-
-    let res = match lpkg {
-        Some(old_pkg) if old_pkg != &new_lpkg => {
-            ctx.log_status("Updated", &format!("{}@{}", pkg.name, new_lpkg.version));
-            SyncResult::Updated
+    match (&pkg.version, lpkg) {
+        // If the package is already installed and the version matches, do nothing.
+        (Some(version), Some(lpkg)) if version == &lpkg.version => {
+            ctx.log_status("Checked", &format!("{}@{}", pkg.name, lpkg.version));
+            Ok((lpkg.clone(), SyncResult::Checked))
+        }
+        (None, Some(lpkg)) if !update => {
+            ctx.log_status("Checked", &format!("{}@{}", pkg.name, lpkg.version));
+            Ok((lpkg.clone(), SyncResult::Checked))
         }
         _ => {
-            ctx.log_status("Checked", &format!("{}@{}", pkg.name, new_lpkg.version));
-            SyncResult::Checked
+            let provider = Github::new()?;
+            let new_lpkg = provider.download(ctx, pkg).await?;
+
+            install_package(ctx, &new_lpkg).await?;
+
+            let res = match lpkg {
+                Some(old_pkg) if old_pkg != &new_lpkg => {
+                    ctx.log_status("Updated", &format!("{}@{}", pkg.name, new_lpkg.version));
+                    SyncResult::Updated
+                }
+                _ => {
+                    ctx.log_status("Checked", &format!("{}@{}", pkg.name, new_lpkg.version));
+                    SyncResult::Checked
+                }
+            };
+            Ok((new_lpkg, res))
         }
-    };
-    Ok((new_lpkg, res))
+    }
 }
 
 pub async fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
@@ -56,14 +68,14 @@ pub async fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> 
 }
 
 /// Install all necessary packages, and returns a [`LockedConfig`].
-pub async fn sync_packages(ctx: &Context, config: Config) -> Result<LockedConfig> {
-    let mut locked = BTreeMap::new();
-    for (name, pkg) in config.pkgs.iter() {
-        let (lpkg, _) = sync_package(ctx, pkg, None).await?;
-        locked.insert(name.clone(), lpkg);
+pub async fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Result<()> {
+    for (name, pkg) in cfg.pkgs.iter() {
+        let old_lpkg = lcfg.pkgs.get(name);
+        let (new_lpkg, _) = sync_package(ctx, pkg, old_lpkg, false).await?;
+        lcfg.upsert(new_lpkg);
     }
 
-    Ok(LockedConfig::new(ctx.clone(), locked))
+    Ok(())
 }
 
 /// Restore packages according to the given [`LockedConfig`].
@@ -82,6 +94,11 @@ impl LockedConfig {
             .await
             .with_context(|| format!("failed to load {}", ctx.lock_file.display()))?;
         lcfg.ctx = ctx.clone();
+
+        // Set the package names for convenience.
+        for (name, lpkg) in lcfg.pkgs.iter_mut() {
+            lpkg.name = name.clone();
+        }
         Ok(lcfg)
     }
 

@@ -15,7 +15,7 @@ pub async fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
     let mut ecfg = EditableConfig::load(ctx).await?;
     ctx.log_header("Loaded", ctx.config_file.as_path());
 
-    let (lpkg, _) = sync_package(ctx, &pkg, None).await?;
+    let (lpkg, _) = sync_package(ctx, &pkg, None, false).await?;
     pkg.desc = lpkg.desc.clone();
 
     ecfg.upsert(&pkg)?;
@@ -33,8 +33,10 @@ pub async fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
 pub async fn sync(ctx: &Context) -> Result<(), anyhow::Error> {
     let cfg = Config::load(ctx).await?;
     ctx.log_header("Loaded", ctx.config_file.as_path());
+    let mut lcfg = LockedConfig::load(ctx).await?;
+    ctx.log_header("Loaded", ctx.lock_file.as_path());
 
-    let lcfg = sync_packages(ctx, cfg).await?;
+    sync_packages(ctx, &cfg, &mut lcfg).await?;
 
     lcfg.save().await?;
     ctx.log_header("Locked", ctx.lock_file.as_path());
@@ -76,7 +78,7 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
             let old_lpkg = lcfg.pkgs.get(&package);
 
             // Sync the package.
-            let (new_lpkg, sync_res) = sync_package(ctx, &pkg, old_lpkg).await?;
+            let (new_lpkg, sync_res) = sync_package(ctx, &pkg, old_lpkg, true).await?;
 
             // Update the package in the lock file.
             if sync_res == SyncResult::Updated {
@@ -90,11 +92,14 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
             ctx.log_header("Loaded", ctx.lock_file.as_path());
 
             let mut updated = false;
-            for pkg in cfg.pkgs.values() {
-                let old_lpkg = lcfg.pkgs.get(&pkg.name);
+            for old_lpkg in lcfg.pkgs.clone().values() {
+                let pkg = match cfg.pkgs.get(&old_lpkg.name) {
+                    Some(pkg) => pkg,
+                    None => continue,
+                };
 
                 // Sync the package.
-                let (new_lpkg, sync_res) = sync_package(ctx, pkg, old_lpkg).await?;
+                let (new_lpkg, sync_res) = sync_package(ctx, pkg, Some(old_lpkg), true).await?;
 
                 // Update the package in the lock file.
                 if sync_res == SyncResult::Updated {

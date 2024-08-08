@@ -1,9 +1,10 @@
 use std::{fmt, io, io::IsTerminal, str::FromStr};
 
+use clap::ValueEnum;
 use thiserror::Error;
 
 /// Whether messages should use color output.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ColorChoice {
     /// Force color output.
     Always,
@@ -11,12 +12,6 @@ pub enum ColorChoice {
     Auto,
     /// Force disable color output.
     Never,
-}
-
-impl Default for ColorChoice {
-    fn default() -> Self {
-        Self::Auto
-    }
 }
 
 impl fmt::Display for ColorChoice {

@@ -1,162 +1,114 @@
 //! Command line interface.
+#![deny(missing_docs)]
 
-mod color_choice;
-mod raw;
+mod color;
 
-use std::process;
+use std::path::PathBuf;
 
-use anyhow::{anyhow, bail, Context as ResultExt, Result};
 use clap::Parser;
-use tracing::debug;
 
-use crate::{
-    cli::raw::{RawCommand, RawOpt},
-    config::{Package, Source},
-    context::{log_error, Context, Output, Verbosity},
-    util::{
-        build::{self, CRATE_NAME},
-        fs_ext::mkdir_p,
-    },
-};
+use crate::{cli::color::ColorChoice, util::build};
 
-/// Parse the command line arguments.
-///
-/// In the event of failure it will print the error message and quit the program
-/// without returning.
-pub async fn from_args() -> Opt {
-    match Opt::from_raw_opt(RawOpt::parse()).await {
-        Ok(opt) => {
-            debug!("parsed options: {:?}", opt);
-            opt
-        }
-        Err(err) => {
-            log_error(true, &err);
-            process::exit(1);
-        }
-    }
-}
-
-/// Resolved command line options with defaults set.
-#[derive(Debug)]
+/// Resolved command line options.
+#[derive(Debug, PartialEq, Eq, Parser)]
+#[clap(
+    author,
+    version = build::CRATE_RELEASE,
+    long_version = build::CRATE_LONG_VERSION,
+    about,
+    long_about = None,
+    disable_help_subcommand(true),
+    subcommand_required(true),
+)]
 pub struct Opt {
-    /// Global context for use across the entire program.
-    pub ctx:     Context,
-    /// The subcommand.
-    pub command: Command,
+    /// Suppress any informational output.
+    #[clap(long, short)]
+    pub quiet: bool,
+
+    /// Use verbose output.
+    #[clap(long, short)]
+    pub verbose: bool,
+
+    /// This flag controls when to use colors.
+    #[clap(long, value_enum, value_name = "WHEN", default_value_t = ColorChoice::Auto, ignore_case = true)]
+    pub color: ColorChoice,
+
+    /// The configuration directory.
+    #[clap(long, value_name = "PATH", env = "SHELDON_CONFIG_DIR")]
+    pub config_dir: Option<PathBuf>,
+
+    /// The directory to store package data.
+    #[clap(long, value_name = "PATH", env = "SHELDON_DATA_DIR")]
+    pub data_dir: Option<PathBuf>,
+
+    /// The directory to store downloaded packages.
+    #[clap(long, value_name = "PATH", env = "SHELDON_CACHE_DIR")]
+    pub cache_dir: Option<PathBuf>,
+
+    /// The directory installed binaries linked to.
+    #[clap(long, value_name = "PATH", env = "SHELDON_CACHE_DIR")]
+    pub bin_dir: Option<PathBuf>,
+
+    /// The subcommand to run.
+    #[clap(subcommand)]
+    pub command: SubCommand,
 }
 
-/// The resolved command.
-#[derive(Debug)]
-pub enum Command {
+/// The resolved sub command.
+#[derive(Debug, PartialEq, Eq, Parser)]
+pub enum SubCommand {
     /// Initialize a new config file.
     Init,
 
-    /// Add a new plugin to the config file.
-    Add(Package),
-
-    /// Check and install any missing packages.
+    /// install any missing packages, re-generating the lock file.
     Sync,
 
-    /// Update the packages and regenerate the lock file.
-    Update {
-        /// The packages to update.
-        package: Option<String>,
+    /// Add a new plugin to the config file.
+    Add {
+        /// The github repository hosting the package
+        ///
+        /// Example: `sharkdp/fd`
+        #[clap(value_name = "REPO")]
+        repo: String,
+
+        /// A unique name for the package.
+        #[clap(long, value_name = "NAME")]
+        name: Option<String>,
+
+        /// The version of the package.
+        #[clap(long, value_name = "VERSION")]
+        version: Option<String>,
+
+        /// A description of the package.
+        #[clap(long, value_name = "DESC", long)]
+        desc: Option<String>,
     },
 
-    /// Restore all packages to the state in the lockfile. For a single package,
-    /// restore it to the state in the lockfile.
+    /// Restore packages to the state in the lockfile.
     Restore {
         /// The packages to restore.
+        #[clap(value_name = "PKG")]
         package: Option<String>,
     },
 
+    /// Update packages and re-generate the lock file.
+    Update {
+        /// The packages to update.
+        #[clap(value_name = "PKG")]
+        package: Option<String>,
+    },
+
+    /// Search for packages on GitHub.
     Search {
         /// The query to search for.
+        #[clap(value_name = "QUERY")]
         query: String,
 
         /// The number of results to display.
+        #[clap(long, value_name = "NUM", default_value = "10")]
         top: u8,
     },
-}
 
-impl Opt {
-    async fn from_raw_opt(raw_opt: RawOpt) -> Result<Self> {
-        let RawOpt {
-            quiet,
-            verbose,
-            color,
-            bin_dir,
-            data_dir,
-            cache_dir,
-            config_dir,
-            command,
-        } = raw_opt;
-
-        let command = match command {
-            RawCommand::Init => Command::Init,
-            RawCommand::Add { name, repo, version, desc } => {
-                let name = match name {
-                    Some(name) => name,
-                    None => match repo.split_once('/') {
-                        Some((_owner, repo)) => repo.to_owned(),
-                        None => bail!("invalid repo format: `{}`", repo),
-                    },
-                };
-                let source = Source::Github { repo };
-
-                Command::Add(Package { name, source, version, desc })
-            }
-            RawCommand::Sync => Command::Sync,
-            RawCommand::Update { package } => Command::Update { package },
-            RawCommand::Version => {
-                println!("{} {}", build::CRATE_NAME, build::CRATE_VERBOSE_VERSION);
-                process::exit(0);
-            }
-            RawCommand::Restore { package } => Command::Restore { package },
-            RawCommand::Search { query, top } => Command::Search { query, top },
-        };
-
-        let verbosity = if quiet {
-            Verbosity::Quiet
-        } else if verbose {
-            Verbosity::Verbose
-        } else {
-            Verbosity::Normal
-        };
-
-        let output = Output { verbosity, no_color: !color.is_color() };
-
-        let xdg_dirs = xdg::BaseDirectories::with_prefix(CRATE_NAME)?;
-        let home = home::home_dir().ok_or_else(|| anyhow!("failed to determine the current user's home directory"))?;
-
-        let config_dir = config_dir.unwrap_or_else(|| xdg_dirs.get_config_home());
-        mkdir_p(&config_dir).await.context("failed to create config dir")?;
-
-        let cache_dir = cache_dir.unwrap_or_else(|| xdg_dirs.get_cache_home());
-        mkdir_p(&cache_dir).await.context("failed to create cache dir")?;
-
-        let data_dir = data_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("packages"));
-        mkdir_p(&data_dir).await.context("failed to create data dir")?;
-
-        let bin_dir = bin_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("bin"));
-        mkdir_p(&bin_dir).await.context("failed to create binary dir")?;
-
-        let config_file = config_dir.join("packages.toml");
-        let lock_file = config_dir.join("packages.lock");
-
-        let version = build::CRATE_RELEASE.to_string();
-        let ctx = Context {
-            version,
-            config_file,
-            config_dir,
-            cache_dir,
-            data_dir,
-            bin_dir,
-            home,
-            lock_file,
-            output,
-        };
-
-        Ok(Self { ctx, command })
-    }
+    /// Prints detailed version information.
+    Version,
 }
