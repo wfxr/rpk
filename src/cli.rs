@@ -1,23 +1,18 @@
-//! Command line interface.
-#![deny(missing_docs)]
+use std::{io::IsTerminal as _, path::PathBuf};
 
-mod color;
+use clap::{Parser, ValueEnum};
+use clap_complete::Shell;
 
-use std::path::PathBuf;
-
-use clap::Parser;
-
-use crate::{cli::color::ColorChoice, util::build};
+use crate::util::build;
 
 /// Resolved command line options.
 #[derive(Debug, PartialEq, Eq, Parser)]
 #[clap(
     author,
-    version = build::CRATE_RELEASE,
+    version = build::CRATE_NAME,
     long_version = build::CRATE_LONG_VERSION,
     about,
     long_about = None,
-    disable_help_subcommand(true),
     subcommand_required(true),
 )]
 pub struct Opt {
@@ -109,6 +104,35 @@ pub enum SubCommand {
         top: u8,
     },
 
+    /// Generate completions for the given shell.
+    Completions {
+        /// The shell to generate completions for.
+        #[clap(value_name = "SHELL", value_enum)]
+        shell: Shell,
+    },
+
     /// Prints detailed version information.
     Version,
+}
+
+/// Whether messages should use color output.
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ColorChoice {
+    /// Force color output.
+    Always,
+    /// Intelligently guess whether to use color output.
+    Auto,
+    /// Force disable color output.
+    Never,
+}
+
+impl ColorChoice {
+    /// Check if color should be used.
+    pub fn is_color(self) -> bool {
+        match self {
+            Self::Always => true,
+            Self::Auto => std::io::stderr().is_terminal(),
+            Self::Never => false,
+        }
+    }
 }

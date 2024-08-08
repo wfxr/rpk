@@ -2,6 +2,7 @@
 name = "grm"
 version = "0.1.0"
 edition = "2021"
+description = "A CLI tool to manage packages from GitHub releases."
 
 [dependencies]
 anyhow = "1"
@@ -24,6 +25,7 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 yansi = "1.0.1"
 zip = "2.1.6"
+clap = { version = "4", features = ["wrap_help", "derive", "env"] }
 clap_complete = { version = "4" }
 home = "0.5.9"
 constcat = "0.5.0"
@@ -36,20 +38,6 @@ futures = "0.3.30"
 xdg = "2.5.2"
 toml_edit = "0.22.20"
 skim = "0.10.4"
-
-[dependencies.clap]
-version = "4"
-default-features = false
-features = [
-    "std",
-    "help",
-    "usage",
-    "error-context",
-    "suggestions",   # default excluding "color"
-    "cargo",
-    "env",
-    "derive",        # optional
-]
 
 [build-dependencies]
 anyhow = "1"

@@ -10,7 +10,8 @@ pub mod util;
 use std::process;
 
 use anyhow::{anyhow, bail, Context as _};
-use clap::Parser as _;
+use clap::{CommandFactory as _, Parser as _};
+use clap_complete::generate;
 use cli::{Opt, SubCommand};
 use config::{Package, Source};
 use context::{log_error, Context, Output, Verbosity};
@@ -20,7 +21,7 @@ use util::{
     fs_ext::mkdir_p,
 };
 
-async fn try_main(opt: Opt) -> anyhow::Result<()> {
+async fn try_main() -> anyhow::Result<()> {
     let Opt {
         quiet,
         verbose,
@@ -30,7 +31,7 @@ async fn try_main(opt: Opt) -> anyhow::Result<()> {
         cache_dir,
         config_dir,
         command,
-    } = opt;
+    } = Opt::parse();
 
     let verbosity = if quiet {
         Verbosity::Quiet
@@ -106,6 +107,10 @@ async fn try_main(opt: Opt) -> anyhow::Result<()> {
         SubCommand::Search { query, top } => {
             commands::search(query, top, ctx).await?;
         }
+        SubCommand::Completions { shell } => {
+            let cmd = &mut Opt::command();
+            generate(shell, cmd, cmd.get_name().to_string(), &mut std::io::stdout());
+        }
     }
 
     Ok(())
@@ -118,9 +123,7 @@ async fn main() {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    let opt = Opt::parse();
-
-    if let Err(e) = try_main(opt).await {
+    if let Err(e) = try_main().await {
         log_error(true, &e);
         process::exit(1);
     }

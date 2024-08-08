@@ -9,7 +9,7 @@ use anyhow::{bail, Context, Result};
 
 /// Nicely format an error message for when the subprocess didn't exit
 /// successfully.
-pub fn format_error_msg(cmd: &process::Command, output: &process::Output) -> String {
+fn format_error_msg(cmd: &process::Command, output: &process::Output) -> String {
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
     let mut msg = format!("subprocess didn't exit successfully `{:?}` ({})", cmd, output.status);
@@ -26,7 +26,7 @@ pub fn format_error_msg(cmd: &process::Command, output: &process::Output) -> Str
 
 /// Whether underlying error kind for the given error is
 /// `io::ErrorKind::NotFound`.
-pub fn is_io_not_found(error: &anyhow::Error) -> bool {
+fn is_io_not_found(error: &anyhow::Error) -> bool {
     for cause in error.chain() {
         if let Some(io_error) = cause.downcast_ref::<io::Error>() {
             return io_error.kind() == io::ErrorKind::NotFound;
