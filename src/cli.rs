@@ -109,6 +109,12 @@ pub enum SubCommand {
         /// The shell to generate completions for.
         #[clap(value_name = "SHELL", value_enum)]
         shell: Shell,
+
+        /// The directory to write the completions to.
+        ///
+        /// Defaults output to stdout.
+        #[clap(short, long, value_name = "DIR")]
+        dir: Option<PathBuf>,
     },
 
     /// Prints detailed version information.

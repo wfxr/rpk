@@ -11,7 +11,7 @@ use std::process;
 
 use anyhow::{anyhow, bail, Context as _};
 use clap::{CommandFactory as _, Parser as _};
-use clap_complete::generate;
+use clap_complete::{generate, generate_to};
 use cli::{Opt, SubCommand};
 use config::{Package, Source};
 use context::{log_error, Context, Output, Verbosity};
@@ -107,9 +107,15 @@ async fn try_main() -> anyhow::Result<()> {
         SubCommand::Search { query, top } => {
             commands::search(query, top, ctx).await?;
         }
-        SubCommand::Completions { shell } => {
+        SubCommand::Completions { shell, dir } => {
             let cmd = &mut Opt::command();
-            generate(shell, cmd, cmd.get_name().to_string(), &mut std::io::stdout());
+            match dir {
+                Some(dir) => {
+                    let path = generate_to(shell, cmd, cmd.get_name().to_string(), dir)?;
+                    ctx.log_status("Generated", path.as_path());
+                }
+                None => generate(shell, cmd, cmd.get_name().to_string(), &mut std::io::stdout()),
+            }
         }
     }
 

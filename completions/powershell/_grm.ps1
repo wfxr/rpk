@@ -2,12 +2,12 @@
 using namespace System.Management.Automation
 using namespace System.Management.Automation.Language
 
-Register-ArgumentCompleter -Native -CommandName 'csview' -ScriptBlock {
+Register-ArgumentCompleter -Native -CommandName 'grm' -ScriptBlock {
     param($wordToComplete, $commandAst, $cursorPosition)
 
     $commandElements = $commandAst.CommandElements
     $command = @(
-        'csview'
+        'grm'
         for ($i = 1; $i -lt $commandElements.Count; $i++) {
             $element = $commandElements[$i]
             if ($element -isnot [StringConstantExpressionAst] -or
@@ -20,30 +20,114 @@ Register-ArgumentCompleter -Native -CommandName 'csview' -ScriptBlock {
     }) -join ';'
 
     $completions = @(switch ($command) {
-        'csview' {
-            [CompletionResult]::new('-d', 'd', [CompletionResultType]::ParameterName, 'Specify the field delimiter')
-            [CompletionResult]::new('--delimiter', 'delimiter', [CompletionResultType]::ParameterName, 'Specify the field delimiter')
-            [CompletionResult]::new('-s', 's', [CompletionResultType]::ParameterName, 'Specify the border style')
-            [CompletionResult]::new('--style', 'style', [CompletionResultType]::ParameterName, 'Specify the border style')
-            [CompletionResult]::new('-p', 'p', [CompletionResultType]::ParameterName, 'Specify padding for table cell')
-            [CompletionResult]::new('--padding', 'padding', [CompletionResultType]::ParameterName, 'Specify padding for table cell')
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'Specify global indent for table')
-            [CompletionResult]::new('--indent', 'indent', [CompletionResultType]::ParameterName, 'Specify global indent for table')
-            [CompletionResult]::new('--sniff', 'sniff', [CompletionResultType]::ParameterName, 'Limit column widths sniffing to the specified number of rows. Specify "0" to cancel limit')
-            [CompletionResult]::new('--header-align', 'header-align', [CompletionResultType]::ParameterName, 'Specify the alignment of the table header')
-            [CompletionResult]::new('--body-align', 'body-align', [CompletionResultType]::ParameterName, 'Specify the alignment of the table body')
-            [CompletionResult]::new('-H', 'H ', [CompletionResultType]::ParameterName, 'Specify that the input has no header row')
-            [CompletionResult]::new('--no-headers', 'no-headers', [CompletionResultType]::ParameterName, 'Specify that the input has no header row')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Prepend a column of line numbers to the table')
-            [CompletionResult]::new('--number', 'number', [CompletionResultType]::ParameterName, 'Prepend a column of line numbers to the table')
-            [CompletionResult]::new('-t', 't', [CompletionResultType]::ParameterName, 'Use ''\t'' as delimiter for tsv')
-            [CompletionResult]::new('--tsv', 'tsv', [CompletionResultType]::ParameterName, 'Use ''\t'' as delimiter for tsv')
-            [CompletionResult]::new('-P', 'P ', [CompletionResultType]::ParameterName, 'Disable pager')
-            [CompletionResult]::new('--disable-pager', 'disable-pager', [CompletionResultType]::ParameterName, 'Disable pager')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+        'grm' {
+            [CompletionResult]::new('--color', 'color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('--config-dir', 'config-dir', [CompletionResultType]::ParameterName, 'The configuration directory')
+            [CompletionResult]::new('--data-dir', 'data-dir', [CompletionResultType]::ParameterName, 'The directory to store package data')
+            [CompletionResult]::new('--cache-dir', 'cache-dir', [CompletionResultType]::ParameterName, 'The directory to store downloaded packages')
+            [CompletionResult]::new('--bin-dir', 'bin-dir', [CompletionResultType]::ParameterName, 'The directory installed binaries linked to')
+            [CompletionResult]::new('-q', 'q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', 'quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', 'v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', 'verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('-V', 'V ', [CompletionResultType]::ParameterName, 'Print version')
             [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a new config file')
+            [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
+            [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
+            [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
+            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
+            [CompletionResult]::new('search', 'search', [CompletionResultType]::ParameterValue, 'Search for packages on GitHub')
+            [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
+            [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
+            [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
+            break
+        }
+        'grm;init' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'grm;sync' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'grm;add' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'A unique name for the package')
+            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'The version of the package')
+            [CompletionResult]::new('--desc', 'desc', [CompletionResultType]::ParameterName, 'A description of the package')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            break
+        }
+        'grm;restore' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'grm;update' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'grm;search' {
+            [CompletionResult]::new('--top', 'top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'grm;completions' {
+            [CompletionResult]::new('-d', 'd', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
+            [CompletionResult]::new('--dir', 'dir', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            break
+        }
+        'grm;version' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'grm;help' {
+            [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a new config file')
+            [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
+            [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
+            [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
+            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
+            [CompletionResult]::new('search', 'search', [CompletionResultType]::ParameterValue, 'Search for packages on GitHub')
+            [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
+            [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
+            [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
+            break
+        }
+        'grm;help;init' {
+            break
+        }
+        'grm;help;sync' {
+            break
+        }
+        'grm;help;add' {
+            break
+        }
+        'grm;help;restore' {
+            break
+        }
+        'grm;help;update' {
+            break
+        }
+        'grm;help;search' {
+            break
+        }
+        'grm;help;completions' {
+            break
+        }
+        'grm;help;version' {
+            break
+        }
+        'grm;help;help' {
             break
         }
     })
