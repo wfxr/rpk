@@ -216,7 +216,7 @@ fn is_aarch64(asset: &Asset) -> bool {
 }
 
 fn is_x86(asset: &Asset) -> bool {
-    !is_x86_64(asset) && (asset.name.contains("386") || asset.name.contains("x86"))
+    !is_x86_64(asset) && (asset.name.contains("386") || asset.name.contains("x86") || asset.name.contains("i686"))
 }
 
 fn is_arm(asset: &Asset) -> bool {
