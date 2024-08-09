@@ -1,3 +1,0 @@
-[submodule "scripts/install"]
-	path = scripts/install
-	url = https://github.com/rossmacarthur/install
