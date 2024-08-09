@@ -168,7 +168,7 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
                 // strip the common prefix from the path
                 let path = match &archive_prefix {
-                    Some(prefix) => path.strip_prefix(prefix)?,
+                    Some(prefix) => path.strip_prefix(prefix).unwrap_or(&path),
                     None => &path,
                 };
 
