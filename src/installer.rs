@@ -1,12 +1,12 @@
 use std::{
     self,
-    fs,
+    fs::{self, Permissions},
     io::{self, Read, Seek},
     os::unix::fs::{OpenOptionsExt, PermissionsExt},
     path::Path,
 };
 
-use anyhow::anyhow;
+use anyhow::{anyhow, bail};
 use flate2::read::GzDecoder;
 use tracing::{debug, trace};
 use zip::ZipArchive;
@@ -67,14 +67,16 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
     mkdir_p(&install_dir).await?;
 
     let link_path = ctx.bin_dir.join(&lpkg.name);
+    let mut bin_candidates = Vec::new();
 
     match archive {
         ArchiveKind::Plain(compression) => {
             let install_path = install_dir.join(&lpkg.name);
+            let mode = 0o744;
             let install_file = fs::OpenOptions::new()
                 .write(true)
                 .create(true)
-                .mode(0o744)
+                .mode(mode)
                 .truncate(true)
                 .open(&install_path)?;
 
@@ -86,7 +88,8 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
             io::copy(&mut io::BufReader::new(decoder), &mut io::BufWriter::new(install_file))?;
 
-            symlink_force(install_path, link_path).await?;
+            trace!("binary candidate: {}", install_path.display());
+            bin_candidates.push((install_path, mode));
         }
         ArchiveKind::Zip => {
             let mut archive = ZipArchive::new(file)?;
@@ -103,9 +106,9 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
                 trace!("extracting file: {:?}", path);
 
-                // strip the common prefix from the path
+                // strip the common prefix from the path if exists
                 let path = match &prefix {
-                    Some(prefix) => path.strip_prefix(prefix)?,
+                    Some(prefix) => path.strip_prefix(prefix).unwrap_or(&path),
                     None => &path,
                 };
 
@@ -130,9 +133,8 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
                 let filename = get_file_name_utf8(path)?;
                 if filename == Some(&lpkg.name) || nfiles == 1 {
-                    let mode = mode | 0o111;
-                    fs::set_permissions(&install_path, fs::Permissions::from_mode(mode))?;
-                    symlink_force(install_path, &link_path).await?;
+                    trace!("binary candidate: {}", install_path.display());
+                    bin_candidates.push((install_path, mode));
                 }
             }
         }
@@ -166,7 +168,7 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
                 trace!("extracting file: {:?}", path);
 
-                // strip the common prefix from the path
+                // strip the common prefix from the path if exists
                 let path = match &archive_prefix {
                     Some(prefix) => path.strip_prefix(prefix).unwrap_or(&path),
                     None => &path,
@@ -177,13 +179,33 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
                 let filename = get_file_name_utf8(path)?;
                 if filename == Some(&lpkg.name) {
-                    let mode = entry.header().mode().unwrap_or(0o644) | 0o111;
-                    fs::set_permissions(&install_path, fs::Permissions::from_mode(mode))?;
-                    symlink_force(install_path, &link_path).await?;
+                    trace!("binary candidate: {}", install_path.display());
+                    bin_candidates.push((install_path, entry.header().mode().unwrap_or(0o644)));
                 }
             }
         }
     };
+
+    match &bin_candidates[..] {
+        [] => bail!("no binary found in archive"),
+        [(install_path, mode), ..] => {
+            let mode = mode | 0o111;
+            fs::set_permissions(install_path, Permissions::from_mode(mode))?;
+            symlink_force(install_path, &link_path).await?;
+
+            debug!("link built: '{}' -> '{}'", install_path.display(), link_path.display());
+
+            if bin_candidates.len() > 1 {
+                ctx.log_warning(
+                    "Warning",
+                    format!(
+                        "Multiple binaries found in archive, using the first one: '{}'",
+                        ctx.replace_home(install_path).display()
+                    ),
+                );
+            }
+        }
+    }
 
     Ok(())
 }
