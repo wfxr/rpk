@@ -168,13 +168,10 @@ fn filter_assets(release: &Release) -> anyhow::Result<&Asset> {
             _ => false,
         })
         .filter(|asset| match ARCH {
-            "x86_64" =>
-                asset.name.contains("amd64")
-                    || asset.name.contains("x86_64")
-                    || asset.name.contains("x64")
-                    || asset.name.contains("x86-64"),
-            "x86" => asset.name.contains("386") || asset.name.contains("x86"),
-            "aarch64" => asset.name.contains("arm64") || asset.name.contains("aarch64"),
+            "x86_64" => is_x86_64(asset),
+            "x86" => is_x86(asset),
+            "aarch64" => is_aarch64(asset),
+            "arm" => is_arm(asset),
             _ => false,
         })
         .filter(|asset| {
@@ -205,4 +202,23 @@ fn filter_assets(release: &Release) -> anyhow::Result<&Asset> {
             Ok(asset)
         }
     }
+}
+
+fn is_x86_64(asset: &Asset) -> bool {
+    asset.name.contains("amd64")
+        || asset.name.contains("x86_64")
+        || asset.name.contains("x64")
+        || asset.name.contains("x86-64")
+}
+
+fn is_aarch64(asset: &Asset) -> bool {
+    asset.name.contains("arm64") || asset.name.contains("aarch64")
+}
+
+fn is_x86(asset: &Asset) -> bool {
+    !is_x86_64(asset) && (asset.name.contains("386") || asset.name.contains("x86"))
+}
+
+fn is_arm(asset: &Asset) -> bool {
+    !is_aarch64(asset) && asset.name.contains("arm")
 }
