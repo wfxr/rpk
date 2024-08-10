@@ -7,7 +7,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result};
-use inquire::Select;
+use inquire::{Select, Text};
 use tracing::debug;
 
 use crate::{
@@ -152,7 +152,6 @@ pub async fn search(query: String, top: u8, ctx: Context) -> Result<(), anyhow::
 
     let page_size = items.len().min(25);
     let answer = Select::new("Select a package ", items)
-        // .with_render_config()
         .with_page_size(page_size)
         .prompt();
 
@@ -162,11 +161,15 @@ pub async fn search(query: String, top: u8, ctx: Context) -> Result<(), anyhow::
         answer => answer?,
     };
 
+    let name = Text::new("Choose package name?")
+        .with_initial_value(&answer.name)
+        .prompt()?;
+
     let pkg = Package {
-        name:    answer.name,
-        source:  Source::Github { repo: answer.fullname },
+        name,
+        source: Source::Github { repo: answer.fullname },
         version: None,
-        desc:    match answer.desc.is_empty() {
+        desc: match answer.desc.is_empty() {
             false => Some(answer.desc),
             true => None,
         },
