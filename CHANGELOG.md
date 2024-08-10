@@ -1,8 +1,22 @@
 
+## [0.1.2](https://github.com/wfxr/rpk/compare/v0.1.1..0.1.2) (2024-08-10)
+
+### 🚀 Features
+
+- Allow user to input package name - ([77385b2](https://github.com/wfxr/rpk/commit/77385b2023a8eb118d08ed99ba28076b841153c9))
+- Enchance the binary installation - ([ea28a14](https://github.com/wfxr/rpk/commit/ea28a14c49c55f110e2be96e4b2477754d9674b3))
+- Handle i686 arch in github provider - ([4ff4532](https://github.com/wfxr/rpk/commit/4ff45328e44f4bfb2213fad3dcbf85c1d149fa3e))
+- Handle arm architecture in github provider - ([2971de4](https://github.com/wfxr/rpk/commit/2971de470d7cf289c3219a1ab926ecf22efacc3d))
+
+### 🐛 Bug Fixes
+
+- Some packages have no common prefix in the archive - ([962bff1](https://github.com/wfxr/rpk/commit/962bff16cd7176c395bb0d0264149cfc9d923efb))
+
 ## [0.1.1] - 2024-08-09
 
 ### ⚙️ Miscellaneous Tasks
 
+- Release rpk version 0.1.1 - ([f1518b3](https://github.com/wfxr/rpk/commit/f1518b33575f7ecd88c656d58e10e042cfca051e))
 - Prefer musl libc over glibc - ([a781c0e](https://github.com/wfxr/rpk/commit/a781c0e52d9c6b3414cedcefabe6e30298066429))
 - Port install script from rossmacarthur/install - ([af96e03](https://github.com/wfxr/rpk/commit/af96e03047cb2af0f9801948cfdcbdd0984fd9b4))
 
