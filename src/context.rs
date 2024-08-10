@@ -162,9 +162,9 @@ impl Context {
 
     fn log_impl(&self, color: Color, prefix: &str, msg: impl fmt::Display) {
         if self.output.no_color {
-            eprintln!("{: >10} {}", prefix.to_uppercase(), msg);
+            eprintln!("{: >12} {}", prefix.to_uppercase(), msg);
         } else {
-            eprintln!("{} {}", Paint::new(format!("{prefix: >10}")).fg(color).bold(), msg);
+            eprintln!("{} {}", Paint::new(format!("{prefix: >12}")).fg(color).bold(), msg);
         }
     }
 

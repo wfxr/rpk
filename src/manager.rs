@@ -32,7 +32,7 @@ pub async fn sync_package(
             Ok((lpkg.clone(), SyncResult::Checked))
         }
         _ => {
-            let provider = Github::new()?;
+            let provider = Github::new(ctx.clone())?;
             let new_lpkg = provider.download(ctx, pkg).await?;
 
             install_package(ctx, &new_lpkg).await?;
@@ -56,7 +56,7 @@ pub async fn sync_package(
 }
 
 pub async fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
-    let provider = Github::new()?;
+    let provider = Github::new(ctx.clone())?;
 
     provider.download_locked(ctx, lpkg).await?;
 

@@ -124,8 +124,8 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
     Ok(())
 }
 
-pub async fn search(query: String, top: u8, ctx: Context) -> Result<(), anyhow::Error> {
-    let gh = Github::new()?;
+pub async fn search(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> {
+    let gh = Github::new(ctx.clone())?;
     let repos = gh.search_repo(&query, top).await?;
 
     let stars_width = Arc::new(AtomicUsize::new(0));
@@ -176,7 +176,7 @@ pub async fn search(query: String, top: u8, ctx: Context) -> Result<(), anyhow::
     };
 
     debug!("selected: {:?}", pkg);
-    commands::add(&ctx, pkg).await?;
+    commands::add(ctx, pkg).await?;
 
     Ok(())
 }

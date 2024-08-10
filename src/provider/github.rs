@@ -12,6 +12,7 @@ use octocrab::{
     Octocrab,
 };
 use tracing::{debug, trace, warn};
+use url::Url;
 
 use crate::{
     config::{LockedPackage, Package, Source},
@@ -22,18 +23,26 @@ use crate::{
 use super::Provider;
 
 pub struct Github {
-    crab: Octocrab,
-    http: reqwest::Client,
+    crab:  Octocrab,
+    http:  reqwest::Client,
+    token: Option<String>,
+
+    ctx: Context,
 }
 
 impl Github {
-    pub fn new() -> Result<Self> {
-        let crab = match env::var("GITHUB_TOKEN").or_else(|_| env::var("RPK_GITHUB_TOKEN")) {
-            Ok(token) => Octocrab::builder().personal_token(token).build()?,
-            Err(_) => Octocrab::builder().build()?,
+    pub fn new(ctx: Context) -> Result<Self> {
+        let builder = Octocrab::builder();
+
+        let token = env::var("GITHUB_TOKEN").or_else(|_| env::var("RPK_GITHUB_TOKEN")).ok();
+
+        let crab = match &token {
+            Some(token) => builder.personal_token(token.clone()).build()?,
+            None => builder.build()?,
         };
+
         let http = reqwest::Client::new();
-        Ok(Github { crab, http })
+        Ok(Github { crab, http, token, ctx })
     }
 
     pub async fn search_repo(&self, query: &str, size: impl Into<u8>) -> Result<Vec<Repository>> {
@@ -71,6 +80,15 @@ impl Github {
     pub fn parse_repo<'a>(&self, repo: &'a str) -> Result<(&'a str, &'a str)> {
         repo.split_once('/').context(format!("Invalid repo: `{repo}`"))
     }
+
+    pub async fn download_asset(&self, name: &str, url: Url) -> Result<()> {
+        self.ctx.log_verbose_status("Downloading", &url);
+        self.http
+            .download(url, name, &self.ctx.cache_dir, self.token.as_deref())
+            .await?;
+        self.ctx.log_status("Downloaded", name);
+        Ok(())
+    }
 }
 
 impl Provider for Github {
@@ -89,12 +107,10 @@ impl Provider for Github {
 
         // skip download if the asset already exists
         if path.exists() {
-            ctx.log_verbose_status("Skipped", "Asset already exists");
+            ctx.log_verbose_status("Skipped", format!("Asset already exists: {}", asset.name));
         } else {
-            self.http
-                .download(asset.browser_download_url.clone(), &ctx.cache_dir, &asset.name)
+            self.download_asset(&asset.name, asset.browser_download_url.clone())
                 .await?;
-            ctx.log_verbose_status("Downloaded", &asset.browser_download_url);
         }
 
         // get description from the release if not provided
@@ -118,7 +134,7 @@ impl Provider for Github {
 
         // skip download if the asset already exists
         if path.exists() {
-            ctx.log_verbose_status("Skipped", "Asset already exists");
+            ctx.log_verbose_status("Skipped", format!("Asset already exists: {}", lpkg.filename));
             return Ok(());
         }
 
@@ -142,10 +158,7 @@ impl Provider for Github {
             }
         };
 
-        ctx.log_verbose_status("Downloading", &download_url);
-        self.http
-            .download(download_url.clone(), &ctx.cache_dir, &lpkg.filename)
-            .await?;
+        self.download_asset(&lpkg.filename, download_url).await?;
 
         Ok(())
     }
