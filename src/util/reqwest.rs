@@ -40,7 +40,7 @@ impl Download for reqwest::Client {
                 .with_key("ETA", |state: &ProgressState, w: &mut dyn fmt::Write| {
                     write!(w, "{:.1}s", state.eta().as_secs_f64()).unwrap()
                 })
-                .progress_chars("#>-"),
+                .progress_chars("█▉▊▋▌▍▎▏  "),
         );
 
         let mut stream = res.bytes_stream();
