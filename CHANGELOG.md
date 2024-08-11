@@ -1,5 +1,5 @@
 
-## [0.1.5](https://github.com/wfxr/rpk/compare/v0.1.4..0.1.5) (2024-08-11)
+## [0.1.5](https://github.com/wfxr/rpk/compare/v0.1.4..v0.1.5) (2024-08-11)
 
 ### 🚀 Features
 
@@ -10,6 +10,10 @@
 ### 🚜 Refactor
 
 - Add log output for init command - ([14a3092](https://github.com/wfxr/rpk/commit/14a3092ce2a2f9aa4cc1d6b4c6a3753833af9166))
+
+### ⚙️ Miscellaneous Tasks
+
+- Release rpk version 0.1.5 - ([0a4c28b](https://github.com/wfxr/rpk/commit/0a4c28beb4cfcba0e7b302f628ee806109f7c35e))
 
 ## [0.1.4](https://github.com/wfxr/rpk/compare/v0.1.3..v0.1.4) (2024-08-11)
 
