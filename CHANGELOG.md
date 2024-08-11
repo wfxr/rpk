@@ -1,5 +1,17 @@
 
-## [0.1.2](https://github.com/wfxr/rpk/compare/v0.1.1..0.1.2) (2024-08-10)
+## [0.1.3](https://github.com/wfxr/rpk/compare/v0.1.2..0.1.3) (2024-08-11)
+
+### 🚀 Features
+
+- Change progress bar characters - ([a3b8bb4](https://github.com/wfxr/rpk/commit/a3b8bb4f51bb84bca85283689f834d5652b11a5e))
+- Improve installer & downloader - ([f7a1726](https://github.com/wfxr/rpk/commit/f7a17263424b39d1356db7b0c785f938e4ec4cb0))
+- Improve assert downloader - ([c6032d9](https://github.com/wfxr/rpk/commit/c6032d9d4da4d065cd2fd7ae9153fa19e4fd972a))
+
+### ⚙️ Miscellaneous Tasks
+
+- Add pre-commit config - ([5eb359f](https://github.com/wfxr/rpk/commit/5eb359f65cd92bc312f2ffb4867b79a5c28bbb10))
+
+## [0.1.2](https://github.com/wfxr/rpk/compare/v0.1.1..v0.1.2) (2024-08-10)
 
 ### 🚀 Features
 
@@ -11,6 +23,10 @@
 ### 🐛 Bug Fixes
 
 - Some packages have no common prefix in the archive - ([962bff1](https://github.com/wfxr/rpk/commit/962bff16cd7176c395bb0d0264149cfc9d923efb))
+
+### ⚙️ Miscellaneous Tasks
+
+- Release rpk version 0.1.2 - ([5205073](https://github.com/wfxr/rpk/commit/5205073b0a0461e19d71ce56e7d5154db24fef89))
 
 ## [0.1.1] - 2024-08-09
 
