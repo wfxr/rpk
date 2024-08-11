@@ -188,9 +188,19 @@ fn filter_assets(release: &Release) -> anyhow::Result<&Asset> {
             _ => false,
         })
         .filter(|asset| {
-            [".checksum", ".sha256sum", ".sbom", ".deb", ".rpm", ".dmg"]
-                .iter()
-                .all(|ext| !asset.name.ends_with(ext))
+            [
+                ".sig",
+                ".deb",
+                ".rpm",
+                ".dmg",
+                ".apk",
+                ".msi",
+                ".sbom",
+                ".checksum",
+                ".sha256sum",
+            ]
+            .iter()
+            .all(|ext| !asset.name.ends_with(ext))
         })
         .collect::<Vec<_>>();
 
