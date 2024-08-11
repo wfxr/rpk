@@ -1,4 +1,20 @@
 
+## [0.1.7](https://github.com/wfxr/rpk/compare/v0.1.6..0.1.7) (2024-08-11)
+
+### 🐛 Bug Fixes
+
+- Add .apk, .msi to the list of ignored asset extensions - ([0df133b](https://github.com/wfxr/rpk/commit/0df133b58170b6427b5b964290cad97d2a998d90))
+
+### 🚜 Refactor
+
+- Fix shellcheck warning in scripts/install - ([6e1ae65](https://github.com/wfxr/rpk/commit/6e1ae6594eda8d6949ef1a1bb37208023b93777d))
+
+## [0.1.6](https://github.com/wfxr/rpk/compare/v0.1.5..v0.1.6) (2024-08-11)
+
+### ⚙️ Miscellaneous Tasks
+
+- Release rpk version 0.1.6 - ([9b84087](https://github.com/wfxr/rpk/commit/9b84087ab5fb2cdc9393d268dc847351c0c34a59))
+
 ## [0.1.5](https://github.com/wfxr/rpk/compare/v0.1.4..v0.1.5) (2024-08-11)
 
 ### 🚀 Features
