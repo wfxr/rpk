@@ -37,7 +37,15 @@ _rpk() {
         (( CURRENT += 1 ))
         curcontext="${curcontext%:*:*}:rpk-command-$line[1]:"
         case $line[1] in
-            (sync)
+            (init)
+_arguments "${_arguments_options[@]}" : \
+'-f+[The config file URL to initialize from]:URL: ' \
+'--from=[The config file URL to initialize from]:URL: ' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(sync)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -146,7 +154,11 @@ _arguments "${_arguments_options[@]}" : \
         (( CURRENT += 1 ))
         curcontext="${curcontext%:*:*}:rpk-help-command-$line[1]:"
         case $line[1] in
-            (sync)
+            (init)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(sync)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -194,8 +206,9 @@ esac
 (( $+functions[_rpk_commands] )) ||
 _rpk_commands() {
     local commands; commands=(
-'sync:install any missing packages, re-generating the lock file' \
-'s:install any missing packages, re-generating the lock file' \
+'init:Initialize a configuration file' \
+'sync:Install any missing packages, re-generating the lock file' \
+'s:Install any missing packages, re-generating the lock file' \
 'add:Add a new plugin to the config file' \
 'a:Add a new plugin to the config file' \
 'restore:Restore packages to the state in the lockfile' \
@@ -234,7 +247,8 @@ _rpk__find_commands() {
 (( $+functions[_rpk__help_commands] )) ||
 _rpk__help_commands() {
     local commands; commands=(
-'sync:install any missing packages, re-generating the lock file' \
+'init:Initialize a configuration file' \
+'sync:Install any missing packages, re-generating the lock file' \
 'add:Add a new plugin to the config file' \
 'restore:Restore packages to the state in the lockfile' \
 'update:Update packages and re-generate the lock file' \
@@ -271,6 +285,11 @@ _rpk__help__help_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help help commands' commands "$@"
 }
+(( $+functions[_rpk__help__init_commands] )) ||
+_rpk__help__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk help init commands' commands "$@"
+}
 (( $+functions[_rpk__help__restore_commands] )) ||
 _rpk__help__restore_commands() {
     local commands; commands=()
@@ -290,6 +309,11 @@ _rpk__help__update_commands() {
 _rpk__help__version_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help version commands' commands "$@"
+}
+(( $+functions[_rpk__init_commands] )) ||
+_rpk__init_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk init commands' commands "$@"
 }
 (( $+functions[_rpk__restore_commands] )) ||
 _rpk__restore_commands() {

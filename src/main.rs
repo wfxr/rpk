@@ -57,6 +57,9 @@ async fn try_main() -> anyhow::Result<()> {
     };
 
     match command {
+        SubCommand::Init { from } => {
+            commands::init(&ctx, from).await?;
+        }
         SubCommand::Sync => {
             commands::sync(&ctx).await?;
         }

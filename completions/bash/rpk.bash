@@ -33,6 +33,9 @@ _rpk() {
             rpk,help)
                 cmd="rpk__help"
                 ;;
+            rpk,init)
+                cmd="rpk__init"
+                ;;
             rpk,r)
                 cmd="rpk__restore"
                 ;;
@@ -69,6 +72,9 @@ _rpk() {
             rpk__help,help)
                 cmd="rpk__help__help"
                 ;;
+            rpk__help,init)
+                cmd="rpk__help__init"
+                ;;
             rpk__help,restore)
                 cmd="rpk__help__restore"
                 ;;
@@ -88,7 +94,7 @@ _rpk() {
 
     case "${cmd}" in
         rpk)
-            opts="-q -v -h -V --quiet --verbose --color --config-dir --data-dir --cache-dir --bin-dir --help --version sync s add a restore r update u find f env completions version help"
+            opts="-q -v -h -V --quiet --verbose --color --config-dir --data-dir --cache-dir --bin-dir --help --version init sync s add a restore r update u find f env completions version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -246,7 +252,7 @@ _rpk() {
             return 0
             ;;
         rpk__help)
-            opts="sync add restore update find env completions version help"
+            opts="init sync add restore update find env completions version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -329,6 +335,20 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
+        rpk__help__init)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
         rpk__help__restore)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
@@ -378,6 +398,28 @@ _rpk() {
                 return 0
             fi
             case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        rpk__init)
+            opts="-f -h --from --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --from)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -f)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;

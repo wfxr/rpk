@@ -6,9 +6,11 @@ use std::{
     },
 };
 
-use anyhow::{Context as _, Result};
+use anyhow::{bail, Context as _, Result};
 use inquire::{Select, Text};
+use tokio::fs;
 use tracing::debug;
+use url::Url;
 
 use crate::{
     commands,
@@ -17,6 +19,28 @@ use crate::{
     manager::{restore_package, restore_packages, sync_package, sync_packages, SyncResult},
     provider::Github,
 };
+
+pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
+    if ctx.config_file.exists() {
+        bail!("config file already exists: {}", ctx.config_file.display());
+    }
+
+    match from {
+        Some(url) => {
+            let client = reqwest::Client::new();
+            let res = client.get(url).send().await?.text().await?;
+            debug!("fetched config file: {}", res);
+            // Parse and validate the downloaded config file.
+            toml::from_str::<Config>(&res)?;
+            fs::write(&ctx.config_file, res).await?;
+        }
+        None => {
+            Config::load(ctx).await?;
+        }
+    }
+
+    sync(ctx).await
+}
 
 pub async fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
     let mut ecfg = EditableConfig::load(ctx).await?;

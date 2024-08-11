@@ -34,8 +34,9 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('-V', 'V ', [CompletionResultType]::ParameterName, 'Print version')
             [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version')
-            [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
-            [CompletionResult]::new('s', 's', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
+            [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a configuration file')
+            [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
+            [CompletionResult]::new('s', 's', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
             [CompletionResult]::new('a', 'a', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
@@ -48,6 +49,13 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
             [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
+            break
+        }
+        'rpk;init' {
+            [CompletionResult]::new('-f', 'f', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
+            [CompletionResult]::new('--from', 'from', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;sync' {
@@ -126,7 +134,8 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;help' {
-            [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
+            [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a configuration file')
+            [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
             [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
@@ -135,6 +144,9 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
             [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
+            break
+        }
+        'rpk;help;init' {
             break
         }
         'rpk;help;sync' {

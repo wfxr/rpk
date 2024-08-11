@@ -31,8 +31,9 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
             cand -V 'Print version'
             cand --version 'Print version'
-            cand sync 'install any missing packages, re-generating the lock file'
-            cand s 'install any missing packages, re-generating the lock file'
+            cand init 'Initialize a configuration file'
+            cand sync 'Install any missing packages, re-generating the lock file'
+            cand s 'Install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
             cand a 'Add a new plugin to the config file'
             cand restore 'Restore packages to the state in the lockfile'
@@ -45,6 +46,12 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand completions 'Generate completions for the given shell'
             cand version 'Prints detailed version information'
             cand help 'Print this message or the help of the given subcommand(s)'
+        }
+        &'rpk;init'= {
+            cand -f 'The config file URL to initialize from'
+            cand --from 'The config file URL to initialize from'
+            cand -h 'Print help'
+            cand --help 'Print help'
         }
         &'rpk;sync'= {
             cand -h 'Print help'
@@ -109,7 +116,8 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;help'= {
-            cand sync 'install any missing packages, re-generating the lock file'
+            cand init 'Initialize a configuration file'
+            cand sync 'Install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
             cand restore 'Restore packages to the state in the lockfile'
             cand update 'Update packages and re-generate the lock file'
@@ -118,6 +126,8 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand completions 'Generate completions for the given shell'
             cand version 'Prints detailed version information'
             cand help 'Print this message or the help of the given subcommand(s)'
+        }
+        &'rpk;help;init'= {
         }
         &'rpk;help;sync'= {
         }

@@ -6,6 +6,7 @@ use std::{
 
 use clap::{ColorChoice, Parser};
 use clap_complete::Shell;
+use url::Url;
 
 use crate::{
     context::{Output, Verbosity},
@@ -59,7 +60,14 @@ pub struct Opt {
 /// The resolved sub command.
 #[derive(Debug, PartialEq, Eq, Parser)]
 pub enum SubCommand {
-    /// install any missing packages, re-generating the lock file.
+    /// Initialize a configuration file.
+    Init {
+        /// The config file URL to initialize from.
+        #[clap(short, long, value_name = "URL")]
+        from: Option<Url>,
+    },
+
+    /// Install any missing packages, re-generating the lock file.
     #[clap(visible_alias = "s")]
     Sync,
 
