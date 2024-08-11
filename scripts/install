@@ -23,6 +23,7 @@ OPTIONS:
     --bin <NAME>     The binary to extract from the release tarball. [default: repository name]
     --tag <TAG>      The release version to install. [default: latest release]
     --target <ARCH>  Install the release compiled for <ARCH>. [default: current host]
+    --init <URL>     The config file URL to initialize from. [default: none]
 EOF
 }
 
@@ -408,7 +409,7 @@ get_target() {
 }
 
 main() {
-    local _name _bin _tag _target _dest _url _filename _td _tf _to
+    local _name _bin _tag _target _dest _url _filename _td _tf _to _init_url
     local _force=false
     local _repo=wfxr/rpk
 
@@ -448,6 +449,13 @@ main() {
                     usage_err "'--to' option requires an argument"
                 fi
                 _to=$1
+                ;;
+            --init)
+                shift
+                if [ -z "$1" ]; then
+                    usage_err "'--init' option requires an argument"
+                fi
+                _init_url=$1
                 ;;
             *)
                 ;;
@@ -519,6 +527,10 @@ main() {
     fi
 
     ok "installed: $_dest"
+
+    if [ -n "$_init_url" ]; then
+        $_dest init --from "$_init_url"
+    fi
 }
 
 main "$@" || exit 1
