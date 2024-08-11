@@ -39,3 +39,10 @@ where
     let config = toml::from_str(&buf)?;
     Ok(config)
 }
+
+pub async fn remove_file_if_exists(path: impl AsRef<Path>) -> Result<()> {
+    match fs::remove_file(path).await {
+        Err(e) if e.kind() != io::ErrorKind::NotFound => Err(e.into()),
+        _ => Ok(()),
+    }
+}

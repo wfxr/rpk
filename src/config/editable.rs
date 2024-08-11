@@ -16,7 +16,7 @@ impl EditableConfig {
     pub async fn load(ctx: &Context) -> Result<Self> {
         let buf = match fs::read_to_string(&ctx.config_file).await {
             Err(e) if not_found_err(&e) => include_str!("packages.toml").to_owned(),
-            buf => buf.context(format!("failed to read {}", ctx.config_file.display()))?,
+            buf => buf.with_context(|| format!("failed to read {}", ctx.config_file.display()))?,
         };
 
         let ctx = ctx.clone();

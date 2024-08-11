@@ -44,7 +44,7 @@ impl LockedConfig {
     pub async fn load(ctx: &Context) -> Result<Self> {
         let mut lcfg = match load_toml(&ctx.lock_file).await {
             Err(e) if not_found_err(e.root_cause()) => LockedConfig::new(ctx.clone(), Default::default()),
-            lcfg => lcfg.context(format!("failed to load {}", ctx.lock_file.display()))?,
+            lcfg => lcfg.with_context(|| format!("failed to load {}", ctx.lock_file.display()))?,
         };
 
         lcfg.ctx = ctx.clone();

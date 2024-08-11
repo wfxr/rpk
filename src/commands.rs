@@ -18,12 +18,20 @@ use crate::{
     context::Context,
     manager::{restore_package, restore_packages, sync_package, sync_packages, SyncResult},
     provider::Github,
+    util::remove_file_if_exists,
 };
 
 pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
     if ctx.config_file.exists() {
         bail!("config file already exists: {}", ctx.config_file.display());
     }
+
+    remove_file_if_exists(&ctx.lock_file).await.with_context(|| {
+        format!(
+            "failed to remove lock file {}",
+            ctx.replace_home(&ctx.lock_file).display(),
+        )
+    })?;
 
     match from {
         Some(url) => {

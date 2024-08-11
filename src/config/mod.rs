@@ -17,7 +17,7 @@ use tokio::fs;
 
 use crate::{
     context::Context,
-    util::{load_toml, not_found_err},
+    util::{load_toml, not_found_err, remove_file_if_exists},
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -122,7 +122,7 @@ impl Config {
     pub async fn load(ctx: &Context) -> Result<Self> {
         let mut cfg = match load_toml(&ctx.config_file).await {
             Err(e) if not_found_err(e.root_cause()) => Config::init(ctx).await?,
-            cfg => cfg.context(format!("failed to load {}", ctx.config_file.display()))?,
+            cfg => cfg.with_context(|| format!("failed to load {}", ctx.config_file.display()))?,
         };
 
         // Set the package names for convenience.
@@ -134,6 +134,13 @@ impl Config {
     }
 
     async fn init(ctx: &Context) -> Result<Self> {
+        remove_file_if_exists(&ctx.lock_file).await.with_context(|| {
+            format!(
+                "failed to remove lock file {}",
+                ctx.replace_home(&ctx.lock_file).display(),
+            )
+        })?;
+
         let default = include_str!("packages.toml");
         fs::write(&ctx.config_file, default)
             .await
