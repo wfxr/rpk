@@ -1,10 +1,26 @@
 
-## [0.1.4](https://github.com/wfxr/rpk/compare/v0.1.3..0.1.4) (2024-08-11)
+## [0.1.5](https://github.com/wfxr/rpk/compare/v0.1.4..0.1.5) (2024-08-11)
+
+### 🚀 Features
+
+- Support to do init during installation - ([f112f7f](https://github.com/wfxr/rpk/commit/f112f7f8d573ce30b9c2e5411c29e187e8881318))
+- Remove lock file when initializing config - ([0a17179](https://github.com/wfxr/rpk/commit/0a17179a956ded5138c7c713813e8d9f707f9df4))
+- Set rpk as the default package in template - ([6bdef0f](https://github.com/wfxr/rpk/commit/6bdef0fe5d483b6eae4af0a33534462ec9c32886))
+
+### 🚜 Refactor
+
+- Add log output for init command - ([14a3092](https://github.com/wfxr/rpk/commit/14a3092ce2a2f9aa4cc1d6b4c6a3753833af9166))
+
+## [0.1.4](https://github.com/wfxr/rpk/compare/v0.1.3..v0.1.4) (2024-08-11)
 
 ### 🚀 Features
 
 - Add `rpk init` command - ([c3b51f9](https://github.com/wfxr/rpk/commit/c3b51f988c5e3a9c4a88542185601f6837c2452e))
 - Rename search to find & add command aliases - ([11854fd](https://github.com/wfxr/rpk/commit/11854fdf687b03d65a6bab5e055386343b9e7c91))
+
+### ⚙️ Miscellaneous Tasks
+
+- Release rpk version 0.1.4 - ([b21b174](https://github.com/wfxr/rpk/commit/b21b174e6012eeb5267a1d0b44f17e12673474eb))
 
 ## [0.1.3](https://github.com/wfxr/rpk/compare/v0.1.2..v0.1.3) (2024-08-11)
 
