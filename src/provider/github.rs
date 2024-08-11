@@ -41,7 +41,7 @@ impl Github {
             None => builder.build()?,
         };
 
-        let http = reqwest::Client::new();
+        let http = reqwest::Client::builder().user_agent("rpk").build()?;
         Ok(Github { crab, http, token, ctx })
     }
 
@@ -188,7 +188,7 @@ fn filter_assets(release: &Release) -> anyhow::Result<&Asset> {
             _ => false,
         })
         .filter(|asset| {
-            [".checksum", ".sha256sum", ".sbom"]
+            [".checksum", ".sha256sum", ".sbom", ".deb", ".rpm", ".dmg"]
                 .iter()
                 .all(|ext| !asset.name.ends_with(ext))
         })

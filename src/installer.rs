@@ -1,20 +1,24 @@
 use std::{
     self,
-    fs::{self, Permissions},
-    io::{self, Read, Seek},
-    os::unix::fs::{OpenOptionsExt, PermissionsExt},
+    ffi::OsString,
+    fs::{self},
+    io::{self, Read},
+    os::unix::fs::PermissionsExt,
     path::Path,
 };
 
 use anyhow::{anyhow, bail};
 use flate2::read::GzDecoder;
+use itertools::Itertools;
+use tar::Archive as TarArchive;
 use tracing::{debug, trace};
+use walkdir::WalkDir;
 use zip::ZipArchive;
 
 use crate::{
     config::LockedPackage,
     context::Context,
-    util::{detect_common_prefix, get_file_name_utf8, mkdir_p, symlink_force},
+    util::{mkdir_p, symlink_force},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -64,19 +68,21 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
     let archive = detect_archive(file)?;
     let file = std::fs::File::open(file)?;
 
+    if let Err(e) = fs::remove_dir_all(&install_dir) {
+        if e.kind() != io::ErrorKind::NotFound {
+            bail!("failed to remove existing install directory: {}", e);
+        }
+    }
     mkdir_p(&install_dir).await?;
 
     let link_path = ctx.bin_dir.join(&lpkg.name);
-    let mut bin_candidates = Vec::new();
 
     match archive {
         ArchiveKind::Plain(compression) => {
             let install_path = install_dir.join(&lpkg.name);
-            let mode = 0o744;
             let install_file = fs::OpenOptions::new()
                 .write(true)
                 .create(true)
-                .mode(mode)
                 .truncate(true)
                 .open(&install_path)?;
 
@@ -87,16 +93,9 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
             };
 
             io::copy(&mut io::BufReader::new(decoder), &mut io::BufWriter::new(install_file))?;
-
-            trace!("binary candidate: {}", install_path.display());
-            bin_candidates.push((install_path, mode));
         }
         ArchiveKind::Zip => {
             let mut archive = ZipArchive::new(file)?;
-            let nfiles = archive.len();
-
-            let prefix =
-                detect_common_prefix((0..archive.len()).flat_map(|i| archive.by_index(i).ok()?.enclosed_name()));
 
             for i in 0..archive.len() {
                 let mut file = archive.by_index(i)?;
@@ -106,101 +105,90 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
                 trace!("extracting file: {:?}", path);
 
-                // strip the common prefix from the path if exists
-                let path = match &prefix {
-                    Some(prefix) => path.strip_prefix(prefix).unwrap_or(&path),
-                    None => &path,
-                };
-
                 if file.is_dir() {
                     continue;
                 }
 
-                let install_path = install_dir.join(path);
+                let install_path = install_dir.join(&path);
                 if let Some(parent) = install_path.parent() {
                     mkdir_p(parent).await?;
                 }
 
                 trace!("installing file to: {:?}", install_path);
-                let mode = file.unix_mode().unwrap_or(0o644);
                 let mut output = fs::OpenOptions::new()
                     .write(true)
                     .create(true)
-                    .mode(mode)
                     .truncate(true)
                     .open(&install_path)?;
                 io::copy(&mut file, &mut output)?;
-
-                let filename = get_file_name_utf8(path)?;
-                if filename == Some(&lpkg.name) || nfiles == 1 {
-                    trace!("binary candidate: {}", install_path.display());
-                    bin_candidates.push((install_path, mode));
-                }
             }
         }
         ArchiveKind::Tar(compression) => {
-            let build_archive = || -> anyhow::Result<tar::Archive<Box<dyn Read>>> {
-                let mut src_file = file.try_clone()?;
-                src_file.seek(io::SeekFrom::Start(0))?;
-                Ok(tar::Archive::new(match compression {
-                    Some(Compression::Gzip) => Box::new(GzDecoder::new(src_file)),
-                    None => Box::new(src_file),
-                }))
-            };
+            let mut archive: TarArchive<Box<dyn Read>> = TarArchive::new(match compression {
+                Some(Compression::Gzip) => Box::new(GzDecoder::new(file)),
+                None => Box::new(file),
+            });
 
-            // detect the common prefix of all files in the archive
-            let mut archive_prefix = None;
-            for entry in build_archive()?.entries()? {
-                let entry = entry?;
-                let path = entry.path()?;
-
-                let entry_prefix = path.components().next().map(|c| c.as_os_str().to_owned());
-                archive_prefix = match archive_prefix {
-                    None => entry_prefix,
-                    p if p != entry_prefix => None,
-                    _ => break,
-                };
-            }
-
-            for entry in build_archive()?.entries()? {
-                let mut entry = entry?;
-                let path = entry.path()?.to_path_buf();
-
-                trace!("extracting file: {:?}", path);
-
-                // strip the common prefix from the path if exists
-                let path = match &archive_prefix {
-                    Some(prefix) => path.strip_prefix(prefix).unwrap_or(&path),
-                    None => &path,
-                };
-
-                let install_path = install_dir.join(path);
-                entry.unpack(&install_path)?;
-
-                let filename = get_file_name_utf8(path)?;
-                if filename == Some(&lpkg.name) {
-                    trace!("binary candidate: {}", install_path.display());
-                    bin_candidates.push((install_path, entry.header().mode().unwrap_or(0o644)));
-                }
-            }
+            archive.unpack(&install_dir)?;
         }
     };
 
+    let mut bin_candidates = Vec::new();
+
+    // Some archives contain only a single directory, move its contents to the install directory
+    let files: Vec<_> = fs::read_dir(&install_dir)?.try_collect()?;
+
+    match &files[..] {
+        [] => bail!("no files found in archive {}", lpkg.filename),
+        [entry] if entry.path().is_file() => bin_candidates.push(entry.path()),
+        [entry] if entry.path().is_dir() =>
+            for entry in fs::read_dir(entry.path())? {
+                let path = entry?.path();
+                let name = path
+                    .file_name()
+                    .ok_or_else(|| anyhow!("invalid filename: {:?}", path.file_name()))?;
+                let install_path = install_dir.join(name);
+
+                trace!("trim extra prefix: {:?} -> {:?}", path, install_path);
+                fs::rename(&path, &install_path)?;
+            },
+        _ => (),
+    }
+
+    if bin_candidates.is_empty() {
+        for entry in WalkDir::new(&install_dir)
+            .into_iter()
+            .filter_ok(|entry| entry.path().is_file())
+        {
+            let entry = entry?;
+
+            let pkg_name: OsString = lpkg.name.clone().into();
+            if entry.file_name() == pkg_name {
+                trace!(
+                    "found bin candidate: {}",
+                    entry.path().strip_prefix(&install_dir)?.display()
+                );
+                bin_candidates.push(entry.path().to_owned());
+            }
+        }
+    }
+
     match &bin_candidates[..] {
         [] => bail!("no binary found in archive"),
-        [(install_path, mode), ..] => {
-            let mode = mode | 0o111;
-            fs::set_permissions(install_path, Permissions::from_mode(mode))?;
-            symlink_force(install_path, &link_path).await?;
+        [path, ..] => {
+            let mut perms = fs::metadata(path)?.permissions();
+            perms.set_mode(perms.mode() | 0o111);
+            fs::set_permissions(path, perms)?;
 
-            debug!("link built: '{}' -> '{}'", install_path.display(), link_path.display());
+            symlink_force(path, &link_path).await?;
+            debug!("link built: '{}' -> '{}'", path.display(), link_path.display());
 
             if bin_candidates.len() > 1 {
                 ctx.log_warning(
                     "Warning",
                     format!(
                         "Multiple binaries found in archive, using the first one: '{}'",
-                        ctx.replace_home(install_path).display()
+                        ctx.replace_home(path).display()
                     ),
                 );
             }

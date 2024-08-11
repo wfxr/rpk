@@ -43,6 +43,8 @@ futures = "0.3"
 xdg = "2"
 toml_edit = "0.22"
 inquire = "0.7"
+itertools = "0.13"
+walkdir = "2"
 
 [build-dependencies]
 anyhow = "1"

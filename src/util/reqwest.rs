@@ -1,9 +1,8 @@
 use std::{fmt, io::Write, path::Path};
 
-use anyhow::{anyhow, Context};
+use anyhow::Context;
 use futures::StreamExt;
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
-use reqwest::{header, IntoUrl, Method, RequestBuilder};
 use url::Url;
 
 pub trait Download {
@@ -15,18 +14,9 @@ pub trait Download {
         download_dir: impl AsRef<Path>,
         token: Option<&str>,
     ) -> anyhow::Result<()>;
-
-    fn with_token(&self, method: Method, url: impl IntoUrl, token: Option<&str>) -> RequestBuilder;
 }
 
 impl Download for reqwest::Client {
-    fn with_token(&self, method: Method, url: impl IntoUrl, token: Option<&str>) -> RequestBuilder {
-        match token {
-            Some(token) => self.request(method, url).bearer_auth(token),
-            None => self.request(method, url),
-        }
-    }
-
     async fn download(
         &self,
         url: Url,
@@ -34,17 +24,16 @@ impl Download for reqwest::Client {
         download_dir: impl AsRef<Path>,
         token: Option<&str>,
     ) -> anyhow::Result<()> {
-        let total_size = self
-            .with_token(Method::HEAD, url.clone(), token)
-            .send()
-            .await?
-            .headers()
-            .get(header::CONTENT_LENGTH)
-            .ok_or_else(|| anyhow!("missing content length"))?
-            .to_str()?
-            .parse::<u64>()?;
+        let req = self.get(url);
+        let req = match token {
+            Some(token) => req.bearer_auth(token),
+            None => req,
+        };
+        let res = req.send().await?;
+        let total_size = res.content_length().unwrap_or(0);
 
         let pb = ProgressBar::new(total_size);
+        pb.set_prefix("Downloading");
         pb.set_style(
             ProgressStyle::with_template("{prefix:>12.green.bold} {wide_bar:.cyan/blue} {bytes}/{total_bytes} ({eta})")
                 .context("failed to build progress style")?
@@ -53,10 +42,8 @@ impl Download for reqwest::Client {
                 })
                 .progress_chars("#>-"),
         );
-        pb.set_prefix("Downloading");
 
-        let mut stream = self.with_token(Method::GET, url, token).send().await?.bytes_stream();
-
+        let mut stream = res.bytes_stream();
         let mut tmp_file = tempfile::NamedTempFile::new_in(download_dir.as_ref())?;
         while let Some(chunk) = stream.next().await {
             let chunk = chunk?;
