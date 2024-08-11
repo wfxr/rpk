@@ -1,5 +1,12 @@
 
-## [0.1.3](https://github.com/wfxr/rpk/compare/v0.1.2..0.1.3) (2024-08-11)
+## [0.1.4](https://github.com/wfxr/rpk/compare/v0.1.3..0.1.4) (2024-08-11)
+
+### 🚀 Features
+
+- Add `rpk init` command - ([c3b51f9](https://github.com/wfxr/rpk/commit/c3b51f988c5e3a9c4a88542185601f6837c2452e))
+- Rename search to find & add command aliases - ([11854fd](https://github.com/wfxr/rpk/commit/11854fdf687b03d65a6bab5e055386343b9e7c91))
+
+## [0.1.3](https://github.com/wfxr/rpk/compare/v0.1.2..v0.1.3) (2024-08-11)
 
 ### 🚀 Features
 
@@ -9,6 +16,7 @@
 
 ### ⚙️ Miscellaneous Tasks
 
+- Release rpk version 0.1.3 - ([06ea268](https://github.com/wfxr/rpk/commit/06ea268350c20c1f6e8010c2a10c56e081e60c3c))
 - Add pre-commit config - ([5eb359f](https://github.com/wfxr/rpk/commit/5eb359f65cd92bc312f2ffb4867b79a5c28bbb10))
 
 ## [0.1.2](https://github.com/wfxr/rpk/compare/v0.1.1..v0.1.2) (2024-08-10)
