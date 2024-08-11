@@ -500,6 +500,8 @@ main() {
     _filename="$_name-$_tag-$_target.tar.gz"
     _url="https://github.com/$_repo/releases/download/$_tag/$_filename"
     _td=$(mktemp -d || mktemp -d -t tmp)
+
+    # shellcheck disable=SC2064
     trap "rm -rf '$_td'" EXIT
 
     ok "downloading: $_filename"
