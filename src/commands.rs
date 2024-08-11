@@ -28,7 +28,7 @@ pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
     match from {
         Some(url) => {
             let client = reqwest::Client::new();
-            let res = client.get(url).send().await?.text().await?;
+            let res = client.get(url.clone()).send().await?.text().await?;
             debug!("fetched config file: {}", res);
             // Parse and validate the downloaded config file.
             toml::from_str::<Config>(&res)?;
@@ -39,6 +39,7 @@ pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
         }
     }
 
+    ctx.log_header_p("Initialized", &ctx.config_file);
     sync(ctx).await
 }
 
