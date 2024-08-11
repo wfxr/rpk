@@ -34,23 +34,28 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('-V', 'V ', [CompletionResultType]::ParameterName, 'Print version')
             [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version')
-            [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'print environment information')
             [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
+            [CompletionResult]::new('s', 's', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
+            [CompletionResult]::new('a', 'a', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
+            [CompletionResult]::new('r', 'r', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
             [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
-            [CompletionResult]::new('search', 'search', [CompletionResultType]::ParameterValue, 'Search for packages on GitHub')
+            [CompletionResult]::new('u', 'u', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
+            [CompletionResult]::new('find', 'find', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
+            [CompletionResult]::new('f', 'f', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
+            [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'print environment information')
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
             [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
             break
         }
-        'rpk;env' {
+        'rpk;sync' {
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
-        'rpk;sync' {
+        'rpk;s' {
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             break
@@ -63,7 +68,20 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
+        'rpk;a' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'A unique name for the package')
+            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'The version of the package')
+            [CompletionResult]::new('--desc', 'desc', [CompletionResultType]::ParameterName, 'A description of the package')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            break
+        }
         'rpk;restore' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;r' {
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             break
@@ -73,8 +91,24 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
-        'rpk;search' {
+        'rpk;u' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;find' {
             [CompletionResult]::new('--top', 'top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;f' {
+            [CompletionResult]::new('--top', 'top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;env' {
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             break
@@ -92,18 +126,15 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;help' {
-            [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'print environment information')
             [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'install any missing packages, re-generating the lock file')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
             [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
-            [CompletionResult]::new('search', 'search', [CompletionResultType]::ParameterValue, 'Search for packages on GitHub')
+            [CompletionResult]::new('find', 'find', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
+            [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'print environment information')
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
             [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
-            break
-        }
-        'rpk;help;env' {
             break
         }
         'rpk;help;sync' {
@@ -118,7 +149,10 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         'rpk;help;update' {
             break
         }
-        'rpk;help;search' {
+        'rpk;help;find' {
+            break
+        }
+        'rpk;help;env' {
             break
         }
         'rpk;help;completions' {

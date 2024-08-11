@@ -12,6 +12,9 @@ _rpk() {
             ",$1")
                 cmd="rpk"
                 ;;
+            rpk,a)
+                cmd="rpk__add"
+                ;;
             rpk,add)
                 cmd="rpk__add"
                 ;;
@@ -21,17 +24,29 @@ _rpk() {
             rpk,env)
                 cmd="rpk__env"
                 ;;
+            rpk,f)
+                cmd="rpk__find"
+                ;;
+            rpk,find)
+                cmd="rpk__find"
+                ;;
             rpk,help)
                 cmd="rpk__help"
+                ;;
+            rpk,r)
+                cmd="rpk__restore"
                 ;;
             rpk,restore)
                 cmd="rpk__restore"
                 ;;
-            rpk,search)
-                cmd="rpk__search"
+            rpk,s)
+                cmd="rpk__sync"
                 ;;
             rpk,sync)
                 cmd="rpk__sync"
+                ;;
+            rpk,u)
+                cmd="rpk__update"
                 ;;
             rpk,update)
                 cmd="rpk__update"
@@ -48,14 +63,14 @@ _rpk() {
             rpk__help,env)
                 cmd="rpk__help__env"
                 ;;
+            rpk__help,find)
+                cmd="rpk__help__find"
+                ;;
             rpk__help,help)
                 cmd="rpk__help__help"
                 ;;
             rpk__help,restore)
                 cmd="rpk__help__restore"
-                ;;
-            rpk__help,search)
-                cmd="rpk__help__search"
                 ;;
             rpk__help,sync)
                 cmd="rpk__help__sync"
@@ -73,7 +88,7 @@ _rpk() {
 
     case "${cmd}" in
         rpk)
-            opts="-q -v -h -V --quiet --verbose --color --config-dir --data-dir --cache-dir --bin-dir --help --version env sync add restore update search completions version help"
+            opts="-q -v -h -V --quiet --verbose --color --config-dir --data-dir --cache-dir --bin-dir --help --version sync s add a restore r update u find f env completions version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -96,6 +111,32 @@ _rpk() {
                     return 0
                     ;;
                 --bin-dir)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        rpk__add)
+            opts="-h --name --version --desc --help <REPO>"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --name)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --version)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --desc)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
@@ -168,8 +209,44 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
+        rpk__find)
+            opts="-h --top --help <QUERY>"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --top)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        rpk__find)
+            opts="-h --top --help <QUERY>"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --top)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
         rpk__help)
-            opts="env sync add restore update search completions version help"
+            opts="sync add restore update find env completions version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -224,6 +301,20 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
+        rpk__help__find)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
         rpk__help__help)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
@@ -239,20 +330,6 @@ _rpk() {
             return 0
             ;;
         rpk__help__restore)
-            opts=""
-            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
-                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-                return 0
-            fi
-            case "${prev}" in
-                *)
-                    COMPREPLY=()
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-            return 0
-            ;;
-        rpk__help__search)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -322,17 +399,13 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__search)
-            opts="-h --top --help <QUERY>"
+        rpk__restore)
+            opts="-h --help [PKG]"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
-                --top)
-                    COMPREPLY=($(compgen -f "${cur}"))
-                    return 0
-                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -342,6 +415,34 @@ _rpk() {
             ;;
         rpk__sync)
             opts="-h --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        rpk__sync)
+            opts="-h --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        rpk__update)
+            opts="-h --help [PKG]"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0

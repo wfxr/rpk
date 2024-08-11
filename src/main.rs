@@ -66,8 +66,8 @@ async fn try_main() -> anyhow::Result<()> {
         SubCommand::Restore { package } => {
             commands::restore(&ctx, package).await?;
         }
-        SubCommand::Search { query, top } => {
-            commands::search(query, top, &ctx).await?;
+        SubCommand::Find { query, top } => {
+            commands::find(query, top, &ctx).await?;
         }
         SubCommand::Add { name, repo, version, desc } => {
             let name = match name {

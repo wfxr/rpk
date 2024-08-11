@@ -31,21 +31,26 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
             cand -V 'Print version'
             cand --version 'Print version'
-            cand env 'print environment information'
             cand sync 'install any missing packages, re-generating the lock file'
+            cand s 'install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
+            cand a 'Add a new plugin to the config file'
             cand restore 'Restore packages to the state in the lockfile'
+            cand r 'Restore packages to the state in the lockfile'
             cand update 'Update packages and re-generate the lock file'
-            cand search 'Search for packages on GitHub'
+            cand u 'Update packages and re-generate the lock file'
+            cand find 'Find packages matching the given query'
+            cand f 'Find packages matching the given query'
+            cand env 'print environment information'
             cand completions 'Generate completions for the given shell'
             cand version 'Prints detailed version information'
             cand help 'Print this message or the help of the given subcommand(s)'
         }
-        &'rpk;env'= {
+        &'rpk;sync'= {
             cand -h 'Print help'
             cand --help 'Print help'
         }
-        &'rpk;sync'= {
+        &'rpk;s'= {
             cand -h 'Print help'
             cand --help 'Print help'
         }
@@ -56,7 +61,18 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand -h 'Print help (see more with ''--help'')'
             cand --help 'Print help (see more with ''--help'')'
         }
+        &'rpk;a'= {
+            cand --name 'A unique name for the package'
+            cand --version 'The version of the package'
+            cand --desc 'A description of the package'
+            cand -h 'Print help (see more with ''--help'')'
+            cand --help 'Print help (see more with ''--help'')'
+        }
         &'rpk;restore'= {
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;r'= {
             cand -h 'Print help'
             cand --help 'Print help'
         }
@@ -64,8 +80,21 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand -h 'Print help'
             cand --help 'Print help'
         }
-        &'rpk;search'= {
+        &'rpk;u'= {
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;find'= {
             cand --top 'The number of results to display'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;f'= {
+            cand --top 'The number of results to display'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;env'= {
             cand -h 'Print help'
             cand --help 'Print help'
         }
@@ -80,17 +109,15 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;help'= {
-            cand env 'print environment information'
             cand sync 'install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
             cand restore 'Restore packages to the state in the lockfile'
             cand update 'Update packages and re-generate the lock file'
-            cand search 'Search for packages on GitHub'
+            cand find 'Find packages matching the given query'
+            cand env 'print environment information'
             cand completions 'Generate completions for the given shell'
             cand version 'Prints detailed version information'
             cand help 'Print this message or the help of the given subcommand(s)'
-        }
-        &'rpk;help;env'= {
         }
         &'rpk;help;sync'= {
         }
@@ -100,7 +127,9 @@ set edit:completion:arg-completer[rpk] = {|@words|
         }
         &'rpk;help;update'= {
         }
-        &'rpk;help;search'= {
+        &'rpk;help;find'= {
+        }
+        &'rpk;help;env'= {
         }
         &'rpk;help;completions'= {
         }

@@ -124,7 +124,7 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
     Ok(())
 }
 
-pub async fn search(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> {
+pub async fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> {
     let gh = Github::new(ctx.clone())?;
     let repos = gh.search_repo(&query, top).await?;
 

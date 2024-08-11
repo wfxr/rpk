@@ -59,13 +59,12 @@ pub struct Opt {
 /// The resolved sub command.
 #[derive(Debug, PartialEq, Eq, Parser)]
 pub enum SubCommand {
-    /// print environment information
-    Env,
-
     /// install any missing packages, re-generating the lock file.
+    #[clap(visible_alias = "s")]
     Sync,
 
     /// Add a new plugin to the config file.
+    #[clap(visible_alias = "a")]
     Add {
         /// The github repository hosting the package
         ///
@@ -87,6 +86,7 @@ pub enum SubCommand {
     },
 
     /// Restore packages to the state in the lockfile.
+    #[clap(visible_alias = "r")]
     Restore {
         /// The packages to restore.
         #[clap(value_name = "PKG")]
@@ -94,14 +94,16 @@ pub enum SubCommand {
     },
 
     /// Update packages and re-generate the lock file.
+    #[clap(visible_alias = "u")]
     Update {
         /// The packages to update.
         #[clap(value_name = "PKG")]
         package: Option<String>,
     },
 
-    /// Search for packages on GitHub.
-    Search {
+    /// Find packages matching the given query.
+    #[clap(visible_alias = "f")]
+    Find {
         /// The query to search for.
         #[clap(value_name = "QUERY")]
         query: String,
@@ -110,6 +112,9 @@ pub enum SubCommand {
         #[clap(long, value_name = "NUM", default_value = "10")]
         top: u8,
     },
+
+    /// print environment information
+    Env,
 
     /// Generate completions for the given shell.
     Completions {
