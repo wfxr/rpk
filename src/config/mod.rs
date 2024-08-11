@@ -55,6 +55,12 @@ impl fmt::Display for Source {
     }
 }
 
+impl Source {
+    fn is_default(&self) -> bool {
+        matches!(self, Self::Github { .. })
+    }
+}
+
 impl fmt::Display for Package {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { name, version, source, desc: _ } = self;
