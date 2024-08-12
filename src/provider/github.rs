@@ -120,11 +120,11 @@ impl Provider for Github {
         };
 
         Ok(LockedPackage {
-            name: pkg.name.clone(),
-            version: release.tag_name.clone(),
-            source: pkg.source.clone(),
-            desc,
-            filename: asset.name.clone(),
+            name:         pkg.name.clone(),
+            version:      release.tag_name.clone(),
+            source:       pkg.source.clone(),
+            desc:         desc.map(|desc| desc.trim().to_string()),
+            filename:     asset.name.clone(),
             download_url: asset.browser_download_url.clone().into(),
         })
     }

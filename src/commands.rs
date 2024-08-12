@@ -24,7 +24,7 @@ use crate::{
     context::Context,
     manager::{restore_package, restore_packages, sync_package, sync_packages, SyncResult},
     provider::Github,
-    util::remove_file_if_exists,
+    util::{remove_file_if_exists, Emojify},
 };
 
 pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
@@ -76,7 +76,7 @@ pub async fn list(ctx: &Context) -> Result<(), anyhow::Error> {
         .map(|lpkg| Item {
             pkg:         lpkg.name,
             version:     lpkg.version,
-            description: lpkg.desc.unwrap_or_default(),
+            description: lpkg.desc.map(|s| s.emojify().unwrap_or(s)).unwrap_or_default(),
         });
 
     let mut table = Table::new(items);
