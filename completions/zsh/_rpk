@@ -57,6 +57,12 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
+(ls)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
 (sync)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -126,6 +132,14 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (f)
+_arguments "${_arguments_options[@]}" : \
+'--top=[The number of results to display]:NUM: ' \
+'-h[Print help]' \
+'--help[Print help]' \
+':query -- The query to search for:' \
+&& ret=0
+;;
+(fd)
 _arguments "${_arguments_options[@]}" : \
 '--top=[The number of results to display]:NUM: ' \
 '-h[Print help]' \
@@ -225,6 +239,7 @@ _rpk_commands() {
 'init:Initialize a configuration file' \
 'list:List all installed packages' \
 'l:List all installed packages' \
+'ls:List all installed packages' \
 'sync:Install any missing packages, re-generating the lock file' \
 's:Install any missing packages, re-generating the lock file' \
 'add:Add a new plugin to the config file' \
@@ -235,6 +250,7 @@ _rpk_commands() {
 'u:Update packages and re-generate the lock file' \
 'find:Find packages matching the given query' \
 'f:Find packages matching the given query' \
+'fd:Find packages matching the given query' \
 'env:print environment information' \
 'completions:Generate completions for the given shell' \
 'version:Prints detailed version information' \

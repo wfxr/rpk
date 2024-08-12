@@ -34,6 +34,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand init 'Initialize a configuration file'
             cand list 'List all installed packages'
             cand l 'List all installed packages'
+            cand ls 'List all installed packages'
             cand sync 'Install any missing packages, re-generating the lock file'
             cand s 'Install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
@@ -44,6 +45,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand u 'Update packages and re-generate the lock file'
             cand find 'Find packages matching the given query'
             cand f 'Find packages matching the given query'
+            cand fd 'Find packages matching the given query'
             cand env 'print environment information'
             cand completions 'Generate completions for the given shell'
             cand version 'Prints detailed version information'
@@ -60,6 +62,10 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;l'= {
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;ls'= {
             cand -h 'Print help'
             cand --help 'Print help'
         }
@@ -107,6 +113,11 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;f'= {
+            cand --top 'The number of results to display'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;fd'= {
             cand --top 'The number of results to display'
             cand -h 'Print help'
             cand --help 'Print help'

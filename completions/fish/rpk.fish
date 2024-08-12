@@ -36,6 +36,7 @@ complete -c rpk -n "__fish_rpk_needs_command" -s V -l version -d 'Print version'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "init" -d 'Initialize a configuration file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "list" -d 'List all installed packages'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "l" -d 'List all installed packages'
+complete -c rpk -n "__fish_rpk_needs_command" -f -a "ls" -d 'List all installed packages'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "sync" -d 'Install any missing packages, re-generating the lock file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "s" -d 'Install any missing packages, re-generating the lock file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "add" -d 'Add a new plugin to the config file'
@@ -46,6 +47,7 @@ complete -c rpk -n "__fish_rpk_needs_command" -f -a "update" -d 'Update packages
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "u" -d 'Update packages and re-generate the lock file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "find" -d 'Find packages matching the given query'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "f" -d 'Find packages matching the given query'
+complete -c rpk -n "__fish_rpk_needs_command" -f -a "fd" -d 'Find packages matching the given query'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "env" -d 'print environment information'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "completions" -d 'Generate completions for the given shell'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "version" -d 'Prints detailed version information'
@@ -54,6 +56,7 @@ complete -c rpk -n "__fish_rpk_using_subcommand init" -s f -l from -d 'The confi
 complete -c rpk -n "__fish_rpk_using_subcommand init" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand list" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand l" -s h -l help -d 'Print help'
+complete -c rpk -n "__fish_rpk_using_subcommand ls" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand s" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l name -d 'A unique name for the package' -r
@@ -72,6 +75,8 @@ complete -c rpk -n "__fish_rpk_using_subcommand find" -l top -d 'The number of r
 complete -c rpk -n "__fish_rpk_using_subcommand find" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand f" -l top -d 'The number of results to display' -r
 complete -c rpk -n "__fish_rpk_using_subcommand f" -s h -l help -d 'Print help'
+complete -c rpk -n "__fish_rpk_using_subcommand fd" -l top -d 'The number of results to display' -r
+complete -c rpk -n "__fish_rpk_using_subcommand fd" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand env" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand completions" -s d -l dir -d 'The directory to write the completions to' -r -F
 complete -c rpk -n "__fish_rpk_using_subcommand completions" -s h -l help -d 'Print help (see more with \'--help\')'

@@ -68,7 +68,7 @@ pub enum SubCommand {
     },
 
     /// List all installed packages.
-    #[clap(visible_alias = "l")]
+    #[clap(visible_aliases = ["l", "ls"])]
     List,
 
     /// Install any missing packages, re-generating the lock file.
@@ -114,7 +114,7 @@ pub enum SubCommand {
     },
 
     /// Find packages matching the given query.
-    #[clap(visible_alias = "f")]
+    #[clap(visible_aliases = ["f", "fd"])]
     Find {
         /// The query to search for.
         #[clap(value_name = "QUERY")]

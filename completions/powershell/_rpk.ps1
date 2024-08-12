@@ -37,6 +37,7 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a configuration file')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'List all installed packages')
             [CompletionResult]::new('l', 'l', [CompletionResultType]::ParameterValue, 'List all installed packages')
+            [CompletionResult]::new('ls', 'ls', [CompletionResultType]::ParameterValue, 'List all installed packages')
             [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
             [CompletionResult]::new('s', 's', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
@@ -47,6 +48,7 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('u', 'u', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
             [CompletionResult]::new('find', 'find', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
             [CompletionResult]::new('f', 'f', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
+            [CompletionResult]::new('fd', 'fd', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
             [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'print environment information')
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
@@ -66,6 +68,11 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;l' {
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;ls' {
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
@@ -123,6 +130,12 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;f' {
+            [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;fd' {
             [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
