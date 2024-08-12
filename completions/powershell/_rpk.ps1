@@ -21,19 +21,19 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
 
     $completions = @(switch ($command) {
         'rpk' {
-            [CompletionResult]::new('--color', 'color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
-            [CompletionResult]::new('--config-dir', 'config-dir', [CompletionResultType]::ParameterName, 'The configuration directory')
-            [CompletionResult]::new('--data-dir', 'data-dir', [CompletionResultType]::ParameterName, 'The directory to store package data')
-            [CompletionResult]::new('--cache-dir', 'cache-dir', [CompletionResultType]::ParameterName, 'The directory to store downloaded packages')
-            [CompletionResult]::new('--bin-dir', 'bin-dir', [CompletionResultType]::ParameterName, 'The directory installed binaries linked to')
-            [CompletionResult]::new('-q', 'q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
-            [CompletionResult]::new('--quiet', 'quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
-            [CompletionResult]::new('-v', 'v', [CompletionResultType]::ParameterName, 'Use verbose output')
-            [CompletionResult]::new('--verbose', 'verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('-V', 'V ', [CompletionResultType]::ParameterName, 'Print version')
-            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('--config-dir', '--config-dir', [CompletionResultType]::ParameterName, 'The configuration directory')
+            [CompletionResult]::new('--data-dir', '--data-dir', [CompletionResultType]::ParameterName, 'The directory to store package data')
+            [CompletionResult]::new('--cache-dir', '--cache-dir', [CompletionResultType]::ParameterName, 'The directory to store downloaded packages')
+            [CompletionResult]::new('--bin-dir', '--bin-dir', [CompletionResultType]::ParameterName, 'The directory installed binaries linked to')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-V', '-V ', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'Print version')
             [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a configuration file')
             [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'List all installed packages')
             [CompletionResult]::new('l', 'l', [CompletionResultType]::ParameterValue, 'List all installed packages')
@@ -54,95 +54,95 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;init' {
-            [CompletionResult]::new('-f', 'f', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
-            [CompletionResult]::new('--from', 'from', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-f', '-f', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
+            [CompletionResult]::new('--from', '--from', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;list' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;l' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;sync' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;s' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;add' {
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'A unique name for the package')
-            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'The version of the package')
-            [CompletionResult]::new('--desc', 'desc', [CompletionResultType]::ParameterName, 'A description of the package')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package')
+            [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'The version of the package')
+            [CompletionResult]::new('--desc', '--desc', [CompletionResultType]::ParameterName, 'A description of the package')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
         'rpk;a' {
-            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'A unique name for the package')
-            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'The version of the package')
-            [CompletionResult]::new('--desc', 'desc', [CompletionResultType]::ParameterName, 'A description of the package')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package')
+            [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'The version of the package')
+            [CompletionResult]::new('--desc', '--desc', [CompletionResultType]::ParameterName, 'A description of the package')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
         'rpk;restore' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;r' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;update' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;u' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;find' {
-            [CompletionResult]::new('--top', 'top', [CompletionResultType]::ParameterName, 'The number of results to display')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;f' {
-            [CompletionResult]::new('--top', 'top', [CompletionResultType]::ParameterName, 'The number of results to display')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;env' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;completions' {
-            [CompletionResult]::new('-d', 'd', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
-            [CompletionResult]::new('--dir', 'dir', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('-d', '-d', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
+            [CompletionResult]::new('--dir', '--dir', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
         'rpk;version' {
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;help' {
