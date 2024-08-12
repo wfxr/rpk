@@ -8,6 +8,12 @@ use std::{
 
 use anyhow::{bail, Context as _, Result};
 use inquire::{Select, Text};
+use itertools::Itertools;
+use tabled::{
+    settings::{object::Rows, Color, Padding, Style},
+    Table,
+    Tabled,
+};
 use tokio::fs;
 use tracing::debug;
 use url::Url;
@@ -49,6 +55,38 @@ pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
 
     ctx.log_header_p("Initialized", &ctx.config_file);
     sync(ctx).await
+}
+
+pub async fn list(ctx: &Context) -> Result<(), anyhow::Error> {
+    let lcfg = LockedConfig::load(ctx).await?;
+    ctx.log_verbose_header_p("Loaded", &ctx.lock_file);
+
+    #[derive(Debug, Tabled)]
+    #[tabled(rename_all = "UPPERCASE")]
+    struct Item {
+        pkg:         String,
+        version:     String,
+        description: String,
+    }
+
+    let items = lcfg
+        .pkgs
+        .into_values()
+        .sorted_by(|a, b| a.name.cmp(&b.name))
+        .map(|lpkg| Item {
+            pkg:         lpkg.name,
+            version:     lpkg.version,
+            description: lpkg.desc.unwrap_or_default(),
+        });
+
+    let mut table = Table::new(items);
+    table
+        .with(Style::empty())
+        .modify(Rows::first(), Color::BOLD)
+        .with(Padding::new(0, 4, 0, 0));
+    println!("{table}");
+
+    Ok(())
 }
 
 pub async fn add(ctx: &Context, mut pkg: Package) -> Result<()> {

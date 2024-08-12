@@ -35,6 +35,8 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('-V', 'V ', [CompletionResultType]::ParameterName, 'Print version')
             [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version')
             [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a configuration file')
+            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'List all installed packages')
+            [CompletionResult]::new('l', 'l', [CompletionResultType]::ParameterValue, 'List all installed packages')
             [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
             [CompletionResult]::new('s', 's', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
@@ -54,6 +56,16 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         'rpk;init' {
             [CompletionResult]::new('-f', 'f', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
             [CompletionResult]::new('--from', 'from', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;list' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;l' {
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
             break
@@ -135,6 +147,7 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         }
         'rpk;help' {
             [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize a configuration file')
+            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'List all installed packages')
             [CompletionResult]::new('sync', 'sync', [CompletionResultType]::ParameterValue, 'Install any missing packages, re-generating the lock file')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add a new plugin to the config file')
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
@@ -147,6 +160,9 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;help;init' {
+            break
+        }
+        'rpk;help;list' {
             break
         }
         'rpk;help;sync' {

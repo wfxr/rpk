@@ -45,6 +45,7 @@ toml_edit = "0.22"
 inquire = "0.7"
 itertools = "0.13"
 walkdir = "2"
+tabled = "0.16.0"
 
 [build-dependencies]
 anyhow = "1"

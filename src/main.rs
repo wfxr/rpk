@@ -60,6 +60,9 @@ async fn try_main() -> anyhow::Result<()> {
         SubCommand::Init { from } => {
             commands::init(&ctx, from).await?;
         }
+        SubCommand::List => {
+            commands::list(&ctx).await?;
+        }
         SubCommand::Sync => {
             commands::sync(&ctx).await?;
         }

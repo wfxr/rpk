@@ -32,6 +32,8 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand -V 'Print version'
             cand --version 'Print version'
             cand init 'Initialize a configuration file'
+            cand list 'List all installed packages'
+            cand l 'List all installed packages'
             cand sync 'Install any missing packages, re-generating the lock file'
             cand s 'Install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
@@ -50,6 +52,14 @@ set edit:completion:arg-completer[rpk] = {|@words|
         &'rpk;init'= {
             cand -f 'The config file URL to initialize from'
             cand --from 'The config file URL to initialize from'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;list'= {
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'rpk;l'= {
             cand -h 'Print help'
             cand --help 'Print help'
         }
@@ -117,6 +127,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
         }
         &'rpk;help'= {
             cand init 'Initialize a configuration file'
+            cand list 'List all installed packages'
             cand sync 'Install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
             cand restore 'Restore packages to the state in the lockfile'
@@ -128,6 +139,8 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand help 'Print this message or the help of the given subcommand(s)'
         }
         &'rpk;help;init'= {
+        }
+        &'rpk;help;list'= {
         }
         &'rpk;help;sync'= {
         }

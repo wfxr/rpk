@@ -45,6 +45,18 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(l)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
 (sync)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -158,6 +170,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (sync)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -207,6 +223,8 @@ esac
 _rpk_commands() {
     local commands; commands=(
 'init:Initialize a configuration file' \
+'list:List all installed packages' \
+'l:List all installed packages' \
 'sync:Install any missing packages, re-generating the lock file' \
 's:Install any missing packages, re-generating the lock file' \
 'add:Add a new plugin to the config file' \
@@ -248,6 +266,7 @@ _rpk__find_commands() {
 _rpk__help_commands() {
     local commands; commands=(
 'init:Initialize a configuration file' \
+'list:List all installed packages' \
 'sync:Install any missing packages, re-generating the lock file' \
 'add:Add a new plugin to the config file' \
 'restore:Restore packages to the state in the lockfile' \
@@ -290,6 +309,11 @@ _rpk__help__init_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help init commands' commands "$@"
 }
+(( $+functions[_rpk__help__list_commands] )) ||
+_rpk__help__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk help list commands' commands "$@"
+}
 (( $+functions[_rpk__help__restore_commands] )) ||
 _rpk__help__restore_commands() {
     local commands; commands=()
@@ -314,6 +338,11 @@ _rpk__help__version_commands() {
 _rpk__init_commands() {
     local commands; commands=()
     _describe -t commands 'rpk init commands' commands "$@"
+}
+(( $+functions[_rpk__list_commands] )) ||
+_rpk__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk list commands' commands "$@"
 }
 (( $+functions[_rpk__restore_commands] )) ||
 _rpk__restore_commands() {

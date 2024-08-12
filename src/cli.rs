@@ -67,6 +67,10 @@ pub enum SubCommand {
         from: Option<Url>,
     },
 
+    /// List all installed packages.
+    #[clap(visible_alias = "l")]
+    List,
+
     /// Install any missing packages, re-generating the lock file.
     #[clap(visible_alias = "s")]
     Sync,
