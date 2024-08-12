@@ -63,7 +63,7 @@ pub fn detect_archive(path: impl AsRef<Path>) -> anyhow::Result<ArchiveKind> {
 
 pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()> {
     let file = &ctx.cache_dir.join(&lpkg.filename);
-    let install_dir = ctx.data_dir.join(format!("{}-{}", lpkg.name, lpkg.version));
+    let install_dir = ctx.data_dir.join(&lpkg.name).join(&lpkg.version);
 
     let archive = detect_archive(file)?;
     let file = std::fs::File::open(file)?;
