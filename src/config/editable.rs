@@ -1,5 +1,5 @@
 use anyhow::{bail, Context as _, Result};
-use tokio::fs;
+use std::fs;
 
 use crate::{context::Context, util::not_found_err};
 
@@ -13,8 +13,8 @@ pub struct EditableConfig {
 }
 
 impl EditableConfig {
-    pub async fn load(ctx: &Context) -> Result<Self> {
-        let buf = match fs::read_to_string(&ctx.config_file).await {
+    pub fn load(ctx: &Context) -> Result<Self> {
+        let buf = match fs::read_to_string(&ctx.config_file) {
             Err(e) if not_found_err(&e) => include_str!("packages.toml").to_owned(),
             buf => buf.with_context(|| format!("failed to read {}", ctx.config_file.display()))?,
         };
@@ -24,9 +24,8 @@ impl EditableConfig {
         Ok(Self { ctx, doc })
     }
 
-    pub async fn save(&self) -> Result<()> {
+    pub fn save(&self) -> Result<()> {
         fs::write(&self.ctx.config_file, self.doc.to_string())
-            .await
             .with_context(|| format!("failed to write {}", self.ctx.config_file.display()))
     }
 

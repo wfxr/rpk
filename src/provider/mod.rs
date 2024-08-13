@@ -9,8 +9,7 @@ use crate::{
 
 pub use github::Github;
 
-#[allow(async_fn_in_trait)]
 pub trait Provider {
-    async fn download(&self, ctx: &Context, pkg: &Package) -> Result<LockedPackage>;
-    async fn download_locked(&self, ctx: &Context, pkg: &LockedPackage) -> Result<()>;
+    fn download(&self, ctx: &Context, pkg: &Package) -> Result<LockedPackage>;
+    fn download_locked(&self, ctx: &Context, pkg: &LockedPackage) -> Result<()>;
 }

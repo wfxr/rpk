@@ -61,7 +61,7 @@ pub fn detect_archive(path: impl AsRef<Path>) -> anyhow::Result<ArchiveKind> {
     Ok(kind)
 }
 
-pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()> {
+pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()> {
     let file = &ctx.cache_dir.join(&lpkg.filename);
     let install_dir = ctx.data_dir.join(&lpkg.name).join(&lpkg.version);
 
@@ -73,7 +73,7 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
             bail!("failed to remove existing install directory: {}", e);
         }
     }
-    mkdir_p(&install_dir).await?;
+    mkdir_p(&install_dir)?;
 
     let link_path = ctx.bin_dir.join(&lpkg.name);
 
@@ -111,7 +111,7 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
 
                 let install_path = install_dir.join(&path);
                 if let Some(parent) = install_path.parent() {
-                    mkdir_p(parent).await?;
+                    mkdir_p(parent)?;
                 }
 
                 trace!("installing file to: {:?}", install_path);
@@ -180,7 +180,7 @@ pub async fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Res
             perms.set_mode(perms.mode() | 0o111);
             fs::set_permissions(path, perms)?;
 
-            symlink_force(path, &link_path).await?;
+            symlink_force(path, &link_path)?;
             debug!("link built: '{}' -> '{}'", path.display(), link_path.display());
 
             if bin_candidates.len() > 1 {

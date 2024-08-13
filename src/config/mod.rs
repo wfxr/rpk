@@ -4,7 +4,7 @@ mod locked;
 pub use editable::EditableConfig;
 pub use locked::{LockedConfig, LockedPackage};
 
-use std::{collections::BTreeMap, fmt, str};
+use std::{collections::BTreeMap, fmt, fs, str};
 
 use anyhow::{Context as _, Result};
 use serde::{
@@ -13,7 +13,6 @@ use serde::{
     Deserializer,
     Serialize,
 };
-use tokio::fs;
 
 use crate::{
     context::Context,
@@ -125,9 +124,9 @@ impl<'de> Visitor<'de> for SourceVisitor {
 
 impl Config {
     /// Load the configuration from the given path.
-    pub async fn load(ctx: &Context) -> Result<Self> {
-        let mut cfg = match load_toml(&ctx.config_file).await {
-            Err(e) if not_found_err(e.root_cause()) => Config::init(ctx).await?,
+    pub fn load(ctx: &Context) -> Result<Self> {
+        let mut cfg = match load_toml(&ctx.config_file) {
+            Err(e) if not_found_err(e.root_cause()) => Config::init(ctx)?,
             cfg => cfg.with_context(|| format!("failed to load {}", ctx.config_file.display()))?,
         };
 
@@ -139,8 +138,8 @@ impl Config {
         Ok(cfg)
     }
 
-    async fn init(ctx: &Context) -> Result<Self> {
-        remove_file_if_exists(&ctx.lock_file).await.with_context(|| {
+    fn init(ctx: &Context) -> Result<Self> {
+        remove_file_if_exists(&ctx.lock_file).with_context(|| {
             format!(
                 "failed to remove lock file {}",
                 ctx.replace_home(&ctx.lock_file).display(),
@@ -149,7 +148,6 @@ impl Config {
 
         let default = include_str!("packages.toml");
         fs::write(&ctx.config_file, default)
-            .await
             .with_context(|| format!("failed to init {}", ctx.config_file.display()))?;
         Ok(toml::from_str(default)?)
     }

@@ -19,7 +19,7 @@ use context::{log_error, Context};
 use tracing_subscriber::EnvFilter;
 use util::{mkdir_p, CRATE_NAME};
 
-async fn try_main() -> anyhow::Result<()> {
+fn try_main() -> anyhow::Result<()> {
     let opt = Opt::parse();
     let output = opt.output_opt();
 
@@ -29,16 +29,16 @@ async fn try_main() -> anyhow::Result<()> {
     let home = home::home_dir().ok_or_else(|| anyhow!("failed to determine the current user's home directory"))?;
 
     let config_dir = config_dir.unwrap_or_else(|| xdg_dirs.get_config_home());
-    mkdir_p(&config_dir).await.context("failed to create config dir")?;
+    mkdir_p(&config_dir).context("failed to create config dir")?;
 
     let cache_dir = cache_dir.unwrap_or_else(|| xdg_dirs.get_cache_home());
-    mkdir_p(&cache_dir).await.context("failed to create cache dir")?;
+    mkdir_p(&cache_dir).context("failed to create cache dir")?;
 
     let data_dir = data_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("packages"));
-    mkdir_p(&data_dir).await.context("failed to create data dir")?;
+    mkdir_p(&data_dir).context("failed to create data dir")?;
 
     let bin_dir = bin_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("bin"));
-    mkdir_p(&bin_dir).await.context("failed to create binary dir")?;
+    mkdir_p(&bin_dir).context("failed to create binary dir")?;
 
     let config_file = config_dir.join("packages.toml");
     let lock_file = config_dir.join("packages.lock");
@@ -58,22 +58,22 @@ async fn try_main() -> anyhow::Result<()> {
 
     match command {
         SubCommand::Init { from } => {
-            commands::init(&ctx, from).await?;
+            commands::init(&ctx, from)?;
         }
         SubCommand::List => {
-            commands::list(&ctx).await?;
+            commands::list(&ctx)?;
         }
         SubCommand::Sync => {
-            commands::sync(&ctx).await?;
+            commands::sync(&ctx)?;
         }
         SubCommand::Update { package } => {
-            commands::update(&ctx, package).await?;
+            commands::update(&ctx, package)?;
         }
         SubCommand::Restore { package } => {
-            commands::restore(&ctx, package).await?;
+            commands::restore(&ctx, package)?;
         }
         SubCommand::Find { query, top } => {
-            commands::find(query, top, &ctx).await?;
+            commands::find(query, top, &ctx)?;
         }
         SubCommand::Add { name, repo, version, desc } => {
             let name = match name {
@@ -87,7 +87,7 @@ async fn try_main() -> anyhow::Result<()> {
 
             let pkg = Package { name, source, version, desc };
 
-            commands::add(&ctx, pkg).await?;
+            commands::add(&ctx, pkg)?;
         }
 
         SubCommand::Env => {
@@ -114,14 +114,13 @@ async fn try_main() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     tracing_subscriber::fmt()
         .event_format(tracing_subscriber::fmt::format().with_file(true).with_line_number(true))
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    if let Err(e) = try_main().await {
+    if let Err(e) = try_main() {
         log_error(true, &e);
         process::exit(1);
     }

@@ -4,96 +4,99 @@ use std::env::{
 };
 
 use anyhow::{bail, Context as _, Result};
-use octocrab::{
-    models::{
-        repos::{Asset, Release},
-        Repository,
-    },
-    Octocrab,
-};
+use models::{Asset, Release, RepoSearchResult, Repository};
 use tracing::{debug, trace, warn};
+use ureq::Agent;
 use url::Url;
 
 use crate::{
     config::{LockedPackage, Package, Source},
     context::Context,
-    util::http::download,
+    util::http::{BearerAuthMiddleware, UreqExt as _},
 };
 
 use super::Provider;
 
 pub struct Github {
-    crab:  Octocrab,
-    token: Option<String>,
+    client: Agent,
 
     ctx: Context,
 }
 
 impl Github {
     pub fn new(ctx: Context) -> Result<Self> {
-        let builder = Octocrab::builder();
-
         let token = env::var("GITHUB_TOKEN").or_else(|_| env::var("RPK_GITHUB_TOKEN")).ok();
 
-        let crab = match &token {
-            Some(token) => builder.personal_token(token.clone()).build()?,
-            None => builder.build()?,
-        };
+        let agent = ureq::AgentBuilder::new()
+            .user_agent("rpk")
+            .middleware(BearerAuthMiddleware(token))
+            .build();
 
-        Ok(Github { crab, token, ctx })
+        Ok(Github { client: agent, ctx })
     }
 
-    pub async fn search_repo(&self, query: &str, size: impl Into<u8>) -> Result<Vec<Repository>> {
-        self.crab
-            .search()
-            .repositories(query)
-            .per_page(size)
-            .send()
-            .await
-            .map(|x| x.items)
-            .context("failed to search package")
+    pub fn search_repo(&self, query: &str, size: impl Into<u8>) -> Result<Vec<Repository>> {
+        let res: RepoSearchResult = self
+            .client
+            .get("https://api.github.com/search/repositories")
+            .query("q", query)
+            .query("per_page", &size.into().to_string())
+            .call()
+            .context("failed to search repo")?
+            .into_json()?;
+
+        Ok(res.items)
     }
 
-    pub async fn get_release(&self, repo: &str, version: Option<&str>) -> Result<Release> {
-        let (owner, repo) = self.parse_repo(repo)?;
+    pub fn get_release(&self, repo: &str, version: Option<&str>) -> Result<Release> {
         match version {
-            Some(version) => self.crab.repos(owner, repo).releases().get_by_tag(version).await,
-            None => self.crab.repos(owner, repo).releases().get_latest().await,
+            Some(version) => self
+                .client
+                .get(&format!("https://api.github.com/repos/{repo}/releases/tags/{version}",))
+                .call(),
+            None => self
+                .client
+                .get(&format!("https://api.github.com/repos/{repo}/releases/latest"))
+                .call(),
         }
         .context(format!(
-            "failed to get release: `{owner}/{repo}@{version}`",
+            "failed to get release: `{repo}@{version}`",
             version = version.unwrap_or("latest")
-        ))
+        ))?
+        .into_json()
+        .map_err(Into::into)
     }
 
-    pub async fn get_repo(&self, repo: &str) -> Result<Repository> {
-        let (owner, repo) = self.parse_repo(repo)?;
-        self.crab
-            .repos(owner, repo)
-            .get()
-            .await
-            .context(format!("failed to get repo: `{owner}/{repo}`"))
+    pub fn get_repo(&self, repo: &str) -> Result<Repository> {
+        self.client
+            .get(&format!("https://api.github.com/repos/{}", repo))
+            .call()
+            .context(format!("failed to get repo: `{repo}`"))?
+            .into_json()
+            .map_err(Into::into)
     }
 
     pub fn parse_repo<'a>(&self, repo: &'a str) -> Result<(&'a str, &'a str)> {
         repo.split_once('/').context(format!("Invalid repo: `{repo}`"))
     }
 
-    pub async fn download_asset(&self, name: &str, url: Url) -> Result<()> {
+    pub fn download_asset(&self, name: &str, url: Url) -> Result<()> {
         self.ctx.log_verbose_status("Downloading", &url);
-        download(url, self.ctx.cache_dir.join(name), self.token.as_deref())?;
+        self.client
+            .download(url, self.ctx.cache_dir.join(name))
+            .context("failed to download asset")?;
         self.ctx.log_status("Downloaded", name);
         Ok(())
     }
 }
 
 impl Provider for Github {
-    async fn download(&self, ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
+    fn download(&self, ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
         let repo = match &pkg.source {
             Source::Github { repo } => repo,
         };
 
-        let release = self.get_release(repo, pkg.version.as_deref()).await?;
+        let release = self.get_release(repo, pkg.version.as_deref())?;
         ctx.log_verbose_status("Fetched", format!("{repo}@{version}", version = release.tag_name));
 
         let asset = filter_assets(&release)?;
@@ -105,14 +108,13 @@ impl Provider for Github {
         if path.exists() {
             ctx.log_verbose_status("Skipped", format!("Asset already exists: {}", asset.name));
         } else {
-            self.download_asset(&asset.name, asset.browser_download_url.clone())
-                .await?;
+            self.download_asset(&asset.name, asset.browser_download_url.clone())?;
         }
 
         // get description from the release if not provided
         let desc = match &pkg.desc {
             Some(desc) => desc.clone().into(),
-            None => self.get_repo(repo).await.ok().and_then(|repo| repo.description),
+            None => self.get_repo(repo).ok().and_then(|repo| repo.description),
         };
 
         Ok(LockedPackage {
@@ -125,7 +127,7 @@ impl Provider for Github {
         })
     }
 
-    async fn download_locked(&self, ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
+    fn download_locked(&self, ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
         let path = ctx.cache_dir.join(&lpkg.filename);
 
         // skip download if the asset already exists
@@ -143,7 +145,7 @@ impl Provider for Github {
             Some(url) => url.clone(),
             None => {
                 let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
-                let release = self.crab.repos(owner, repo).releases().get_by_tag(version).await?;
+                let release = self.get_release(repo, Some(version))?;
                 ctx.log_verbose_status("Fetched", format!("{owner}/{repo}@{version}"));
                 let asset = release
                     .assets
@@ -154,7 +156,7 @@ impl Provider for Github {
             }
         };
 
-        self.download_asset(&lpkg.filename, download_url).await?;
+        self.download_asset(&lpkg.filename, download_url)?;
 
         Ok(())
     }
@@ -240,4 +242,87 @@ fn is_x86(asset: &Asset) -> bool {
 
 fn is_arm(asset: &Asset) -> bool {
     !is_aarch64(asset) && asset.name.contains("arm")
+}
+
+mod models {
+    use serde::Deserialize;
+    use url::Url;
+
+    #[derive(Debug, Clone, Eq, PartialEq, Deserialize)]
+    pub struct RepoSearchResult {
+        pub total_count:        u32,
+        pub incomplete_results: bool,
+        pub items:              Vec<Repository>,
+    }
+
+    #[derive(Debug, Clone, Eq, PartialEq, Deserialize)]
+    pub struct Repository {
+        pub name:              String,
+        pub full_name:         Option<String>,
+        pub owner:             Option<Author>,
+        pub description:       Option<String>,
+        pub fork:              Option<bool>,
+        pub homepage:          Option<String>,
+        pub language:          Option<String>,
+        pub forks_count:       Option<u32>,
+        pub stargazers_count:  Option<u32>,
+        pub watchers_count:    Option<u32>,
+        pub size:              Option<u32>,
+        pub default_branch:    Option<String>,
+        pub open_issues_count: Option<u32>,
+        pub is_template:       Option<bool>,
+        pub topics:            Option<Vec<String>>,
+        pub has_downloads:     Option<bool>,
+        pub archived:          Option<bool>,
+        pub disabled:          Option<bool>,
+        pub visibility:        Option<String>,
+        pub pushed_at:         Option<String>,
+        pub created_at:        Option<String>,
+        pub updated_at:        Option<String>,
+        pub subscribers_count: Option<i64>,
+        pub network_count:     Option<i64>,
+        pub license:           Option<License>,
+        pub parent:            Option<Box<Repository>>,
+    }
+
+    #[derive(Debug, Clone, Hash, Eq, PartialEq, Deserialize)]
+    pub struct License {
+        pub key:  String,
+        pub name: String,
+    }
+
+    #[derive(Debug, Clone, Hash, Eq, PartialEq, Deserialize)]
+    pub struct Author {
+        pub login:      String,
+        pub avatar_url: Url,
+    }
+
+    #[derive(Debug, Clone, PartialEq, Deserialize)]
+    pub struct Release {
+        pub name:             Option<String>,
+        pub body:             Option<String>,
+        pub tag_name:         String,
+        pub target_commitish: String,
+        pub tarball_url:      Option<Url>,
+        pub zipball_url:      Option<Url>,
+        pub draft:            bool,
+        pub prerelease:       bool,
+        pub created_at:       Option<String>,
+        pub published_at:     Option<String>,
+        pub assets:           Vec<Asset>,
+    }
+
+    #[derive(Debug, Clone, PartialEq, Deserialize)]
+    pub struct Asset {
+        pub name:                 String,
+        pub url:                  Url,
+        pub browser_download_url: Url,
+        pub label:                Option<String>,
+        pub state:                String,
+        pub content_type:         String,
+        pub size:                 i64,
+        pub download_count:       i64,
+        pub created_at:           String,
+        pub updated_at:           String,
+    }
 }

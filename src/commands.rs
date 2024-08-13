@@ -1,4 +1,5 @@
 use std::{
+    fs,
     process,
     sync::{
         atomic::{AtomicUsize, Ordering},
@@ -14,7 +15,6 @@ use tabled::{
     Table,
     Tabled,
 };
-use tokio::fs;
 use tracing::debug;
 use url::Url;
 
@@ -24,15 +24,15 @@ use crate::{
     context::Context,
     manager::{restore_package, restore_packages, sync_package, sync_packages, SyncResult},
     provider::Github,
-    util::{http::http_get, remove_file_if_exists, Emojify},
+    util::{remove_file_if_exists, Emojify},
 };
 
-pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
+pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
     if ctx.config_file.exists() {
         bail!("config file already exists: {}", ctx.config_file.display());
     }
 
-    remove_file_if_exists(&ctx.lock_file).await.with_context(|| {
+    remove_file_if_exists(&ctx.lock_file).with_context(|| {
         format!(
             "failed to remove lock file {}",
             ctx.replace_home(&ctx.lock_file).display(),
@@ -41,23 +41,23 @@ pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
 
     match from {
         Some(url) => {
-            let res = http_get(url)?;
-            debug!("fetched config file: {}", res);
+            let body = ureq::get(url.as_str()).call()?.into_string()?;
+            debug!("fetched config file: {}", body);
             // Parse and validate the downloaded config file.
-            toml::from_str::<Config>(&res)?;
-            fs::write(&ctx.config_file, res).await?;
+            toml::from_str::<Config>(&body)?;
+            fs::write(&ctx.config_file, body)?;
         }
         None => {
-            Config::load(ctx).await?;
+            Config::load(ctx)?;
         }
     }
 
     ctx.log_header_p("Initialized", &ctx.config_file);
-    sync(ctx).await
+    sync(ctx)
 }
 
-pub async fn list(ctx: &Context) -> Result<(), anyhow::Error> {
-    let lcfg = LockedConfig::load(ctx).await?;
+pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
+    let lcfg = LockedConfig::load(ctx)?;
     ctx.log_verbose_header_p("Loaded", &ctx.lock_file);
 
     #[derive(Debug, Tabled)]
@@ -88,41 +88,41 @@ pub async fn list(ctx: &Context) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub async fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
-    let mut ecfg = EditableConfig::load(ctx).await?;
+pub fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
+    let mut ecfg = EditableConfig::load(ctx)?;
     ctx.log_verbose_header_p("Loaded", &ctx.config_file);
 
-    let (lpkg, _) = sync_package(ctx, &pkg, None, false).await?;
+    let (lpkg, _) = sync_package(ctx, &pkg, None, false)?;
     pkg.desc = lpkg.desc.clone();
 
     ecfg.upsert(&pkg)?;
 
-    let mut lcfg = LockedConfig::load(ctx).await?;
+    let mut lcfg = LockedConfig::load(ctx)?;
     lcfg.upsert(lpkg);
 
-    ecfg.save().await?;
-    lcfg.save().await?;
+    ecfg.save()?;
+    lcfg.save()?;
     ctx.log_verbose_header_p("Locked", &ctx.lock_file);
 
     Ok(())
 }
 
-pub async fn sync(ctx: &Context) -> Result<(), anyhow::Error> {
-    let cfg = Config::load(ctx).await?;
+pub fn sync(ctx: &Context) -> Result<(), anyhow::Error> {
+    let cfg = Config::load(ctx)?;
     ctx.log_verbose_header_p("Loaded", &ctx.config_file);
-    let mut lcfg = LockedConfig::load(ctx).await?;
+    let mut lcfg = LockedConfig::load(ctx)?;
     ctx.log_verbose_header_p("Loaded", &ctx.lock_file);
 
-    sync_packages(ctx, &cfg, &mut lcfg).await?;
+    sync_packages(ctx, &cfg, &mut lcfg)?;
 
-    lcfg.save().await?;
+    lcfg.save()?;
     ctx.log_verbose_header_p("Locked", &ctx.lock_file);
 
     Ok(())
 }
 
-pub async fn restore(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Error> {
-    let lcfg = LockedConfig::load(ctx).await?;
+pub fn restore(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Error> {
+    let lcfg = LockedConfig::load(ctx)?;
     ctx.log_verbose_header_p("Loaded", &ctx.lock_file);
 
     match package {
@@ -131,16 +131,16 @@ pub async fn restore(ctx: &Context, package: Option<String>) -> Result<(), anyho
                 .pkgs
                 .get(&pkg)
                 .with_context(|| format!("package {} not found", pkg))?;
-            restore_package(ctx, lpkg).await?;
+            restore_package(ctx, lpkg)?;
         }
-        None => restore_packages(lcfg).await?,
+        None => restore_packages(lcfg)?,
     }
 
     Ok(())
 }
 
-pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Error> {
-    let cfg = Config::load(ctx).await?;
+pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Error> {
+    let cfg = Config::load(ctx)?;
     ctx.log_verbose_header_p("Loaded", &ctx.config_file);
     match package {
         Some(package) => {
@@ -151,21 +151,21 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
                 .cloned()
                 .with_context(|| format!("package {} not found", package))?;
 
-            let mut lcfg = LockedConfig::load(ctx).await?;
+            let mut lcfg = LockedConfig::load(ctx)?;
             let old_lpkg = lcfg.pkgs.get(&package);
 
             // Sync the package.
-            let (new_lpkg, sync_res) = sync_package(ctx, &pkg, old_lpkg, true).await?;
+            let (new_lpkg, sync_res) = sync_package(ctx, &pkg, old_lpkg, true)?;
 
             // Update the package in the lock file.
             if sync_res == SyncResult::Updated {
                 lcfg.upsert(new_lpkg);
-                lcfg.save().await?;
+                lcfg.save()?;
                 ctx.log_verbose_header_p("Locked", &ctx.lock_file);
             }
         }
         None => {
-            let mut lcfg = LockedConfig::load(ctx).await?;
+            let mut lcfg = LockedConfig::load(ctx)?;
             ctx.log_verbose_header_p("Loaded", &ctx.lock_file);
 
             let mut updated = false;
@@ -176,7 +176,7 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
                 };
 
                 // Sync the package.
-                let (new_lpkg, sync_res) = sync_package(ctx, pkg, Some(old_lpkg), true).await?;
+                let (new_lpkg, sync_res) = sync_package(ctx, pkg, Some(old_lpkg), true)?;
 
                 // Update the package in the lock file.
                 if sync_res == SyncResult::Updated {
@@ -186,7 +186,7 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
             }
 
             if updated {
-                lcfg.save().await?;
+                lcfg.save()?;
                 ctx.log_verbose_header_p("Locked", &ctx.lock_file);
             }
         }
@@ -194,9 +194,9 @@ pub async fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow
     Ok(())
 }
 
-pub async fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> {
+pub fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> {
     let gh = Github::new(ctx.clone())?;
-    let repos = gh.search_repo(&query, top).await?;
+    let repos = gh.search_repo(&query, top)?;
 
     let stars_width = Arc::new(AtomicUsize::new(0));
     let fullname_width = Arc::new(AtomicUsize::new(0));
@@ -246,7 +246,7 @@ pub async fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::E
     };
 
     debug!("selected: {:?}", pkg);
-    commands::add(ctx, pkg).await?;
+    commands::add(ctx, pkg)?;
 
     Ok(())
 }

@@ -1,8 +1,7 @@
-use std::{collections::BTreeMap, str};
+use std::{collections::BTreeMap, fs, str};
 
 use anyhow::{Context as _, Result};
 use serde::{Deserialize, Serialize};
-use tokio::fs;
 use url::Url;
 
 use crate::{
@@ -41,8 +40,8 @@ impl LockedConfig {
         Self { ctx, pkgs }
     }
 
-    pub async fn load(ctx: &Context) -> Result<Self> {
-        let mut lcfg = match load_toml(&ctx.lock_file).await {
+    pub fn load(ctx: &Context) -> Result<Self> {
+        let mut lcfg = match load_toml(&ctx.lock_file) {
             Err(e) if not_found_err(e.root_cause()) => LockedConfig::new(ctx.clone(), Default::default()),
             lcfg => lcfg.with_context(|| format!("failed to load {}", ctx.lock_file.display()))?,
         };
@@ -57,11 +56,9 @@ impl LockedConfig {
     }
 
     /// Write this `LockedConfig` to the given path.
-    pub async fn save(&self) -> Result<()> {
+    pub fn save(&self) -> Result<()> {
         let buf = toml::to_string_pretty(self).context("failed to serialize `LockedConfig`")?;
-        fs::write(&self.ctx.lock_file, buf)
-            .await
-            .with_context(|| format!("failed to save {}", self.ctx.lock_file.display()))
+        fs::write(&self.ctx.lock_file, buf).with_context(|| format!("failed to save {}", self.ctx.lock_file.display()))
     }
 
     /// Update a package in the configuration. If the package does not exist, add it.

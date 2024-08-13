@@ -1,5 +1,4 @@
 use anyhow::Result;
-use futures::{stream, StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -15,7 +14,7 @@ pub enum SyncResult {
     Checked,
 }
 
-pub async fn sync_package(
+pub fn sync_package(
     ctx: &Context,
     pkg: &Package,
     lpkg: Option<&LockedPackage>,
@@ -33,9 +32,9 @@ pub async fn sync_package(
         }
         _ => {
             let provider = Github::new(ctx.clone())?;
-            let new_lpkg = provider.download(ctx, pkg).await?;
+            let new_lpkg = provider.download(ctx, pkg)?;
 
-            install_package(ctx, &new_lpkg).await?;
+            install_package(ctx, &new_lpkg)?;
 
             let res = match lpkg {
                 Some(old_lpkg) if old_lpkg != &new_lpkg => {
@@ -55,22 +54,22 @@ pub async fn sync_package(
     }
 }
 
-pub async fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
+pub fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
     let provider = Github::new(ctx.clone())?;
 
-    provider.download_locked(ctx, lpkg).await?;
+    provider.download_locked(ctx, lpkg)?;
 
-    install_package(ctx, lpkg).await?;
+    install_package(ctx, lpkg)?;
     ctx.log_status("Checked", format!("{}@{}", lpkg.name, lpkg.version));
 
     Ok(())
 }
 
 /// Install all necessary packages, and returns a [`LockedConfig`].
-pub async fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Result<()> {
+pub fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Result<()> {
     for (name, pkg) in cfg.pkgs.iter() {
         let old_lpkg = lcfg.pkgs.get(name);
-        let (new_lpkg, _) = sync_package(ctx, pkg, old_lpkg, false).await?;
+        let (new_lpkg, _) = sync_package(ctx, pkg, old_lpkg, false)?;
         lcfg.upsert(new_lpkg);
     }
 
@@ -78,11 +77,10 @@ pub async fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig)
 }
 
 /// Restore packages according to the given [`LockedConfig`].
-pub async fn restore_packages(lcfg: LockedConfig) -> Result<()> {
-    let _: Vec<()> = stream::iter(lcfg.pkgs.values())
-        .then(|pkg| restore_package(&lcfg.ctx, pkg))
-        .try_collect()
-        .await?;
+pub fn restore_packages(lcfg: LockedConfig) -> Result<()> {
+    for (_, pkg) in lcfg.pkgs.iter() {
+        restore_package(&lcfg.ctx, pkg)?;
+    }
 
     Ok(())
 }
