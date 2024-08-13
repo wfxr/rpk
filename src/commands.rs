@@ -24,7 +24,7 @@ use crate::{
     context::Context,
     manager::{restore_package, restore_packages, sync_package, sync_packages, SyncResult},
     provider::Github,
-    util::{remove_file_if_exists, Emojify},
+    util::{http::http_get, remove_file_if_exists, Emojify},
 };
 
 pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
@@ -41,8 +41,7 @@ pub async fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
 
     match from {
         Some(url) => {
-            let client = reqwest::Client::new();
-            let res = client.get(url.clone()).send().await?.text().await?;
+            let res = http_get(url)?;
             debug!("fetched config file: {}", res);
             // Parse and validate the downloaded config file.
             toml::from_str::<Config>(&res)?;

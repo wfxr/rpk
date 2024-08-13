@@ -20,13 +20,8 @@ flate2 = "1"
 futures-util = "0.3"
 indicatif = "0.17"
 octocrab = "0.39"
-reqwest = { version = "0.12", features = [
-    "stream",
-    "rustls-tls",
-], default-features = false }
 serde = { version = "1", features = ["derive"] }
 tar = "0.4"
-tempfile = "3"
 tokio = { version = "1", features = ["full"] }
 toml = "0.8"
 tracing = "0.1"
@@ -47,6 +42,7 @@ itertools = "0.13"
 walkdir = "2"
 tabled = "0.16"
 emojis = "0"
+curl = { version = "0.4", features = ["rustls"], default-features = false }
 
 [build-dependencies]
 anyhow = "1"

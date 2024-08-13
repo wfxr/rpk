@@ -17,14 +17,13 @@ use url::Url;
 use crate::{
     config::{LockedPackage, Package, Source},
     context::Context,
-    util::reqwest::Download as _,
+    util::http::download,
 };
 
 use super::Provider;
 
 pub struct Github {
     crab:  Octocrab,
-    http:  reqwest::Client,
     token: Option<String>,
 
     ctx: Context,
@@ -41,8 +40,7 @@ impl Github {
             None => builder.build()?,
         };
 
-        let http = reqwest::Client::builder().user_agent("rpk").build()?;
-        Ok(Github { crab, http, token, ctx })
+        Ok(Github { crab, token, ctx })
     }
 
     pub async fn search_repo(&self, query: &str, size: impl Into<u8>) -> Result<Vec<Repository>> {
@@ -83,9 +81,7 @@ impl Github {
 
     pub async fn download_asset(&self, name: &str, url: Url) -> Result<()> {
         self.ctx.log_verbose_status("Downloading", &url);
-        self.http
-            .download(url, name, &self.ctx.cache_dir, self.token.as_deref())
-            .await?;
+        download(url, self.ctx.cache_dir.join(name), self.token.as_deref())?;
         self.ctx.log_status("Downloaded", name);
         Ok(())
     }

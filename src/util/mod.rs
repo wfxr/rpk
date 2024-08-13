@@ -1,7 +1,8 @@
 mod build;
 mod fs;
 
-pub mod reqwest;
+pub mod http;
+pub mod temp;
 
 pub use build::*;
 pub use fs::*;
