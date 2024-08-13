@@ -10,6 +10,7 @@ use std::{
 use anyhow::{bail, Context as _, Result};
 use inquire::{Select, Text};
 use itertools::Itertools;
+use rayon::prelude::*;
 use tabled::{
     settings::{object::Rows, Color, Padding, Style},
     Table,
@@ -22,7 +23,7 @@ use crate::{
     commands,
     config::{Config, EditableConfig, LockedConfig, Package, Source},
     context::Context,
-    manager::{restore_package, restore_packages, sync_package, sync_packages, SyncResult},
+    manager::{restore_package, restore_packages, sync_package, sync_packages},
     provider::Github,
     util::{remove_file_if_exists, Emojify},
 };
@@ -92,7 +93,7 @@ pub fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
     let mut ecfg = EditableConfig::load(ctx)?;
     ctx.log_verbose_header_p("Loaded", &ctx.config_file);
 
-    let (lpkg, _) = sync_package(ctx, &pkg, None, false)?;
+    let lpkg = sync_package(ctx, &pkg, None, false)?;
     pkg.desc = lpkg.desc.clone();
 
     ecfg.upsert(&pkg)?;
@@ -155,40 +156,30 @@ pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Erro
             let old_lpkg = lcfg.pkgs.get(&package);
 
             // Sync the package.
-            let (new_lpkg, sync_res) = sync_package(ctx, &pkg, old_lpkg, true)?;
+            let new_lpkg = sync_package(ctx, &pkg, old_lpkg, true)?;
 
             // Update the package in the lock file.
-            if sync_res == SyncResult::Updated {
-                lcfg.upsert(new_lpkg);
-                lcfg.save()?;
-                ctx.log_verbose_header_p("Locked", &ctx.lock_file);
-            }
+            lcfg.upsert(new_lpkg);
+            lcfg.save()?;
+            ctx.log_verbose_header_p("Locked", &ctx.lock_file);
         }
         None => {
             let mut lcfg = LockedConfig::load(ctx)?;
             ctx.log_verbose_header_p("Loaded", &ctx.lock_file);
 
-            let mut updated = false;
-            for old_lpkg in lcfg.pkgs.clone().values() {
-                let pkg = match cfg.pkgs.get(&old_lpkg.name) {
-                    Some(pkg) => pkg,
-                    None => continue,
-                };
+            lcfg.pkgs
+                .clone()
+                .into_par_iter()
+                .filter_map(|(_, lpkg)| cfg.pkgs.get(&lpkg.name).map(|pkg| (pkg, lpkg)))
+                .map(|(pkg, old_lpkg)| sync_package(ctx, pkg, Some(&old_lpkg), true))
+                .collect::<Result<Vec<_>>>()?
+                .into_iter()
+                .for_each(|res| {
+                    lcfg.upsert(res);
+                });
 
-                // Sync the package.
-                let (new_lpkg, sync_res) = sync_package(ctx, pkg, Some(old_lpkg), true)?;
-
-                // Update the package in the lock file.
-                if sync_res == SyncResult::Updated {
-                    lcfg.upsert(new_lpkg);
-                    updated = true;
-                }
-            }
-
-            if updated {
-                lcfg.save()?;
-                ctx.log_verbose_header_p("Locked", &ctx.lock_file);
-            }
+            lcfg.save()?;
+            ctx.log_verbose_header_p("Locked", &ctx.lock_file);
         }
     };
     Ok(())

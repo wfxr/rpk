@@ -1,6 +1,5 @@
 use anyhow::Result;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
-use serde::{Deserialize, Serialize};
 
 use crate::{
     config::{Config, LockedConfig, LockedPackage, Package},
@@ -9,48 +8,32 @@ use crate::{
     provider::{Github, Provider},
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub enum SyncResult {
-    Updated,
-    Checked,
-}
-
-pub fn sync_package(
-    ctx: &Context,
-    pkg: &Package,
-    lpkg: Option<&LockedPackage>,
-    update: bool,
-) -> Result<(LockedPackage, SyncResult)> {
+pub fn sync_package(ctx: &Context, pkg: &Package, lpkg: Option<&LockedPackage>, update: bool) -> Result<LockedPackage> {
     match (&pkg.version, lpkg) {
         // If the package is already installed and the version matches, do nothing.
         (Some(version), Some(lpkg)) if version == &lpkg.version => {
             ctx.log_status("Checked", format!("{}@{}", pkg.name, lpkg.version));
-            Ok((lpkg.clone(), SyncResult::Checked))
+            Ok(lpkg.clone())
         }
         (None, Some(lpkg)) if !update => {
             ctx.log_status("Checked", format!("{}@{}", pkg.name, lpkg.version));
-            Ok((lpkg.clone(), SyncResult::Checked))
+            Ok(lpkg.clone())
         }
         _ => {
             let provider = Github::new(ctx.clone())?;
-            let new_lpkg = provider.download(ctx, pkg)?;
+            let new = provider.download(ctx, pkg)?;
 
-            install_package(ctx, &new_lpkg)?;
+            install_package(ctx, &new)?;
 
-            let res = match lpkg {
-                Some(old_lpkg) if old_lpkg != &new_lpkg => {
-                    ctx.log_status(
-                        "Updated",
-                        format!("{}@{} => {}", pkg.name, old_lpkg.version, new_lpkg.version),
-                    );
-                    SyncResult::Updated
+            match lpkg {
+                Some(old) if old != &new => {
+                    ctx.log_status("Updated", format!("{}@{} => {}", pkg.name, old.version, new.version));
                 }
                 _ => {
-                    ctx.log_status("Checked", format!("{}@{}", pkg.name, new_lpkg.version));
-                    SyncResult::Checked
+                    ctx.log_status("Checked", format!("{}@{}", pkg.name, new.version));
                 }
             };
-            Ok((new_lpkg, res))
+            Ok(new)
         }
     }
 }
@@ -73,10 +56,9 @@ pub fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Re
         .par_iter()
         .map(|(name, pkg)| {
             let old_lpkg = lcfg.pkgs.get(name);
-            let (new_lpkg, _) = sync_package(ctx, pkg, old_lpkg, false).unwrap();
-            new_lpkg
+            sync_package(ctx, pkg, old_lpkg, false)
         })
-        .collect();
+        .collect::<Result<_>>()?;
 
     for lpkg in new_lpkgs {
         lcfg.upsert(lpkg);
