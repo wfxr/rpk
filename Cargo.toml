@@ -42,7 +42,7 @@ itertools = "0.13"
 walkdir = "2"
 tabled = "0.16"
 emojis = "0"
-curl = { version = "0.4", features = ["rustls"], default-features = false }
+ureq = { version = "2", features = ["proxy-from-env"] }
 
 [build-dependencies]
 anyhow = "1"

@@ -1,65 +1,51 @@
 use std::{
-    ffi,
-    fs,
+    ffi::OsString,
+    fs::{self, File},
     io,
     path::{Path, PathBuf},
-    result,
 };
 
-use anyhow::Result;
+use anyhow::Context as _;
 
-/// Holds a temporary directory or file path that is removed when dropped.
-pub struct TempPath {
-    /// The temporary directory or file path.
-    path: PathBuf,
+pub struct TempFile {
+    temp_file: File,
+    temp_path: PathBuf,
+    orig_path: PathBuf,
 }
 
-impl TempPath {
-    /// Create a new `TempPath` based on an original path, the temporary
-    /// filename will be placed in the same directory with a deterministic name.
-    ///
-    /// # Errors
-    ///
-    /// If the temporary path already exists.
-    pub fn new(original_path: &Path) -> result::Result<Self, PathBuf> {
-        let mut path = original_path.parent().unwrap().to_path_buf();
-        let mut file_name = ffi::OsString::from("~");
-        file_name.push(original_path.file_name().unwrap());
-        path.push(file_name);
-        if path.exists() {
-            Err(path)
-        } else {
-            Ok(Self { path })
-        }
+impl TempFile {
+    pub fn new_force(orig_path: impl AsRef<Path>) -> anyhow::Result<Self> {
+        let orig_path = orig_path.as_ref().to_owned();
+        let dir = orig_path.parent().context("no parent directory")?;
+        let orig_name = orig_path.file_name().context("no filename")?;
+        let mut temp_name = OsString::from("~");
+        temp_name.push(orig_name);
+
+        let temp_path = dir.join(&temp_name);
+        rm_rf(&temp_path)?;
+
+        let temp_file =
+            File::create(&temp_path).with_context(|| format!("failed to create temporary file: {:?}", temp_path))?;
+        Ok(Self { temp_file, temp_path, orig_path })
     }
 
-    /// Create a new `TempPath` based on an original path, if something exists
-    /// at that temporary path is will be deleted.
-    pub fn new_force(original_path: &Path) -> Result<Self> {
-        match Self::new(original_path) {
-            Ok(temp) => Ok(temp),
-            Err(path) => {
-                rm_rf(&path)?;
-                Ok(Self { path })
-            }
-        }
+    pub fn persist(self) -> io::Result<()> {
+        rm_rf(&self.orig_path)?;
+        fs::rename(&self.temp_path, &self.orig_path)
     }
 
-    /// Access the underlying `Path`.
     pub fn path(&self) -> &Path {
-        self.path.as_ref()
+        &self.temp_path
     }
 
-    /// Move the temporary path to a new location.
-    pub fn rename(self, new_path: &Path) -> io::Result<()> {
-        rm_rf(new_path)?;
-        fs::rename(&self.path, new_path)
+    pub fn file(&mut self) -> &mut File {
+        &mut self.temp_file
     }
 }
 
-impl Drop for TempPath {
+impl Drop for TempFile {
     fn drop(&mut self) {
-        rm_rf(&self.path).expect("failed to delete temporary path");
+        rm_rf(&self.temp_path).expect("failed to delete temporary path");
     }
 }
 
