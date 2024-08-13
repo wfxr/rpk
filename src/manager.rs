@@ -1,4 +1,5 @@
 use anyhow::Result;
+use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -67,10 +68,18 @@ pub fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
 
 /// Install all necessary packages, and returns a [`LockedConfig`].
 pub fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Result<()> {
-    for (name, pkg) in cfg.pkgs.iter() {
-        let old_lpkg = lcfg.pkgs.get(name);
-        let (new_lpkg, _) = sync_package(ctx, pkg, old_lpkg, false)?;
-        lcfg.upsert(new_lpkg);
+    let new_lpkgs: Vec<_> = cfg
+        .pkgs
+        .par_iter()
+        .map(|(name, pkg)| {
+            let old_lpkg = lcfg.pkgs.get(name);
+            let (new_lpkg, _) = sync_package(ctx, pkg, old_lpkg, false).unwrap();
+            new_lpkg
+        })
+        .collect();
+
+    for lpkg in new_lpkgs {
+        lcfg.upsert(lpkg);
     }
 
     Ok(())
@@ -78,9 +87,9 @@ pub fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Re
 
 /// Restore packages according to the given [`LockedConfig`].
 pub fn restore_packages(lcfg: LockedConfig) -> Result<()> {
-    for (_, pkg) in lcfg.pkgs.iter() {
-        restore_package(&lcfg.ctx, pkg)?;
-    }
+    lcfg.pkgs.into_par_iter().for_each(|(_, pkg)| {
+        restore_package(&lcfg.ctx, &pkg).unwrap();
+    });
 
     Ok(())
 }
