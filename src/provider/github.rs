@@ -3,7 +3,7 @@ use std::env::{
     consts::{ARCH, OS},
 };
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::{anyhow, Context as _, Result};
 use models::{Asset, Release, RepoSearchResult, Repository};
 use tracing::{debug, trace, warn};
 use ureq::Agent;
@@ -100,6 +100,7 @@ impl Provider for Github {
         ctx.log_verbose_status("Fetched", format!("{repo}@{version}", version = release.tag_name));
 
         let asset = filter_assets(&release)?;
+        let asset = asset.ok_or_else(|| anyhow!("No matching asset found for {repo}@{}", release.tag_name))?;
         ctx.log_verbose_status("Filtered", &asset.name);
 
         let path = ctx.cache_dir.join(&asset.name);
@@ -162,7 +163,7 @@ impl Provider for Github {
     }
 }
 
-fn filter_assets(release: &Release) -> anyhow::Result<&Asset> {
+fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
     debug!("OS: {OS}, ARCH: {ARCH}");
 
     let assets = release
@@ -212,15 +213,15 @@ fn filter_assets(release: &Release) -> anyhow::Result<&Asset> {
     let assets = if !musl_assets.is_empty() { musl_assets } else { assets };
 
     match &assets[..] {
-        [] => bail!("asset not found after filtered"),
-        [asset] => Ok(asset),
+        [] => Ok(None),
+        [asset] => Ok(Some(asset)),
         [asset, ..] => {
             warn!(
-                "{} assets found, the first one will be used: {:#?}",
+                "{} assets found, the first one will be used: {:?}",
                 assets.len(),
                 assets.iter().map(|asset| &asset.name).collect::<Vec<_>>()
             );
-            Ok(asset)
+            Ok(Some(asset))
         }
     }
 }

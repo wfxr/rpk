@@ -1025,7 +1025,6 @@ dependencies = [
  "constcat",
  "emojis",
  "flate2",
- "form_urlencoded",
  "home",
  "indexmap",
  "inquire",
