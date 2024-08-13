@@ -1,5 +1,22 @@
 
-## [0.1.8](https://github.com/wfxr/rpk/compare/v0.1.7..0.1.8) (2024-08-12)
+## [0.2.0-rc.1](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0-rc.1) (2024-08-13)
+
+### 🚀 Features
+
+- Support parallel update - ([92d6692](https://github.com/wfxr/rpk/commit/92d6692d41fd7374d6fb55af9f5220728b729787))
+- Support parallel & remove progress bar - ([153b722](https://github.com/wfxr/rpk/commit/153b722f9d73663cd35a8628ae050ddccbea4c0a))
+- Emojify package descriptions when doing search - ([ebb6983](https://github.com/wfxr/rpk/commit/ebb6983fd69608b30dfd2db848c7c6b57724444e))
+- Replace async api with blocking api - ([9c0d825](https://github.com/wfxr/rpk/commit/9c0d825eb9c8a3c962c1fd6cb3e95dbc4faf5878))
+- Replace curl with ureq for http requests - ([c4cebc0](https://github.com/wfxr/rpk/commit/c4cebc089221c90933b12f5b6e16ec7669d34730))
+- Replace reqwest with curl - ([d6540d7](https://github.com/wfxr/rpk/commit/d6540d7e5afbdf28fea536106c6c305524ae1f81))
+- Render emojis in package description - ([eb46b6a](https://github.com/wfxr/rpk/commit/eb46b6a547e769730039fa81ce9d4ff855d237b2))
+- Add `ls` and `fd` aliases for commands - ([a6e5379](https://github.com/wfxr/rpk/commit/a6e5379c8812f8e0389acb535e26f59e0f3e85c7))
+
+### 🚜 Refactor
+
+- Change package install directory layout - ([dac6b2a](https://github.com/wfxr/rpk/commit/dac6b2a3b2225cf2266a06c90f1399bd34760187))
+
+## [0.1.8](https://github.com/wfxr/rpk/compare/v0.1.7..v0.1.8) (2024-08-12)
 
 ### 🚀 Features
 
