@@ -75,7 +75,7 @@ pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
         .map(|lpkg| Item {
             pkg:         lpkg.name,
             version:     lpkg.version,
-            description: lpkg.desc.map(|s| s.emojify().unwrap_or(s)).unwrap_or_default(),
+            description: lpkg.desc.map(|s| s.emojify()).unwrap_or_default(),
         });
 
     let mut table = Table::new(items);
@@ -207,7 +207,7 @@ pub fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> 
         .flat_map(|repo| {
             Some(RepoItem {
                 name:           repo.name,
-                desc:           repo.description.unwrap_or_default(),
+                desc:           repo.description.unwrap_or_default().emojify(),
                 stars:          repo.stargazers_count.map(|x| format!("★ {x}")).unwrap_or_default(),
                 stars_width:    stars_width.clone(),
                 fullname:       repo.full_name?,
@@ -240,7 +240,7 @@ pub fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> 
         source: Source::Github { repo: answer.fullname },
         version: None,
         desc: match answer.desc.is_empty() {
-            false => Some(answer.desc),
+            false => Some(answer.desc.emojify()),
             true => None,
         },
     };
