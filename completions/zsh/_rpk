@@ -251,7 +251,7 @@ _rpk_commands() {
 'find:Find packages matching the given query' \
 'f:Find packages matching the given query' \
 'fd:Find packages matching the given query' \
-'env:print environment information' \
+'env:Prints the environment variables for rpk' \
 'completions:Generate completions for the given shell' \
 'version:Prints detailed version information' \
 'help:Print this message or the help of the given subcommand(s)' \
@@ -288,7 +288,7 @@ _rpk__help_commands() {
 'restore:Restore packages to the state in the lockfile' \
 'update:Update packages and re-generate the lock file' \
 'find:Find packages matching the given query' \
-'env:print environment information' \
+'env:Prints the environment variables for rpk' \
 'completions:Generate completions for the given shell' \
 'version:Prints detailed version information' \
 'help:Print this message or the help of the given subcommand(s)' \

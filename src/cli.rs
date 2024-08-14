@@ -126,7 +126,7 @@ pub enum SubCommand {
         top: u8,
     },
 
-    /// print environment information
+    /// Prints the environment variables for rpk.
     Env,
 
     /// Generate completions for the given shell.

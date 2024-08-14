@@ -92,10 +92,20 @@ fn try_main() -> anyhow::Result<()> {
         }
 
         SubCommand::Env => {
-            println!("{}='{}'", ENV_CONFIG_DIR, ctx.config_dir.display());
-            println!("{}='{}'", ENV_CACHE_DIR, ctx.cache_dir.display());
-            println!("{}='{}'", ENV_DATA_DIR, ctx.data_dir.display());
-            println!("{}='{}'", ENV_BIN_DIR, ctx.bin_dir.display());
+            macro_rules! print_env {
+                ($name:expr, $path:expr) => {
+                    println!(
+                        r#"export {}="{}""#,
+                        $name,
+                        ctx.replace_home(&$path).display()
+                    );
+                };
+            }
+            print_env!(ENV_CONFIG_DIR, ctx.config_dir);
+            print_env!(ENV_CACHE_DIR, ctx.cache_dir);
+            print_env!(ENV_DATA_DIR, ctx.data_dir);
+            print_env!(ENV_BIN_DIR, ctx.bin_dir);
+            println!(r#"export PATH="${ENV_BIN_DIR}:$PATH""#);
         }
         SubCommand::Completions { shell, dir } => {
             let cmd = &mut Opt::command();

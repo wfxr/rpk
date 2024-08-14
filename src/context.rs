@@ -86,7 +86,7 @@ impl Context {
     {
         let path = path.as_ref();
         if let Ok(p) = path.strip_prefix(&self.home) {
-            Path::new("~").join(p)
+            Path::new("$HOME").join(p)
         } else {
             path.to_path_buf()
         }
