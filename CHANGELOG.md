@@ -1,8 +1,10 @@
 
-## [0.2.0-rc.1](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0-rc.1) (2024-08-13)
+## [0.2.0-rc.2](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0-rc.2) (2024-08-14)
 
 ### 🚀 Features
 
+- Improve the `env` output - ([b34cf00](https://github.com/wfxr/rpk/commit/b34cf006e0b4369dab7e4225d414b59345fbbb28))
+- Lock config dir when running commands - ([0dd3270](https://github.com/wfxr/rpk/commit/0dd327033fbae268c1feb4defc9a9712deab7210))
 - Support parallel update - ([92d6692](https://github.com/wfxr/rpk/commit/92d6692d41fd7374d6fb55af9f5220728b729787))
 - Support parallel & remove progress bar - ([153b722](https://github.com/wfxr/rpk/commit/153b722f9d73663cd35a8628ae050ddccbea4c0a))
 - Emojify package descriptions when doing search - ([ebb6983](https://github.com/wfxr/rpk/commit/ebb6983fd69608b30dfd2db848c7c6b57724444e))
@@ -14,6 +16,8 @@
 
 ### 🚜 Refactor
 
+- Validate repo using clap's value_parser - ([70c6ea8](https://github.com/wfxr/rpk/commit/70c6ea8ac6dec38abf20d80c469b14b4eb0953c7))
+- Improve error handling in filter_assets - ([ffd17c9](https://github.com/wfxr/rpk/commit/ffd17c94c107e117b6cd6208e8ff11de9d7f6346))
 - Change package install directory layout - ([dac6b2a](https://github.com/wfxr/rpk/commit/dac6b2a3b2225cf2266a06c90f1399bd34760187))
 
 ## [0.1.8](https://github.com/wfxr/rpk/compare/v0.1.7..v0.1.8) (2024-08-12)
