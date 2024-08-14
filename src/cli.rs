@@ -82,7 +82,8 @@ pub enum SubCommand {
         ///
         /// Example: `sharkdp/fd`
         #[clap(value_name = "REPO")]
-        repo: String,
+        #[arg(value_parser = repo_parser)]
+        repo: (String, String),
 
         /// A unique name for the package.
         #[clap(long, value_name = "NAME")]
@@ -170,5 +171,12 @@ impl Opt {
             },
             no_color:  !self.color_enabled(),
         }
+    }
+}
+
+fn repo_parser(repo: &str) -> Result<(String, String), String> {
+    match repo.split_once('/') {
+        Some((owner, repo)) => Ok((owner.to_owned(), repo.to_owned())),
+        None => Err("invalid repo format, should be: 'owner/repo'".into()),
     }
 }

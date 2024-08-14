@@ -9,7 +9,7 @@ pub mod util;
 
 use std::process;
 
-use anyhow::{anyhow, bail, Context as _};
+use anyhow::{anyhow, Context as _};
 use clap::{CommandFactory as _, Parser as _};
 use clap_complete::{generate, generate_to};
 use cli::{Opt, SubCommand, ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR};
@@ -81,16 +81,13 @@ fn try_main() -> anyhow::Result<()> {
         SubCommand::Find { query, top } => {
             with_flock!(commands::find(query, top, &ctx)?);
         }
-        SubCommand::Add { name, repo, version, desc } => {
-            let name = match name {
-                Some(name) => name,
-                None => match repo.split_once('/') {
-                    Some((_owner, repo)) => repo.to_owned(),
-                    None => bail!("invalid repo format: `{}`", repo),
-                },
+        SubCommand::Add { name, repo: (owner, repo), version, desc } => {
+            let pkg = Package {
+                name: name.unwrap_or_else(|| repo.clone()),
+                source: Source::Github { repo: format!("{}/{}", owner, repo) },
+                version,
+                desc,
             };
-            let pkg = Package { name, source: Source::Github { repo }, version, desc };
-
             with_flock!(commands::add(&ctx, pkg)?);
         }
 
