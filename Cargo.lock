@@ -459,6 +459,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fmutex"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01e84c17070603126a7b0cd07d0ecc8e8cca4d15b67934ac2740286a84f3086c"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1025,6 +1034,7 @@ dependencies = [
  "constcat",
  "emojis",
  "flate2",
+ "fmutex",
  "home",
  "indexmap",
  "inquire",

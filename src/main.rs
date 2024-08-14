@@ -1,4 +1,3 @@
-#![feature(anonymous_lifetime_in_impl_trait)]
 pub mod cli;
 pub mod commands;
 pub mod config;
@@ -56,24 +55,31 @@ fn try_main() -> anyhow::Result<()> {
         output,
     };
 
+    macro_rules! with_flock {
+        ($command:expr) => {
+            let _guard = acquire_flock(&ctx)?;
+            $command
+        };
+    }
+
     match command {
         SubCommand::Init { from } => {
-            commands::init(&ctx, from)?;
+            with_flock!(commands::init(&ctx, from)?);
         }
         SubCommand::List => {
-            commands::list(&ctx)?;
+            with_flock!(commands::list(&ctx)?);
         }
         SubCommand::Sync => {
-            commands::sync(&ctx)?;
+            with_flock!(commands::sync(&ctx)?);
         }
         SubCommand::Update { package } => {
-            commands::update(&ctx, package)?;
+            with_flock!(commands::update(&ctx, package)?);
         }
         SubCommand::Restore { package } => {
-            commands::restore(&ctx, package)?;
+            with_flock!(commands::restore(&ctx, package)?);
         }
         SubCommand::Find { query, top } => {
-            commands::find(query, top, &ctx)?;
+            with_flock!(commands::find(query, top, &ctx)?);
         }
         SubCommand::Add { name, repo, version, desc } => {
             let name = match name {
@@ -83,11 +89,9 @@ fn try_main() -> anyhow::Result<()> {
                     None => bail!("invalid repo format: `{}`", repo),
                 },
             };
-            let source = Source::Github { repo };
+            let pkg = Package { name, source: Source::Github { repo }, version, desc };
 
-            let pkg = Package { name, source, version, desc };
-
-            commands::add(&ctx, pkg)?;
+            with_flock!(commands::add(&ctx, pkg)?);
         }
 
         SubCommand::Env => {
@@ -123,5 +127,19 @@ fn main() {
     if let Err(e) = try_main() {
         log_error(true, &e);
         process::exit(1);
+    }
+}
+
+fn acquire_flock(ctx: &Context) -> anyhow::Result<fmutex::Guard> {
+    let path = &ctx.config_dir;
+    match fmutex::try_lock(path).with_context(|| format!("failed to open `{}`", path.display()))? {
+        Some(g) => Ok(g),
+        None => {
+            ctx.log_warning(
+                "Blocking",
+                format!("waiting for file lock on {}", ctx.replace_home(path).display()),
+            );
+            fmutex::lock(path).with_context(|| format!("failed to acquire file lock `{}`", path.display()))
+        }
     }
 }
