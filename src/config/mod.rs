@@ -139,12 +139,8 @@ impl Config {
     }
 
     fn init(ctx: &Context) -> Result<Self> {
-        remove_file_if_exists(&ctx.lock_file).with_context(|| {
-            format!(
-                "failed to remove lock file {}",
-                ctx.replace_home(&ctx.lock_file).display(),
-            )
-        })?;
+        remove_file_if_exists(&ctx.lock_file)
+            .with_context(|| format!("failed to remove lock file {}", ctx.lock_file.display()))?;
 
         let default = include_str!("packages.toml");
         fs::write(&ctx.config_file, default)

@@ -7,7 +7,15 @@ pub mod temp;
 pub use build::*;
 pub use fs::*;
 
-use std::{error::Error, fmt::Write, io};
+use std::{
+    error::Error,
+    fmt::Write,
+    io,
+    path::{Path, PathBuf},
+    sync::LazyLock,
+};
+
+use anyhow::Result;
 
 pub fn not_found_err(e: &(dyn Error + 'static)) -> bool {
     matches!(e.downcast_ref::<io::Error>(), Some(e) if e.kind() == io::ErrorKind::NotFound)
@@ -57,5 +65,25 @@ impl Emojify for str {
         // output.write_all(input.as_bytes())
         write!(output, "{}", input).unwrap();
         output
+    }
+}
+
+static HOME: LazyLock<PathBuf> =
+    LazyLock::new(|| home::home_dir().expect("failed to determine the current user's home directory"));
+
+pub trait Shorten {
+    fn shorten(&self) -> Result<String>;
+}
+
+impl<T> Shorten for T
+where
+    T: AsRef<Path>,
+{
+    fn shorten(&self) -> Result<String> {
+        let s = match self.as_ref().strip_prefix(&*HOME) {
+            Ok(p) => Path::new("$HOME").join(p).to_str().map(|s| s.to_owned()),
+            Err(_) => self.as_ref().to_str().map(|s| s.to_owned()),
+        };
+        s.ok_or_else(|| anyhow::anyhow!("failed to convert path to string: {:?}", self.as_ref()))
     }
 }

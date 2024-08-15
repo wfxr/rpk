@@ -9,14 +9,14 @@ pub mod util;
 
 use std::process;
 
-use anyhow::{anyhow, Context as _};
+use anyhow::Context as _;
 use clap::{CommandFactory as _, Parser as _};
 use clap_complete::{generate, generate_to};
 use cli::{Opt, SubCommand, ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR};
 use config::{Package, Source};
 use context::{log_error, Context};
 use tracing_subscriber::EnvFilter;
-use util::{mkdir_p, CRATE_NAME};
+use util::{mkdir_p, Shorten as _, CRATE_NAME};
 
 fn try_main() -> anyhow::Result<()> {
     let opt = Opt::parse();
@@ -25,7 +25,6 @@ fn try_main() -> anyhow::Result<()> {
     let Opt { bin_dir, data_dir, cache_dir, config_dir, command, .. } = opt;
 
     let xdg_dirs = xdg::BaseDirectories::with_prefix(CRATE_NAME)?;
-    let home = home::home_dir().ok_or_else(|| anyhow!("failed to determine the current user's home directory"))?;
 
     let config_dir = config_dir.unwrap_or_else(|| xdg_dirs.get_config_home());
     mkdir_p(&config_dir).context("failed to create config dir")?;
@@ -50,7 +49,6 @@ fn try_main() -> anyhow::Result<()> {
         cache_dir,
         data_dir,
         bin_dir,
-        home,
         lock_file,
         output,
     };
@@ -94,11 +92,7 @@ fn try_main() -> anyhow::Result<()> {
         SubCommand::Env => {
             macro_rules! print_env {
                 ($name:expr, $path:expr) => {
-                    println!(
-                        r#"export {}="{}""#,
-                        $name,
-                        ctx.replace_home(&$path).display()
-                    );
+                    println!(r#"export {}="{}""#, $name, $path.shorten()?);
                 };
             }
             print_env!(ENV_CONFIG_DIR, ctx.config_dir);
@@ -112,7 +106,7 @@ fn try_main() -> anyhow::Result<()> {
             match dir {
                 Some(dir) => {
                     let path = generate_to(shell, cmd, cmd.get_name().to_string(), dir)?;
-                    ctx.log_status_p("Generated", &path);
+                    ctx.log_status("Generated", path.shorten()?);
                 }
                 None => generate(shell, cmd, cmd.get_name().to_string(), &mut std::io::stdout()),
             }
@@ -142,10 +136,7 @@ fn acquire_flock(ctx: &Context) -> anyhow::Result<fmutex::Guard> {
     match fmutex::try_lock(path).with_context(|| format!("failed to open `{}`", path.display()))? {
         Some(g) => Ok(g),
         None => {
-            ctx.log_warning(
-                "Blocking",
-                format!("waiting for file lock on {}", ctx.replace_home(path).display()),
-            );
+            ctx.log_warning("Blocking", format!("waiting for file lock on {}", path.shorten()?));
             fmutex::lock(path).with_context(|| format!("failed to acquire file lock `{}`", path.display()))
         }
     }

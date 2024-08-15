@@ -18,7 +18,7 @@ use zip::ZipArchive;
 use crate::{
     config::LockedPackage,
     context::Context,
-    util::{mkdir_p, symlink_force},
+    util::{mkdir_p, symlink_force, Shorten},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -188,7 +188,7 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
                     "Warning",
                     format!(
                         "Multiple binaries found in archive, using the first one: '{}'",
-                        ctx.replace_home(path).display()
+                        path.shorten()?
                     ),
                 );
             }

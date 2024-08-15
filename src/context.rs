@@ -1,9 +1,6 @@
 //! Contextual information.
 
-use std::{
-    fmt,
-    path::{Path, PathBuf},
-};
+use std::{fmt, path::PathBuf};
 
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
@@ -29,9 +26,6 @@ pub struct Context {
 
     /// The location of the binary directory.
     pub bin_dir: PathBuf,
-
-    #[serde(skip)]
-    pub home: PathBuf,
 
     /// The location of the lock file.
     #[serde(skip)]
@@ -69,50 +63,15 @@ impl Context {
         self.output.verbosity
     }
 
-    /// Expands the tilde in the given path to the configured user's home
-    /// directory.
-    pub fn expand_tilde(&self, path: PathBuf) -> PathBuf {
-        if let Ok(p) = path.strip_prefix("~") {
-            self.home.join(p)
-        } else {
-            path
-        }
-    }
-
-    /// Replaces the home directory in the given path with a tilde.
-    pub fn replace_home<P>(&self, path: P) -> PathBuf
-    where
-        P: AsRef<Path>,
-    {
-        let path = path.as_ref();
-        if let Ok(p) = path.strip_prefix(&self.home) {
-            Path::new("$HOME").join(p)
-        } else {
-            path.to_path_buf()
-        }
-    }
-
     pub fn log_header(&self, prefix: &str, msg: impl fmt::Display) {
         if self.verbosity() >= Verbosity::Normal {
             self.log_header_impl(prefix, msg);
         }
     }
 
-    pub fn log_header_p(&self, prefix: &str, path: impl AsRef<Path>) {
-        if self.verbosity() >= Verbosity::Normal {
-            self.log_header_impl(prefix, self.replace_home(path).display());
-        }
-    }
-
     pub fn log_verbose_header(&self, prefix: &str, msg: impl fmt::Display) {
         if self.verbosity() >= Verbosity::Verbose {
             self.log_header_impl(prefix, msg);
-        }
-    }
-
-    pub fn log_verbose_header_p(&self, prefix: &str, path: impl AsRef<Path>) {
-        if self.verbosity() >= Verbosity::Verbose {
-            self.log_header_impl(prefix, self.replace_home(path).display());
         }
     }
 
@@ -130,21 +89,9 @@ impl Context {
         }
     }
 
-    pub fn log_status_p(&self, prefix: &str, path: impl AsRef<Path>) {
-        if self.verbosity() >= Verbosity::Normal {
-            self.log_impl(Color::Cyan, prefix, self.replace_home(path).display());
-        }
-    }
-
     pub fn log_verbose_status(&self, prefix: &str, msg: impl fmt::Display) {
         if self.verbosity() >= Verbosity::Verbose {
             self.log_impl(Color::Cyan, prefix, msg);
-        }
-    }
-
-    pub fn log_verbose_status_p(&self, prefix: &str, path: impl AsRef<Path>) {
-        if self.verbosity() >= Verbosity::Verbose {
-            self.log_impl(Color::Cyan, prefix, self.replace_home(path).display());
         }
     }
 

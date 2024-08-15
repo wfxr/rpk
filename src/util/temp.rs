@@ -7,6 +7,8 @@ use std::{
 
 use anyhow::Context as _;
 
+use super::rm_rf;
+
 pub struct TempFile {
     temp_file: File,
     temp_path: PathBuf,
@@ -47,18 +49,4 @@ impl Drop for TempFile {
     fn drop(&mut self) {
         rm_rf(&self.temp_path).expect("failed to delete temporary path");
     }
-}
-
-/// Remove a file or directory.
-fn rm_rf(path: &Path) -> io::Result<()> {
-    let res = if path.is_dir() {
-        fs::remove_dir_all(path)
-    } else {
-        fs::remove_file(path)
-    };
-
-    res.or_else(|e| match e.kind() {
-        io::ErrorKind::NotFound => Ok(()),
-        _ => Err(e),
-    })
 }
