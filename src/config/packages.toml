@@ -2,5 +2,6 @@
 #
 # See the documentation for more https://github.com/wfxr/rpk#readme
 
+# Example
 [pkgs.fd]
 repo = "sharkdp/fd"

@@ -60,10 +60,7 @@ pub fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Re
         })
         .collect::<Result<_>>()?;
 
-    for lpkg in new_lpkgs {
-        lcfg.upsert(lpkg);
-    }
-
+    lcfg.pkgs = new_lpkgs.into_iter().map(|lpkg| (lpkg.name.clone(), lpkg)).collect();
     Ok(())
 }
 
