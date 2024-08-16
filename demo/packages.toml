@@ -1,0 +1,28 @@
+# RPK Config File
+#
+# See the documentation for more https://github.com/wfxr/rpk#readme
+
+# You can manage rpk by itself
+[pkgs.rpk]
+repo = "wfxr/rpk"
+desc = "A lightweight, cross-platform cli package manager."
+
+[pkgs.fzf]
+repo = "junegunn/fzf"
+desc = ":cherry_blossom: A command-line fuzzy finder"
+
+[pkgs.fd]
+repo = "sharkdp/fd"
+desc = "A simple, fast and user-friendly alternative to 'find'"
+
+[pkgs.rg]
+repo = "BurntSushi/ripgrep"
+desc = "ripgrep recursively searches directories for a regex pattern while respecting your gitignore"
+
+[pkgs.eza]
+repo = "eza-community/eza"
+desc = "A modern alternative to ls"
+
+[pkgs.bat]
+repo = "sharkdp/bat"
+desc = "A cat(1) clone with wings."
