@@ -1,8 +1,9 @@
 
-## [0.2.0-rc.2](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0-rc.2) (2024-08-14)
+## [0.2.0-rc.3](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0-rc.3) (2024-08-16)
 
 ### 🚀 Features
 
+- Add cleanup command & improve completions command - ([6ab4fc6](https://github.com/wfxr/rpk/commit/6ab4fc6e19711d4dc16df78edcaf1e9776d68d0c))
 - Improve the `env` output - ([b34cf00](https://github.com/wfxr/rpk/commit/b34cf006e0b4369dab7e4225d414b59345fbbb28))
 - Lock config dir when running commands - ([0dd3270](https://github.com/wfxr/rpk/commit/0dd327033fbae268c1feb4defc9a9712deab7210))
 - Support parallel update - ([92d6692](https://github.com/wfxr/rpk/commit/92d6692d41fd7374d6fb55af9f5220728b729787))
@@ -14,8 +15,13 @@
 - Render emojis in package description - ([eb46b6a](https://github.com/wfxr/rpk/commit/eb46b6a547e769730039fa81ce9d4ff855d237b2))
 - Add `ls` and `fd` aliases for commands - ([a6e5379](https://github.com/wfxr/rpk/commit/a6e5379c8812f8e0389acb535e26f59e0f3e85c7))
 
+### 🐛 Bug Fixes
+
+- Sync should always generate a new locked package list - ([523a7ba](https://github.com/wfxr/rpk/commit/523a7bac6adb1e0cece5bd2a94f80ef19258f74d))
+
 ### 🚜 Refactor
 
+- Add Shorten trait for path shortening - ([a06ff06](https://github.com/wfxr/rpk/commit/a06ff06cea31b1a091d4f09e97a2a126bfc77868))
 - Validate repo using clap's value_parser - ([70c6ea8](https://github.com/wfxr/rpk/commit/70c6ea8ac6dec38abf20d80c469b14b4eb0953c7))
 - Improve error handling in filter_assets - ([ffd17c9](https://github.com/wfxr/rpk/commit/ffd17c94c107e117b6cd6208e8ff11de9d7f6346))
 - Change package install directory layout - ([dac6b2a](https://github.com/wfxr/rpk/commit/dac6b2a3b2225cf2266a06c90f1399bd34760187))
