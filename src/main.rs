@@ -10,8 +10,8 @@ pub mod util;
 use std::process;
 
 use anyhow::Context as _;
-use clap::{CommandFactory as _, Parser as _};
-use clap_complete::{generate, generate_to};
+use clap::{CommandFactory as _, Parser as _, ValueEnum};
+use clap_complete::{generate, generate_to, Shell};
 use cli::{Opt, SubCommand, ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR};
 use config::{Package, Source};
 use context::{log_error, Context};
@@ -88,6 +88,9 @@ fn try_main() -> anyhow::Result<()> {
             };
             with_flock!(commands::add(&ctx, pkg)?);
         }
+        SubCommand::Cleanup { cache } => {
+            with_flock!(commands::cleanup(&ctx, cache)?);
+        }
 
         SubCommand::Env => {
             macro_rules! print_env {
@@ -101,14 +104,21 @@ fn try_main() -> anyhow::Result<()> {
             print_env!(ENV_BIN_DIR, ctx.bin_dir);
             println!(r#"export PATH="${ENV_BIN_DIR}:$PATH""#);
         }
-        SubCommand::Completions { shell, dir } => {
+        SubCommand::Completions { shell, dir, list } => {
             let cmd = &mut Opt::command();
-            match dir {
-                Some(dir) => {
-                    let path = generate_to(shell, cmd, cmd.get_name().to_string(), dir)?;
-                    ctx.log_status("Generated", path.shorten()?);
+            if list {
+                for shell in Shell::value_variants() {
+                    println!("{}", shell);
                 }
-                None => generate(shell, cmd, cmd.get_name().to_string(), &mut std::io::stdout()),
+            } else {
+                let shell = shell.context("shell not specified")?;
+                match dir {
+                    Some(dir) => {
+                        let path = generate_to(shell, cmd, cmd.get_name().to_string(), dir)?;
+                        ctx.log_status("Generated", path.shorten()?);
+                    }
+                    None => generate(shell, cmd, cmd.get_name().to_string(), &mut std::io::stdout()),
+                }
             }
         }
         SubCommand::Version => {

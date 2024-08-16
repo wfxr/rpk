@@ -25,15 +25,15 @@ pub const ENV_BIN_DIR: &str = "RPK_BIN_DIR";
 #[clap(long_version = util::CRATE_LONG_VERSION)]
 pub struct Opt {
     /// Suppress any informational output.
-    #[clap(long, short)]
+    #[clap(long, short, global = true)]
     pub quiet: bool,
 
     /// Use verbose output.
-    #[clap(long, short)]
+    #[clap(long, short, global = true)]
     pub verbose: bool,
 
     /// This flag controls when to use colors.
-    #[clap(long, value_enum, value_name = "WHEN", default_value_t = ColorChoice::Auto, ignore_case = true)]
+    #[clap(long, value_enum, value_name = "WHEN", default_value_t = ColorChoice::Auto, ignore_case = true, global = true)]
     pub color: ColorChoice,
 
     /// The configuration directory.
@@ -85,7 +85,7 @@ pub enum SubCommand {
         #[arg(value_parser = repo_parser)]
         repo: (String, String),
 
-        /// A unique name for the package.
+        /// A unique name for the package. Defaults to the repo name.
         #[clap(long, value_name = "NAME")]
         name: Option<String>,
 
@@ -126,20 +126,31 @@ pub enum SubCommand {
         top: u8,
     },
 
+    /// Remove packages which are not listed in the lock file.
+    Cleanup {
+        /// Remove all cached data as well.
+        #[clap(long)]
+        cache: bool,
+    },
+
     /// Prints the environment variables for rpk.
     Env,
 
     /// Generate completions for the given shell.
     Completions {
         /// The shell to generate completions for.
-        #[clap(value_name = "SHELL", value_enum)]
-        shell: Shell,
+        #[clap(value_name = "SHELL", value_enum, required_unless_present = "list")]
+        shell: Option<Shell>,
 
         /// The directory to write the completions to.
         ///
         /// Defaults output to stdout.
         #[clap(short, long, value_name = "DIR")]
         dir: Option<PathBuf>,
+
+        /// List all available shells.
+        #[clap(short, long, exclusive = true)]
+        list: bool,
     },
 
     /// Prints detailed version information.

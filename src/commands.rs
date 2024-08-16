@@ -18,6 +18,7 @@ use tabled::{
 };
 use tracing::debug;
 use url::Url;
+use walkdir::WalkDir;
 
 use crate::{
     commands,
@@ -25,7 +26,7 @@ use crate::{
     context::Context,
     manager::{restore_package, restore_packages, sync_package, sync_packages},
     provider::Github,
-    util::{remove_file_if_exists, Emojify, Shorten as _},
+    util::{remove_file_if_exists, rm_rf, Emojify, Shorten as _},
 };
 
 pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
@@ -178,6 +179,54 @@ pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Erro
             ctx.log_verbose_header("Locked", ctx.lock_file.shorten()?);
         }
     };
+    Ok(())
+}
+
+pub fn cleanup(ctx: &Context, clear_cache: bool) -> Result<()> {
+    let lcfg = LockedConfig::load(ctx)?;
+
+    for entry in WalkDir::new(&ctx.data_dir).max_depth(2) {
+        let entry = entry?;
+        match entry.depth() {
+            1 => match entry.file_name().to_str() {
+                Some(name) if lcfg.pkgs.contains_key(name) => {
+                    continue;
+                }
+                _ => {
+                    rm_rf(entry.path())?;
+                    ctx.log_status("Removed", entry.path().shorten()?);
+                }
+            },
+            2 => {
+                let mut parts = entry.path().components().map(|c| c.as_os_str().to_str()).rev();
+                match (parts.next(), parts.next()) {
+                    (Some(Some(version)), Some(Some(name))) => match lcfg.pkgs.get(name) {
+                        Some(lpkg) if lpkg.version == version => {
+                            continue;
+                        }
+                        _ => {
+                            rm_rf(entry.path())?;
+                            ctx.log_status("Removed", entry.path().shorten()?);
+                        }
+                    },
+                    _ => {
+                        rm_rf(entry.path())?;
+                        ctx.log_status("Removed", entry.path().shorten()?);
+                    }
+                }
+            }
+            _ => continue,
+        }
+    }
+
+    if clear_cache {
+        for entry in fs::read_dir(&ctx.cache_dir)? {
+            let entry = entry?;
+            rm_rf(&entry.path())?;
+            ctx.log_status("Removed", entry.path().shorten()?);
+        }
+    }
+
     Ok(())
 }
 

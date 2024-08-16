@@ -41,45 +41,80 @@ _rpk() {
 _arguments "${_arguments_options[@]}" : \
 '-f+[The config file URL to initialize from]:URL: ' \
 '--from=[The config file URL to initialize from]:URL: ' \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (list)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (l)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (ls)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (sync)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (s)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
 ;;
 (add)
 _arguments "${_arguments_options[@]}" : \
-'--name=[A unique name for the package]:NAME: ' \
+'--name=[A unique name for the package. Defaults to the repo name]:NAME: ' \
 '--version=[The version of the package]:VERSION: ' \
 '--desc=[A description of the package]:DESC: ' \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 ':repo -- The github repository hosting the package:' \
@@ -87,9 +122,14 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (a)
 _arguments "${_arguments_options[@]}" : \
-'--name=[A unique name for the package]:NAME: ' \
+'--name=[A unique name for the package. Defaults to the repo name]:NAME: ' \
 '--version=[The version of the package]:VERSION: ' \
 '--desc=[A description of the package]:DESC: ' \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 ':repo -- The github repository hosting the package:' \
@@ -97,6 +137,11 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (restore)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 '::package -- The packages to restore:' \
@@ -104,6 +149,11 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (r)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 '::package -- The packages to restore:' \
@@ -111,6 +161,11 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (update)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 '::package -- The packages to update:' \
@@ -118,6 +173,11 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (u)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 '::package -- The packages to update:' \
@@ -126,6 +186,11 @@ _arguments "${_arguments_options[@]}" : \
 (find)
 _arguments "${_arguments_options[@]}" : \
 '--top=[The number of results to display]:NUM: ' \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 ':query -- The query to search for:' \
@@ -134,6 +199,11 @@ _arguments "${_arguments_options[@]}" : \
 (f)
 _arguments "${_arguments_options[@]}" : \
 '--top=[The number of results to display]:NUM: ' \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 ':query -- The query to search for:' \
@@ -142,13 +212,35 @@ _arguments "${_arguments_options[@]}" : \
 (fd)
 _arguments "${_arguments_options[@]}" : \
 '--top=[The number of results to display]:NUM: ' \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 ':query -- The query to search for:' \
 && ret=0
 ;;
+(cleanup)
+_arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'--cache[Remove all cached data as well]' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
 (env)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
@@ -157,13 +249,25 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-d+[The directory to write the completions to]:DIR:_files' \
 '--dir=[The directory to write the completions to]:DIR:_files' \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-l[List all available shells]' \
+'--list[List all available shells]' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
-':shell -- The shell to generate completions for:(bash elvish fish powershell zsh)' \
+'::shell -- The shell to generate completions for:(bash elvish fish powershell zsh)' \
 && ret=0
 ;;
 (version)
 _arguments "${_arguments_options[@]}" : \
+'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
+'-q[Suppress any informational output]' \
+'--quiet[Suppress any informational output]' \
+'-v[Use verbose output]' \
+'--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
 && ret=0
@@ -205,6 +309,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (find)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(cleanup)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -251,6 +359,7 @@ _rpk_commands() {
 'find:Find packages matching the given query' \
 'f:Find packages matching the given query' \
 'fd:Find packages matching the given query' \
+'cleanup:Remove packages which are not listed in the lock file' \
 'env:Prints the environment variables for rpk' \
 'completions:Generate completions for the given shell' \
 'version:Prints detailed version information' \
@@ -262,6 +371,11 @@ _rpk_commands() {
 _rpk__add_commands() {
     local commands; commands=()
     _describe -t commands 'rpk add commands' commands "$@"
+}
+(( $+functions[_rpk__cleanup_commands] )) ||
+_rpk__cleanup_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk cleanup commands' commands "$@"
 }
 (( $+functions[_rpk__completions_commands] )) ||
 _rpk__completions_commands() {
@@ -288,6 +402,7 @@ _rpk__help_commands() {
 'restore:Restore packages to the state in the lockfile' \
 'update:Update packages and re-generate the lock file' \
 'find:Find packages matching the given query' \
+'cleanup:Remove packages which are not listed in the lock file' \
 'env:Prints the environment variables for rpk' \
 'completions:Generate completions for the given shell' \
 'version:Prints detailed version information' \
@@ -299,6 +414,11 @@ _rpk__help_commands() {
 _rpk__help__add_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help add commands' commands "$@"
+}
+(( $+functions[_rpk__help__cleanup_commands] )) ||
+_rpk__help__cleanup_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk help cleanup commands' commands "$@"
 }
 (( $+functions[_rpk__help__completions_commands] )) ||
 _rpk__help__completions_commands() {

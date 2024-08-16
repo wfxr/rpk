@@ -6,9 +6,7 @@ SDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SDIR"
 
 PDIR=$(cd "$SDIR/.." && pwd)
 
-shells=$(cargo run -q -- completions --help |
-    grep -Po '(?<=\[possible values: )(.*)(?=\])' |
-    tr ',' '\n' | tr -d ' ')
+shells=$(cargo run -q -- completions --list)
 
 for shell in $shells; do
     dir="$PDIR/completions/$shell"

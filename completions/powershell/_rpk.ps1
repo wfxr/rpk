@@ -49,6 +49,7 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('find', 'find', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
             [CompletionResult]::new('f', 'f', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
             [CompletionResult]::new('fd', 'fd', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
+            [CompletionResult]::new('cleanup', 'cleanup', [CompletionResultType]::ParameterValue, 'Remove packages which are not listed in the lock file')
             [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'Prints the environment variables for rpk')
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
@@ -58,90 +59,181 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         'rpk;init' {
             [CompletionResult]::new('-f', '-f', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
             [CompletionResult]::new('--from', '--from', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;list' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;l' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;ls' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;sync' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;s' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;add' {
-            [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package')
+            [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package. Defaults to the repo name')
             [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'The version of the package')
             [CompletionResult]::new('--desc', '--desc', [CompletionResultType]::ParameterName, 'A description of the package')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
         'rpk;a' {
-            [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package')
+            [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package. Defaults to the repo name')
             [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'The version of the package')
             [CompletionResult]::new('--desc', '--desc', [CompletionResultType]::ParameterName, 'A description of the package')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
         'rpk;restore' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;r' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;update' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;u' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;find' {
             [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;f' {
             [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;fd' {
             [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'rpk;cleanup' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('--cache', '--cache', [CompletionResultType]::ParameterName, 'Remove all cached data as well')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'rpk;env' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
@@ -149,11 +241,23 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         'rpk;completions' {
             [CompletionResult]::new('-d', '-d', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
             [CompletionResult]::new('--dir', '--dir', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-l', '-l', [CompletionResultType]::ParameterName, 'List all available shells')
+            [CompletionResult]::new('--list', '--list', [CompletionResultType]::ParameterName, 'List all available shells')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
         'rpk;version' {
+            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
+            [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
+            [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
+            [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'Use verbose output')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
@@ -166,6 +270,7 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('restore', 'restore', [CompletionResultType]::ParameterValue, 'Restore packages to the state in the lockfile')
             [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'Update packages and re-generate the lock file')
             [CompletionResult]::new('find', 'find', [CompletionResultType]::ParameterValue, 'Find packages matching the given query')
+            [CompletionResult]::new('cleanup', 'cleanup', [CompletionResultType]::ParameterValue, 'Remove packages which are not listed in the lock file')
             [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'Prints the environment variables for rpk')
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate completions for the given shell')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Prints detailed version information')
@@ -191,6 +296,9 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;help;find' {
+            break
+        }
+        'rpk;help;cleanup' {
             break
         }
         'rpk;help;env' {
