@@ -1,8 +1,9 @@
 
-## [0.2.0-rc.3](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0-rc.3) (2024-08-16)
+## [0.2.0](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0) (2024-08-20)
 
 ### 🚀 Features
 
+- Add socks support for ureq - ([d3661aa](https://github.com/wfxr/rpk/commit/d3661aad4f014155f7bd8f14df34c40503856728))
 - Add cleanup command & improve completions command - ([6ab4fc6](https://github.com/wfxr/rpk/commit/6ab4fc6e19711d4dc16df78edcaf1e9776d68d0c))
 - Improve the `env` output - ([b34cf00](https://github.com/wfxr/rpk/commit/b34cf006e0b4369dab7e4225d414b59345fbbb28))
 - Lock config dir when running commands - ([0dd3270](https://github.com/wfxr/rpk/commit/0dd327033fbae268c1feb4defc9a9712deab7210))
@@ -25,6 +26,10 @@
 - Validate repo using clap's value_parser - ([70c6ea8](https://github.com/wfxr/rpk/commit/70c6ea8ac6dec38abf20d80c469b14b4eb0953c7))
 - Improve error handling in filter_assets - ([ffd17c9](https://github.com/wfxr/rpk/commit/ffd17c94c107e117b6cd6208e8ff11de9d7f6346))
 - Change package install directory layout - ([dac6b2a](https://github.com/wfxr/rpk/commit/dac6b2a3b2225cf2266a06c90f1399bd34760187))
+
+### 📚 Documentation
+
+- Update README.md and add a config sample - ([ad16d40](https://github.com/wfxr/rpk/commit/ad16d40692d9e9cb0caba4fe71f41bfaa7aeddb1))
 
 ## [0.1.8](https://github.com/wfxr/rpk/compare/v0.1.7..v0.1.8) (2024-08-12)
 
