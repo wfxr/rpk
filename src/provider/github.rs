@@ -1,6 +1,9 @@
-use std::env::{
-    self,
-    consts::{ARCH, OS},
+use std::{
+    cmp::Reverse,
+    env::{
+        self,
+        consts::{ARCH, OS},
+    },
 };
 
 use anyhow::{anyhow, Context as _, Result};
@@ -163,31 +166,55 @@ impl Provider for Github {
     }
 }
 
+// check if a string contains any of the patterns (case-insensitive)
+macro_rules! contains_any {
+    ($s:expr, $($pat:expr),+ $(,)?) => {{
+        let s = $s.to_lowercase();
+        [$($pat),+].iter().any(|pat| s.contains(pat))
+
+    }};
+}
+
+// check if a string ends with any of the patterns (case-insensitive)
+macro_rules! ends_with_any {
+    ($s:expr, $($pat:expr),+ $(,)?) => {{
+        let s = $s.to_lowercase();
+        [$($pat),+].iter().any(|pat| s.ends_with(&pat.to_lowercase()))
+
+    }};
+}
+
 fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
     debug!("OS: {OS}, ARCH: {ARCH}");
 
-    let assets = release
+    let mut assets = release
         .assets
         .iter()
         .inspect(|asset| {
             trace!("before filter: {asset}", asset = asset.name);
         })
         .filter(|asset| match OS {
-            "linux" => asset.name.contains("linux"),
-            "macos" => ["apple", "darwin", "osx", "mac"]
-                .iter()
-                .any(|os| asset.name.contains(os)),
-            _ => false,
+            "linux" => is_linux(&asset.name),
+            "macos" => is_macos(&asset.name),
+            _ => {
+                warn!("unsupported OS: {OS}", OS = OS);
+                false
+            }
         })
         .filter(|asset| match ARCH {
-            "x86_64" => is_x86_64(asset),
-            "x86" => is_x86(asset),
-            "aarch64" => is_aarch64(asset),
-            "arm" => is_arm(asset),
-            _ => false,
+            "x86_64" => is_x86_64(&asset.name),
+            "x86" => is_x86(&asset.name),
+            // apple silicon macs can run x86_64 binaries
+            "aarch64" => is_aarch64(&asset.name) || is_macos(&asset.name) && is_x86_64(&asset.name),
+            "arm" => is_arm(&asset.name),
+            _ => {
+                warn!("unsupported ARCH: {ARCH}", ARCH = ARCH);
+                false
+            }
         })
         .filter(|asset| {
-            [
+            ends_with_any!(
+                asset.name,
                 ".sig",
                 ".deb",
                 ".rpm",
@@ -196,21 +223,12 @@ fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
                 ".msi",
                 ".sbom",
                 ".checksum",
-                ".sha256sum",
-            ]
-            .iter()
-            .all(|ext| !asset.name.ends_with(ext))
+                ".sha256sum"
+            )
         })
         .collect::<Vec<_>>();
 
-    // choose the musl version if available
-    let musl_assets = assets
-        .iter()
-        .filter(|asset| asset.name.contains("musl"))
-        .cloned()
-        .collect::<Vec<_>>();
-
-    let assets = if !musl_assets.is_empty() { musl_assets } else { assets };
+    assets.sort_by_key(|asset| Reverse(priority(asset)));
 
     match &assets[..] {
         [] => Ok(None),
@@ -226,23 +244,50 @@ fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
     }
 }
 
-fn is_x86_64(asset: &Asset) -> bool {
-    asset.name.contains("amd64")
-        || asset.name.contains("x86_64")
-        || asset.name.contains("x64")
-        || asset.name.contains("x86-64")
+fn is_linux(filename: &str) -> bool {
+    contains_any!(filename, "linux")
 }
 
-fn is_aarch64(asset: &Asset) -> bool {
-    asset.name.contains("arm64") || asset.name.contains("aarch64")
+fn is_macos(filename: &str) -> bool {
+    contains_any!(filename, "apple", "darwin", "osx", "mac")
 }
 
-fn is_x86(asset: &Asset) -> bool {
-    !is_x86_64(asset) && (asset.name.contains("386") || asset.name.contains("x86") || asset.name.contains("i686"))
+fn is_x86_64(filename: &str) -> bool {
+    contains_any!(filename, "amd64", "x86_64", "x64", "x86-64")
 }
 
-fn is_arm(asset: &Asset) -> bool {
-    !is_aarch64(asset) && asset.name.contains("arm")
+fn is_aarch64(filename: &str) -> bool {
+    contains_any!(filename, "arm64", "aarch64")
+}
+
+fn is_x86(filename: &str) -> bool {
+    !is_x86_64(filename) && contains_any!(filename, "386", "x86", "i686")
+}
+
+fn is_arm(filename: &str) -> bool {
+    !is_aarch64(filename) && contains_any!(filename, "arm")
+}
+
+fn is_musl(filename: &str) -> bool {
+    contains_any!(filename, "musl")
+}
+
+fn priority(asset: &Asset) -> u64 {
+    let mut priority = 0;
+
+    // choose the musl version if available
+    priority <<= 1;
+    if is_musl(&asset.name) {
+        priority += 1;
+    }
+
+    // choose the aarch64 version if available
+    priority <<= 1;
+    if is_aarch64(&asset.name) {
+        priority += 1;
+    }
+
+    priority
 }
 
 mod models {
