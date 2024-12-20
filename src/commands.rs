@@ -169,16 +169,17 @@ pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Erro
             let mut lcfg = LockedConfig::load(ctx)?;
             ctx.log_verbose_header("Loaded", ctx.lock_file.shorten()?);
 
-            lcfg.pkgs
+            for lpkg in lcfg
+                .pkgs
                 .clone()
                 .into_par_iter()
                 .filter_map(|(_, lpkg)| cfg.pkgs.get(&lpkg.name).map(|pkg| (pkg, lpkg)))
                 .map(|(pkg, old_lpkg)| sync_package(ctx, pkg, Some(&old_lpkg), true))
                 .collect::<Result<Vec<_>>>()?
                 .into_iter()
-                .for_each(|res| {
-                    lcfg.upsert(res);
-                });
+            {
+                lcfg.upsert(lpkg);
+            }
 
             lcfg.save()?;
             ctx.log_verbose_header("Locked", ctx.lock_file.shorten()?);

@@ -27,6 +27,7 @@ pub struct LockedConfig {
 pub struct LockedPackage {
     #[serde(skip)]
     pub name:         String,
+    #[serde(default)]
     pub bins:         Vec<String>,
     pub version:      String,
     #[serde(flatten)]
@@ -52,6 +53,9 @@ impl LockedConfig {
         // Set the package names for convenience.
         for (name, lpkg) in lcfg.pkgs.iter_mut() {
             lpkg.name = name.clone();
+            if lpkg.bins.is_empty() {
+                lpkg.bins.push(name.clone());
+            }
         }
         Ok(lcfg)
     }
@@ -64,6 +68,7 @@ impl LockedConfig {
 
     /// Update a package in the configuration. If the package does not exist, add it.
     pub fn upsert(&mut self, lpkg: LockedPackage) {
+        assert!(!lpkg.name.is_empty(), "locked package must have at least one binary");
         self.pkgs.insert(lpkg.name.clone(), lpkg);
     }
 }
