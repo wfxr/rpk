@@ -1,5 +1,22 @@
 
-## [0.2.0](https://github.com/wfxr/rpk/compare/v0.1.8..0.2.0) (2024-08-20)
+## [0.2.1-rc.1](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.1) (2024-12-20)
+
+### 🚀 Features
+
+- Support multiple binaries in a package - ([bb89c72](https://github.com/wfxr/rpk/commit/bb89c724ca390d3538790c055b33f75fa010a31c))
+- Improve asset selection logic - ([99567aa](https://github.com/wfxr/rpk/commit/99567aa4ea5bdcd77dfd39f27d28ff69d1bc0536))
+
+### 🚜 Refactor
+
+- Improve error handling misc - ([f7f7f5d](https://github.com/wfxr/rpk/commit/f7f7f5d81c4feaac64273b0ac745a0d25fdc69e4))
+- Update subcommand names - ([18eae36](https://github.com/wfxr/rpk/commit/18eae36b0b30de46ccb622c1ed2458f986ad33aa))
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump up dependencies - ([5e5c19c](https://github.com/wfxr/rpk/commit/5e5c19ceab4237b5153791a1f2890fe063e7b70c))
+- Update rust toolchain to nightly-2024-08-20 - ([4fa6fe7](https://github.com/wfxr/rpk/commit/4fa6fe7d4f4fe2692b0916186ff7c6283bf61294))
+
+## [0.2.0](https://github.com/wfxr/rpk/compare/v0.1.8..v0.2.0) (2024-08-20)
 
 ### 🚀 Features
 
