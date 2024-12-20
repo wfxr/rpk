@@ -1,8 +1,9 @@
 
-## [0.2.1-rc.2](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.2) (2024-12-20)
+## [0.2.1-rc.3](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.3) (2024-12-20)
 
 ### 🚀 Features
 
+- Fix log level - ([1d64d15](https://github.com/wfxr/rpk/commit/1d64d15b6830306becc3364a454efbd62bb1adc8))
 - Compatibility with old lock files - ([a291e2b](https://github.com/wfxr/rpk/commit/a291e2ba41371bdf73933391ffe4a0d750a2602d))
 - Support multiple binaries in a package - ([bb89c72](https://github.com/wfxr/rpk/commit/bb89c724ca390d3538790c055b33f75fa010a31c))
 - Improve asset selection logic - ([99567aa](https://github.com/wfxr/rpk/commit/99567aa4ea5bdcd77dfd39f27d28ff69d1bc0536))
