@@ -1,8 +1,9 @@
 
-## [0.2.1-rc.1](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.1) (2024-12-20)
+## [0.2.1-rc.2](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.2) (2024-12-20)
 
 ### 🚀 Features
 
+- Compatibility with old lock files - ([a291e2b](https://github.com/wfxr/rpk/commit/a291e2ba41371bdf73933391ffe4a0d750a2602d))
 - Support multiple binaries in a package - ([bb89c72](https://github.com/wfxr/rpk/commit/bb89c724ca390d3538790c055b33f75fa010a31c))
 - Improve asset selection logic - ([99567aa](https://github.com/wfxr/rpk/commit/99567aa4ea5bdcd77dfd39f27d28ff69d1bc0536))
 
@@ -13,6 +14,7 @@
 
 ### ⚙️ Miscellaneous Tasks
 
+- Update macos-13 to macos-14 - ([80c5387](https://github.com/wfxr/rpk/commit/80c53871fcf551461a48c7cc52daa605805e3043))
 - Bump up dependencies - ([5e5c19c](https://github.com/wfxr/rpk/commit/5e5c19ceab4237b5153791a1f2890fe063e7b70c))
 - Update rust toolchain to nightly-2024-08-20 - ([4fa6fe7](https://github.com/wfxr/rpk/commit/4fa6fe7d4f4fe2692b0916186ff7c6283bf61294))
 
