@@ -22,7 +22,7 @@ tar = "0.4"
 toml = "0.8"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-yansi = "1"
+yansi = { version = "1", features = ["detect-env", "detect-tty"] }
 zip = "2"
 clap = { version = "4", features = ["wrap_help", "derive", "env", "color"] }
 clap_complete = { version = "4" }

@@ -15,7 +15,6 @@ _rpk() {
 
     local context curcontext="$curcontext" state line
     _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '--config-dir=[The configuration directory]:PATH:_files' \
 '--data-dir=[The directory to store package data]:PATH:_files' \
 '--cache-dir=[The directory to store downloaded packages]:PATH:_files' \
@@ -41,7 +40,6 @@ _rpk() {
 _arguments "${_arguments_options[@]}" : \
 '-f+[The config file URL to initialize from]:URL:_default' \
 '--from=[The config file URL to initialize from]:URL:_default' \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -52,7 +50,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (list)
 _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -63,7 +60,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (sync)
 _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -78,7 +74,6 @@ _arguments "${_arguments_options[@]}" : \
 '*--binary=[The binaries to install. Defaults to the package name]' \
 '--version=[The version of the package]:VERSION:_default' \
 '--desc=[A description of the package]:DESC:_default' \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -90,7 +85,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (restore)
 _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -102,7 +96,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (update)
 _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -115,7 +108,6 @@ _arguments "${_arguments_options[@]}" : \
 (search)
 _arguments "${_arguments_options[@]}" : \
 '--top=[The number of results to display]:NUM:_default' \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -127,7 +119,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (cleanup)
 _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '--cache[Remove all cached data as well]' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
@@ -139,7 +130,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (env)
 _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \
@@ -152,7 +142,6 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-d+[The directory to write the completions to]:DIR:_files' \
 '--dir=[The directory to write the completions to]:DIR:_files' \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-l[List all available shells]' \
 '--list[List all available shells]' \
 '-q[Suppress any informational output]' \
@@ -166,7 +155,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (version)
 _arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
 '-v[Use verbose output]' \

@@ -8,7 +8,7 @@ use std::{
 
 use anyhow::{anyhow, Context as _, Result};
 use models::{Asset, Release, RepoSearchResult, Repository};
-use tracing::{debug, trace, warn};
+use tracing::{debug, info, trace, warn};
 use ureq::Agent;
 use url::Url;
 
@@ -192,29 +192,35 @@ fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
         .assets
         .iter()
         .inspect(|asset| {
-            trace!("before filter: {asset}", asset = asset.name);
+            debug!("before filter: {asset}", asset = asset.name);
         })
-        .filter(|asset| match OS {
-            "linux" => is_linux(&asset.name),
-            "macos" => is_macos(&asset.name),
-            _ => {
-                warn!("unsupported OS: {OS}", OS = OS);
-                false
-            }
-        })
-        .filter(|asset| match ARCH {
-            "x86_64" => is_x86_64(&asset.name),
-            "x86" => is_x86(&asset.name),
-            // apple silicon macs can run x86_64 binaries
-            "aarch64" => is_aarch64(&asset.name) || is_macos(&asset.name) && is_x86_64(&asset.name),
-            "arm" => is_arm(&asset.name),
-            _ => {
-                warn!("unsupported ARCH: {ARCH}", ARCH = ARCH);
-                false
+        .filter(|asset| {
+            trace!("before OS filter: {asset}", asset = asset.name);
+            match OS {
+                "linux" => is_linux(&asset.name),
+                "macos" => is_macos(&asset.name),
+                _ => {
+                    warn!("unsupported OS: {OS}", OS = OS);
+                    false
+                }
             }
         })
         .filter(|asset| {
-            ends_with_any!(
+            trace!("before ARCH filter: {asset}", asset = asset.name);
+            match ARCH {
+                "x86_64" => is_x86_64(&asset.name),
+                "x86" => is_x86(&asset.name),
+                "aarch64" => is_aarch64(&asset.name) || is_macos(&asset.name) && is_x86_64(&asset.name),
+                "arm" => is_arm(&asset.name),
+                _ => {
+                    warn!("unsupported ARCH: {ARCH}", ARCH = ARCH);
+                    false
+                }
+            }
+        })
+        .filter(|asset| {
+            trace!("before SUFFIX filter: {asset}", asset = asset.name);
+            !ends_with_any!(
                 asset.name,
                 ".sig",
                 ".deb",
@@ -227,6 +233,9 @@ fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
                 ".sha256sum"
             )
         })
+        .inspect(|asset| {
+            debug!("after filter: {asset}", asset = asset.name);
+        })
         .collect::<Vec<_>>();
 
     assets.sort_by_key(|asset| Reverse(priority(asset)));
@@ -235,10 +244,10 @@ fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
         [] => Ok(None),
         [asset] => Ok(Some(asset)),
         [asset, ..] => {
-            warn!(
-                "{} assets found, the first one will be used: {:?}",
+            info!(
+                "{} assets found, the first one will be used: {}",
                 assets.len(),
-                assets.iter().map(|asset| &asset.name).collect::<Vec<_>>()
+                asset.name
             );
             Ok(Some(asset))
         }

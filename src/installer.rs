@@ -1,6 +1,6 @@
 use std::{
     self,
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs::{self},
     io::{self, Read},
     os::unix::fs::PermissionsExt,
@@ -131,7 +131,7 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         }
     };
 
-    let mut bins_candiates: HashMap<_, _> = lpkg.bins.iter().map(|bin| (bin, Vec::new())).collect();
+    let mut bins_candiates: HashMap<_, _> = lpkg.bins.iter().map(|bin| (bin, HashSet::new())).collect();
 
     // Some archives contain only a single directory, move its contents to the install directory
     let files: Vec<_> = fs::read_dir(&install_dir)?.try_collect()?;
@@ -139,9 +139,9 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
     match &files[..] {
         [] => bail!("no files found in archive {}", lpkg.filename),
         [entry] if entry.path().is_file() => {
-            bins_candiates
-                .values_mut()
-                .for_each(|candidates| candidates.push(entry.path().to_owned()));
+            bins_candiates.values_mut().for_each(|candidates| {
+                candidates.insert(entry.path().to_owned());
+            });
         }
         [entry] if entry.path().is_dir() =>
             for entry in fs::read_dir(entry.path())? {
@@ -169,32 +169,34 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
                 "found bin candidate: {}",
                 entry.path().strip_prefix(&install_dir)?.display()
             );
-            candidates.push(entry.path().to_owned());
+            candidates.insert(entry.path().to_owned());
         }
     }
 
     for (bin, candidates) in &bins_candiates {
-        let link_path = ctx.bin_dir.join(bin);
-        match &candidates[..] {
-            [] => bail!("no binary {} found in archive", bin),
-            [path, ..] => {
-                let mut perms = fs::metadata(path)?.permissions();
-                perms.set_mode(perms.mode() | 0o111);
-                fs::set_permissions(path, perms)?;
+        let link = ctx.bin_dir.join(bin);
 
-                symlink_force(path, &link_path)?;
-                debug!("link built: '{}' -> '{}'", path.display(), link_path.display());
+        let target = candidates
+            .iter()
+            .next()
+            .ok_or_else(|| anyhow!("no binary {} found in archive", bin))?;
 
-                if candidates.len() > 1 {
-                    ctx.log_warning(
-                        "Warning",
-                        format!(
-                            "Multiple binaries found in archive, using the first one: '{}'",
-                            path.shorten()?
-                        ),
-                    );
-                }
-            }
+        let mut perms = fs::metadata(target)?.permissions();
+        perms.set_mode(perms.mode() | 0o111);
+        fs::set_permissions(target, perms)?;
+
+        symlink_force(target, &link)?;
+        debug!("link built: '{}' -> '{}'", link.display(), target.display());
+
+        if candidates.len() > 1 {
+            ctx.log_warning(
+                "Warning",
+                format!(
+                    "{} candidate binaries found in archive, using the first one: '{}'",
+                    candidates.len(),
+                    target.shorten()?
+                ),
+            );
         }
     }
 

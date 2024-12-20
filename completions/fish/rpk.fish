@@ -1,6 +1,6 @@
 # Print an optspec for argparse to handle cmd's options that are independent of any subcommand.
 function __fish_rpk_global_optspecs
-	string join \n q/quiet v/verbose color= config-dir= data-dir= cache-dir= bin-dir= h/help V/version
+	string join \n q/quiet v/verbose config-dir= data-dir= cache-dir= bin-dir= h/help V/version
 end
 
 function __fish_rpk_needs_command
@@ -24,7 +24,6 @@ function __fish_rpk_using_subcommand
 	contains -- $cmd[1] $argv
 end
 
-complete -c rpk -n "__fish_rpk_needs_command" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_needs_command" -l config-dir -d 'The configuration directory' -r -F
 complete -c rpk -n "__fish_rpk_needs_command" -l data-dir -d 'The directory to store package data' -r -F
 complete -c rpk -n "__fish_rpk_needs_command" -l cache-dir -d 'The directory to store downloaded packages' -r -F
@@ -46,15 +45,12 @@ complete -c rpk -n "__fish_rpk_needs_command" -f -a "completions" -d 'Generate c
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "version" -d 'Prints detailed version information'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
 complete -c rpk -n "__fish_rpk_using_subcommand init" -s f -l from -d 'The config file URL to initialize from' -r
-complete -c rpk -n "__fish_rpk_using_subcommand init" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand init" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand init" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand init" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand list" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand list" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand list" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand list" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand sync" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -s h -l help -d 'Print help'
@@ -62,39 +58,31 @@ complete -c rpk -n "__fish_rpk_using_subcommand add" -l name -d 'A unique name f
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l binary -d 'The binaries to install. Defaults to the package name' -r
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l version -d 'The version of the package' -r
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l desc -d 'A description of the package' -r
-complete -c rpk -n "__fish_rpk_using_subcommand add" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s h -l help -d 'Print help (see more with \'--help\')'
-complete -c rpk -n "__fish_rpk_using_subcommand restore" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand restore" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand restore" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand restore" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand update" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand update" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand update" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand update" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand search" -l top -d 'The number of results to display' -r
-complete -c rpk -n "__fish_rpk_using_subcommand search" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand search" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand search" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand search" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -l cache -d 'Remove all cached data as well'
 complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand env" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand env" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand env" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand env" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand completions" -s d -l dir -d 'The directory to write the completions to' -r -F
-complete -c rpk -n "__fish_rpk_using_subcommand completions" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand completions" -s l -l list -d 'List all available shells'
 complete -c rpk -n "__fish_rpk_using_subcommand completions" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand completions" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand completions" -s h -l help -d 'Print help (see more with \'--help\')'
-complete -c rpk -n "__fish_rpk_using_subcommand version" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand version" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand version" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand version" -s h -l help -d 'Print help'

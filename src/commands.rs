@@ -19,6 +19,7 @@ use tabled::{
 use tracing::debug;
 use url::Url;
 use walkdir::WalkDir;
+use yansi::Paint;
 
 use crate::{
     commands,
@@ -89,6 +90,10 @@ pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
 pub fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
     let mut ecfg = EditableConfig::load(ctx)?;
     ctx.log_verbose_header("Loaded", ctx.config_file.shorten()?);
+
+    if ecfg.contains(&pkg.name) {
+        bail!("package {} already exists", pkg.name.blue());
+    }
 
     let lpkg = sync_package(ctx, &pkg, None, false)?;
     pkg.desc = lpkg.desc.clone();

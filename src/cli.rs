@@ -1,17 +1,10 @@
-use std::{
-    env,
-    io::{self, IsTerminal as _},
-    path::PathBuf,
-};
+use std::path::PathBuf;
 
-use clap::{ColorChoice, Parser};
+use clap::Parser;
 use clap_complete::Shell;
 use url::Url;
 
-use crate::{
-    context::{Output, Verbosity},
-    util,
-};
+use crate::{context::Verbosity, util};
 
 pub const ENV_CONFIG_DIR: &str = "RPK_CONFIG_DIR";
 pub const ENV_DATA_DIR: &str = "RPK_DATA_DIR";
@@ -31,10 +24,6 @@ pub struct Opt {
     /// Use verbose output.
     #[clap(long, short, global = true)]
     pub verbose: bool,
-
-    /// This flag controls when to use colors.
-    #[clap(long, value_enum, value_name = "WHEN", default_value_t = ColorChoice::Auto, ignore_case = true, global = true)]
-    pub color: ColorChoice,
 
     /// The configuration directory.
     #[clap(long, value_name = "PATH", env = ENV_CONFIG_DIR)]
@@ -156,29 +145,13 @@ pub enum SubCommand {
 }
 
 impl Opt {
-    pub fn color_enabled(&self) -> bool {
-        let enabled = match self.color {
-            ColorChoice::Always => true,
-            ColorChoice::Auto => io::stderr().is_terminal() && env::var("NO_COLOR").is_err(),
-            ColorChoice::Never => false,
-        };
-        match enabled {
-            true => env::remove_var("NO_COLOR"),
-            false => env::set_var("NO_COLOR", "1"),
-        }
-        enabled
-    }
-
-    pub fn output_opt(&self) -> Output {
-        Output {
-            verbosity: if self.quiet {
-                Verbosity::Quiet
-            } else if self.verbose {
-                Verbosity::Verbose
-            } else {
-                Verbosity::Normal
-            },
-            no_color:  !self.color_enabled(),
+    pub fn verbosity(&self) -> Verbosity {
+        if self.quiet {
+            Verbosity::Quiet
+        } else if self.verbose {
+            Verbosity::Verbose
+        } else {
+            Verbosity::Normal
         }
     }
 }

@@ -17,10 +17,11 @@ use config::{Package, Source};
 use context::{log_error, Context};
 use tracing_subscriber::EnvFilter;
 use util::{mkdir_p, Shorten as _, CRATE_NAME};
+use yansi::Condition;
 
 fn try_main() -> anyhow::Result<()> {
     let opt = Opt::parse();
-    let output = opt.output_opt();
+    let verbosity = opt.verbosity();
 
     let Opt { bin_dir, data_dir, cache_dir, config_dir, command, .. } = opt;
 
@@ -50,7 +51,7 @@ fn try_main() -> anyhow::Result<()> {
         data_dir,
         bin_dir,
         lock_file,
-        output,
+        verbosity,
     };
 
     macro_rules! with_flock {
@@ -131,13 +132,15 @@ fn try_main() -> anyhow::Result<()> {
 }
 
 fn main() {
+    yansi::whenever(Condition::TTY_AND_COLOR);
+
     tracing_subscriber::fmt()
         .event_format(tracing_subscriber::fmt::format().with_file(true).with_line_number(true))
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
     if let Err(e) = try_main() {
-        log_error(true, &e);
+        log_error(&e);
         process::exit(1);
     }
 }

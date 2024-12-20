@@ -18,7 +18,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
     }
     var completions = [
         &'rpk'= {
-            cand --color 'This flag controls when to use colors'
             cand --config-dir 'The configuration directory'
             cand --data-dir 'The directory to store package data'
             cand --cache-dir 'The directory to store downloaded packages'
@@ -47,7 +46,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
         &'rpk;init'= {
             cand -f 'The config file URL to initialize from'
             cand --from 'The config file URL to initialize from'
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -56,7 +54,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;list'= {
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -65,7 +62,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;sync'= {
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -78,7 +74,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --binary 'The binaries to install. Defaults to the package name'
             cand --version 'The version of the package'
             cand --desc 'A description of the package'
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -87,7 +82,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help (see more with ''--help'')'
         }
         &'rpk;restore'= {
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -96,7 +90,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;update'= {
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -106,7 +99,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
         }
         &'rpk;search'= {
             cand --top 'The number of results to display'
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -115,7 +107,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;cleanup'= {
-            cand --color 'This flag controls when to use colors'
             cand --cache 'Remove all cached data as well'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
@@ -125,7 +116,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help'
         }
         &'rpk;env'= {
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'
@@ -136,7 +126,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
         &'rpk;completions'= {
             cand -d 'The directory to write the completions to'
             cand --dir 'The directory to write the completions to'
-            cand --color 'This flag controls when to use colors'
             cand -l 'List all available shells'
             cand --list 'List all available shells'
             cand -q 'Suppress any informational output'
@@ -147,7 +136,6 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --help 'Print help (see more with ''--help'')'
         }
         &'rpk;version'= {
-            cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
             cand -v 'Use verbose output'

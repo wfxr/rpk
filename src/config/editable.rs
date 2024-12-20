@@ -20,7 +20,18 @@ impl EditableConfig {
         };
 
         let ctx = ctx.clone();
-        let doc = buf.parse().context("failed to parse TOML")?;
+        let mut doc: toml_edit::DocumentMut = buf.parse().context("failed to parse TOML")?;
+
+        match &mut doc["pkgs"] {
+            item @ toml_edit::Item::None => {
+                let mut pkgs = toml_edit::Table::new();
+                pkgs.set_implicit(true);
+                *item = toml_edit::Item::Table(pkgs);
+            }
+            toml_edit::Item::Table(_) => {}
+            _ => bail!("current `pkgs` entry is not a table"),
+        }
+
         Ok(Self { ctx, doc })
     }
 
@@ -31,24 +42,13 @@ impl EditableConfig {
 
     pub fn upsert(&mut self, pkg: &Package) -> Result<()> {
         let name = &pkg.name;
-
         let is_default_source = pkg.source.is_default();
         let pkg = toml::to_string_pretty(pkg)
             .context("failed to serialize package")?
             .parse::<toml_edit::DocumentMut>()
             .context("failed to serialized package")?;
 
-        match &mut self.doc["pkgs"] {
-            item @ toml_edit::Item::None => {
-                let mut pkgs = toml_edit::Table::new();
-                pkgs.set_implicit(true);
-                *item = toml_edit::Item::Table(pkgs);
-            }
-            toml_edit::Item::Table(_) => {}
-            _ => bail!("current `pkgs` entry is not a table"),
-        }
-
-        match &mut self.doc["pkgs"][&name] {
+        match &mut self.doc["pkgs"][name] {
             item @ toml_edit::Item::None => {
                 let mut table = toml_edit::table();
                 for (k, v) in pkg.as_table().iter() {
@@ -63,5 +63,9 @@ impl EditableConfig {
         }
 
         Ok(())
+    }
+
+    pub fn contains(&mut self, name: &str) -> bool {
+        self.doc.get("pkgs").and_then(|pkgs| pkgs.get(name)).is_some()
     }
 }

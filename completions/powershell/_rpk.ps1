@@ -21,7 +21,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
 
     $completions = @(switch ($command) {
         'rpk' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('--config-dir', '--config-dir', [CompletionResultType]::ParameterName, 'The configuration directory')
             [CompletionResult]::new('--data-dir', '--data-dir', [CompletionResultType]::ParameterName, 'The directory to store package data')
             [CompletionResult]::new('--cache-dir', '--cache-dir', [CompletionResultType]::ParameterName, 'The directory to store downloaded packages')
@@ -51,7 +50,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         'rpk;init' {
             [CompletionResult]::new('-f', '-f', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
             [CompletionResult]::new('--from', '--from', [CompletionResultType]::ParameterName, 'The config file URL to initialize from')
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -61,7 +59,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;list' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -71,7 +68,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;sync' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -85,7 +81,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             [CompletionResult]::new('--binary', '--binary', [CompletionResultType]::ParameterName, 'The binaries to install. Defaults to the package name')
             [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'The version of the package')
             [CompletionResult]::new('--desc', '--desc', [CompletionResultType]::ParameterName, 'A description of the package')
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -95,7 +90,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;restore' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -105,7 +99,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;update' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -116,7 +109,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         }
         'rpk;search' {
             [CompletionResult]::new('--top', '--top', [CompletionResultType]::ParameterName, 'The number of results to display')
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -126,7 +118,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;cleanup' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('--cache', '--cache', [CompletionResultType]::ParameterName, 'Remove all cached data as well')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
@@ -137,7 +128,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;env' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
@@ -149,7 +139,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         'rpk;completions' {
             [CompletionResult]::new('-d', '-d', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
             [CompletionResult]::new('--dir', '--dir', [CompletionResultType]::ParameterName, 'The directory to write the completions to')
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-l', '-l', [CompletionResultType]::ParameterName, 'List all available shells')
             [CompletionResult]::new('--list', '--list', [CompletionResultType]::ParameterName, 'List all available shells')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
@@ -161,7 +150,6 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
             break
         }
         'rpk;version' {
-            [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
             [CompletionResult]::new('-q', '-q', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('--quiet', '--quiet', [CompletionResultType]::ParameterName, 'Suppress any informational output')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'Use verbose output')
