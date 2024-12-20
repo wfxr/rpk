@@ -110,6 +110,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
         }
         &'rpk;add'= {
             cand --name 'A unique name for the package. Defaults to the repo name'
+            cand --binary 'The binaries to install. Defaults to the package name'
             cand --version 'The version of the package'
             cand --desc 'A description of the package'
             cand --color 'This flag controls when to use colors'
@@ -122,6 +123,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
         }
         &'rpk;a'= {
             cand --name 'A unique name for the package. Defaults to the repo name'
+            cand --binary 'The binaries to install. Defaults to the package name'
             cand --version 'The version of the package'
             cand --desc 'A description of the package'
             cand --color 'This flag controls when to use colors'

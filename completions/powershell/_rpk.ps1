@@ -120,6 +120,7 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         }
         'rpk;add' {
             [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package. Defaults to the repo name')
+            [CompletionResult]::new('--binary', '--binary', [CompletionResultType]::ParameterName, 'The binaries to install. Defaults to the package name')
             [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'The version of the package')
             [CompletionResult]::new('--desc', '--desc', [CompletionResultType]::ParameterName, 'A description of the package')
             [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')
@@ -133,6 +134,7 @@ Register-ArgumentCompleter -Native -CommandName 'rpk' -ScriptBlock {
         }
         'rpk;a' {
             [CompletionResult]::new('--name', '--name', [CompletionResultType]::ParameterName, 'A unique name for the package. Defaults to the repo name')
+            [CompletionResult]::new('--binary', '--binary', [CompletionResultType]::ParameterName, 'The binaries to install. Defaults to the package name')
             [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'The version of the package')
             [CompletionResult]::new('--desc', '--desc', [CompletionResultType]::ParameterName, 'A description of the package')
             [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'This flag controls when to use colors')

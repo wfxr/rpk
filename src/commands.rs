@@ -271,8 +271,16 @@ pub fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> 
         .with_initial_value(&answer.name)
         .prompt()?;
 
+    let bins = Text::new("Choose binary name(s)?")
+        .with_initial_value(&answer.name)
+        .prompt()?;
+
+    let bins: Vec<_> = bins.split(' ').map(str::trim).map(str::to_owned).collect();
+    let bins = if bins.is_empty() { vec![name.clone()] } else { bins };
+
     let pkg = Package {
         name,
+        bins,
         source: Source::Github { repo: answer.fullname },
         version: None,
         desc: match answer.desc.is_empty() {

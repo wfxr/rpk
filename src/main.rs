@@ -79,9 +79,10 @@ fn try_main() -> anyhow::Result<()> {
         SubCommand::Find { query, top } => {
             with_flock!(commands::find(query, top, &ctx)?);
         }
-        SubCommand::Add { name, repo: (owner, repo), version, desc } => {
+        SubCommand::Add { name, binary, repo: (owner, repo), version, desc } => {
             let pkg = Package {
                 name: name.unwrap_or_else(|| repo.clone()),
+                bins: if binary.is_empty() { vec![repo.clone()] } else { binary },
                 source: Source::Github { repo: format!("{}/{}", owner, repo) },
                 version,
                 desc,

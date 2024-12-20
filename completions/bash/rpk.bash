@@ -149,13 +149,17 @@ _rpk() {
             return 0
             ;;
         rpk__add)
-            opts="-q -v -h --name --version --desc --quiet --verbose --color --help <REPO>"
+            opts="-q -v -h --name --binary --version --desc --quiet --verbose --color --help <REPO>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
                 --name)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --binary)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
@@ -179,13 +183,17 @@ _rpk() {
             return 0
             ;;
         rpk__add)
-            opts="-q -v -h --name --version --desc --quiet --verbose --color --help <REPO>"
+            opts="-q -v -h --name --binary --version --desc --quiet --verbose --color --help <REPO>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
                 --name)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --binary)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;

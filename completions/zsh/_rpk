@@ -108,6 +108,7 @@ _arguments "${_arguments_options[@]}" : \
 (add)
 _arguments "${_arguments_options[@]}" : \
 '--name=[A unique name for the package. Defaults to the repo name]:NAME: ' \
+'*--binary=[The binaries to install. Defaults to the package name]' \
 '--version=[The version of the package]:VERSION: ' \
 '--desc=[A description of the package]:DESC: ' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
@@ -123,6 +124,7 @@ _arguments "${_arguments_options[@]}" : \
 (a)
 _arguments "${_arguments_options[@]}" : \
 '--name=[A unique name for the package. Defaults to the repo name]:NAME: ' \
+'*--binary=[The binaries to install. Defaults to the package name]' \
 '--version=[The version of the package]:VERSION: ' \
 '--desc=[A description of the package]:DESC: ' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \

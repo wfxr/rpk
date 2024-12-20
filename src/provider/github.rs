@@ -123,6 +123,7 @@ impl Provider for Github {
 
         Ok(LockedPackage {
             name:         pkg.name.clone(),
+            bins:         pkg.bins.clone(),
             version:      release.tag_name.clone(),
             source:       pkg.source.clone(),
             desc:         desc.map(|desc| desc.trim().to_string()),

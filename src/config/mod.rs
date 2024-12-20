@@ -31,6 +31,9 @@ pub struct Config {
 pub struct Package {
     #[serde(skip)]
     pub name:    String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
+    pub bins:    Vec<String>,
     pub version: Option<String>,
     #[serde(flatten)]
     pub source:  Source,
@@ -62,12 +65,16 @@ impl Source {
 
 impl fmt::Display for Package {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let Self { name, version, source, desc: _ } = self;
-        write!(
-            f,
-            "{name}@{version} from {source}",
-            version = version.as_deref().unwrap_or("latest"),
-        )
+        let Self { name, bins, version, source, desc: _ } = self;
+        write!(f, "{name}@{version} ", version = version.as_deref().unwrap_or("latest"),)?;
+
+        match &bins[..] {
+            [] => {}
+            [bin] if bin == name => {}
+            bins => write!(f, " with binary [{}] ", bins.join(","))?,
+        };
+
+        write!(f, "from {source}")
     }
 }
 
@@ -133,6 +140,9 @@ impl Config {
         // Set the package names for convenience.
         for (name, pkg) in cfg.pkgs.iter_mut() {
             pkg.name = name.clone();
+            if pkg.bins.is_empty() {
+                pkg.bins.push(name.clone());
+            }
         }
 
         Ok(cfg)
@@ -153,6 +163,7 @@ impl From<LockedPackage> for Package {
     fn from(val: LockedPackage) -> Self {
         Package {
             name:    val.name,
+            bins:    val.bins,
             version: val.version.into(),
             source:  val.source,
             desc:    val.desc,

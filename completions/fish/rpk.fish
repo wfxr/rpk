@@ -79,6 +79,7 @@ complete -c rpk -n "__fish_rpk_using_subcommand s" -s q -l quiet -d 'Suppress an
 complete -c rpk -n "__fish_rpk_using_subcommand s" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand s" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l name -d 'A unique name for the package. Defaults to the repo name' -r
+complete -c rpk -n "__fish_rpk_using_subcommand add" -l binary -d 'The binaries to install. Defaults to the package name' -r
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l version -d 'The version of the package' -r
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l desc -d 'A description of the package' -r
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
@@ -86,6 +87,7 @@ complete -c rpk -n "__fish_rpk_using_subcommand add" -s q -l quiet -d 'Suppress 
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c rpk -n "__fish_rpk_using_subcommand a" -l name -d 'A unique name for the package. Defaults to the repo name' -r
+complete -c rpk -n "__fish_rpk_using_subcommand a" -l binary -d 'The binaries to install. Defaults to the package name' -r
 complete -c rpk -n "__fish_rpk_using_subcommand a" -l version -d 'The version of the package' -r
 complete -c rpk -n "__fish_rpk_using_subcommand a" -l desc -d 'A description of the package' -r
 complete -c rpk -n "__fish_rpk_using_subcommand a" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"

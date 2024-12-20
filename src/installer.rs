@@ -1,6 +1,6 @@
 use std::{
     self,
-    ffi::OsString,
+    collections::HashMap,
     fs::{self},
     io::{self, Read},
     os::unix::fs::PermissionsExt,
@@ -75,8 +75,6 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
     }
     mkdir_p(&install_dir)?;
 
-    let link_path = ctx.bin_dir.join(&lpkg.name);
-
     match archive {
         ArchiveKind::Plain(compression) => {
             let install_path = install_dir.join(&lpkg.name);
@@ -133,14 +131,18 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         }
     };
 
-    let mut bin_candidates = Vec::new();
+    let mut bins_candiates: HashMap<_, _> = lpkg.bins.iter().map(|bin| (bin, Vec::new())).collect();
 
     // Some archives contain only a single directory, move its contents to the install directory
     let files: Vec<_> = fs::read_dir(&install_dir)?.try_collect()?;
 
     match &files[..] {
         [] => bail!("no files found in archive {}", lpkg.filename),
-        [entry] if entry.path().is_file() => bin_candidates.push(entry.path()),
+        [entry] if entry.path().is_file() => {
+            bins_candiates
+                .values_mut()
+                .for_each(|candidates| candidates.push(entry.path().to_owned()));
+        }
         [entry] if entry.path().is_dir() =>
             for entry in fs::read_dir(entry.path())? {
                 let path = entry?.path();
@@ -155,42 +157,43 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         _ => (),
     }
 
-    if bin_candidates.is_empty() {
-        for entry in WalkDir::new(&install_dir)
-            .into_iter()
-            .filter_ok(|entry| entry.path().is_file())
-        {
-            let entry = entry?;
+    for entry in WalkDir::new(&install_dir)
+        .into_iter()
+        .filter_ok(|entry| entry.path().is_file())
+    {
+        let entry = entry?;
 
-            let pkg_name: OsString = lpkg.name.clone().into();
-            if entry.file_name() == pkg_name {
-                trace!(
-                    "found bin candidate: {}",
-                    entry.path().strip_prefix(&install_dir)?.display()
-                );
-                bin_candidates.push(entry.path().to_owned());
-            }
+        let file_name = entry.file_name().to_string_lossy().to_string();
+        if let Some(candidates) = bins_candiates.get_mut(&file_name) {
+            trace!(
+                "found bin candidate: {}",
+                entry.path().strip_prefix(&install_dir)?.display()
+            );
+            candidates.push(entry.path().to_owned());
         }
     }
 
-    match &bin_candidates[..] {
-        [] => bail!("no binary found in archive"),
-        [path, ..] => {
-            let mut perms = fs::metadata(path)?.permissions();
-            perms.set_mode(perms.mode() | 0o111);
-            fs::set_permissions(path, perms)?;
+    for (bin, candidates) in &bins_candiates {
+        let link_path = ctx.bin_dir.join(bin);
+        match &candidates[..] {
+            [] => bail!("no binary {} found in archive", bin),
+            [path, ..] => {
+                let mut perms = fs::metadata(path)?.permissions();
+                perms.set_mode(perms.mode() | 0o111);
+                fs::set_permissions(path, perms)?;
 
-            symlink_force(path, &link_path)?;
-            debug!("link built: '{}' -> '{}'", path.display(), link_path.display());
+                symlink_force(path, &link_path)?;
+                debug!("link built: '{}' -> '{}'", path.display(), link_path.display());
 
-            if bin_candidates.len() > 1 {
-                ctx.log_warning(
-                    "Warning",
-                    format!(
-                        "Multiple binaries found in archive, using the first one: '{}'",
-                        path.shorten()?
-                    ),
-                );
+                if candidates.len() > 1 {
+                    ctx.log_warning(
+                        "Warning",
+                        format!(
+                            "Multiple binaries found in archive, using the first one: '{}'",
+                            path.shorten()?
+                        ),
+                    );
+                }
             }
         }
     }

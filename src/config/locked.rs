@@ -27,6 +27,7 @@ pub struct LockedConfig {
 pub struct LockedPackage {
     #[serde(skip)]
     pub name:         String,
+    pub bins:         Vec<String>,
     pub version:      String,
     #[serde(flatten)]
     pub source:       Source,

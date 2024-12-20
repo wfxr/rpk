@@ -89,6 +89,10 @@ pub enum SubCommand {
         #[clap(long, value_name = "NAME")]
         name: Option<String>,
 
+        /// The binaries to install. Defaults to the package name.
+        #[clap(long, value_name = "BIN", num_args = 0..)]
+        binary: Vec<String>,
+
         /// The version of the package.
         #[clap(long, value_name = "VERSION")]
         version: Option<String>,
