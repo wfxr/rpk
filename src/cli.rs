@@ -68,15 +68,12 @@ pub enum SubCommand {
     },
 
     /// List all installed packages.
-    #[clap(visible_aliases = ["l", "ls"])]
     List,
 
     /// Install any missing packages, re-generating the lock file.
-    #[clap(visible_alias = "s")]
     Sync,
 
     /// Add a new plugin to the config file.
-    #[clap(visible_alias = "a")]
     Add {
         /// The github repository hosting the package
         ///
@@ -103,7 +100,6 @@ pub enum SubCommand {
     },
 
     /// Restore packages to the state in the lockfile.
-    #[clap(visible_alias = "r")]
     Restore {
         /// The packages to restore.
         #[clap(value_name = "PKG")]
@@ -111,16 +107,14 @@ pub enum SubCommand {
     },
 
     /// Update packages and re-generate the lock file.
-    #[clap(visible_alias = "u")]
     Update {
         /// The packages to update.
         #[clap(value_name = "PKG")]
         package: Option<String>,
     },
 
-    /// Find packages matching the given query.
-    #[clap(visible_aliases = ["f", "fd"])]
-    Find {
+    /// Search packages matching the given query.
+    Search {
         /// The query to search for.
         #[clap(value_name = "QUERY")]
         query: String,

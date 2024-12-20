@@ -33,19 +33,11 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand --version 'Print version'
             cand init 'Initialize a configuration file'
             cand list 'List all installed packages'
-            cand l 'List all installed packages'
-            cand ls 'List all installed packages'
             cand sync 'Install any missing packages, re-generating the lock file'
-            cand s 'Install any missing packages, re-generating the lock file'
             cand add 'Add a new plugin to the config file'
-            cand a 'Add a new plugin to the config file'
             cand restore 'Restore packages to the state in the lockfile'
-            cand r 'Restore packages to the state in the lockfile'
             cand update 'Update packages and re-generate the lock file'
-            cand u 'Update packages and re-generate the lock file'
-            cand find 'Find packages matching the given query'
-            cand f 'Find packages matching the given query'
-            cand fd 'Find packages matching the given query'
+            cand search 'Search packages matching the given query'
             cand cleanup 'Remove packages which are not listed in the lock file'
             cand env 'Prints the environment variables for rpk'
             cand completions 'Generate completions for the given shell'
@@ -72,34 +64,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand -h 'Print help'
             cand --help 'Print help'
         }
-        &'rpk;l'= {
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
-        &'rpk;ls'= {
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
         &'rpk;sync'= {
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
-        &'rpk;s'= {
             cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
@@ -121,29 +86,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand -h 'Print help (see more with ''--help'')'
             cand --help 'Print help (see more with ''--help'')'
         }
-        &'rpk;a'= {
-            cand --name 'A unique name for the package. Defaults to the repo name'
-            cand --binary 'The binaries to install. Defaults to the package name'
-            cand --version 'The version of the package'
-            cand --desc 'A description of the package'
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help (see more with ''--help'')'
-            cand --help 'Print help (see more with ''--help'')'
-        }
         &'rpk;restore'= {
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
-        &'rpk;r'= {
             cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
             cand --quiet 'Suppress any informational output'
@@ -161,36 +104,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand -h 'Print help'
             cand --help 'Print help'
         }
-        &'rpk;u'= {
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
-        &'rpk;find'= {
-            cand --top 'The number of results to display'
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
-        &'rpk;f'= {
-            cand --top 'The number of results to display'
-            cand --color 'This flag controls when to use colors'
-            cand -q 'Suppress any informational output'
-            cand --quiet 'Suppress any informational output'
-            cand -v 'Use verbose output'
-            cand --verbose 'Use verbose output'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
-        &'rpk;fd'= {
+        &'rpk;search'= {
             cand --top 'The number of results to display'
             cand --color 'This flag controls when to use colors'
             cand -q 'Suppress any informational output'
@@ -248,7 +162,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
             cand add 'Add a new plugin to the config file'
             cand restore 'Restore packages to the state in the lockfile'
             cand update 'Update packages and re-generate the lock file'
-            cand find 'Find packages matching the given query'
+            cand search 'Search packages matching the given query'
             cand cleanup 'Remove packages which are not listed in the lock file'
             cand env 'Prints the environment variables for rpk'
             cand completions 'Generate completions for the given shell'
@@ -267,7 +181,7 @@ set edit:completion:arg-completer[rpk] = {|@words|
         }
         &'rpk;help;update'= {
         }
-        &'rpk;help;find'= {
+        &'rpk;help;search'= {
         }
         &'rpk;help;cleanup'= {
         }

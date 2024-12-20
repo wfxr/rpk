@@ -76,8 +76,8 @@ fn try_main() -> anyhow::Result<()> {
         SubCommand::Restore { package } => {
             with_flock!(commands::restore(&ctx, package)?);
         }
-        SubCommand::Find { query, top } => {
-            with_flock!(commands::find(query, top, &ctx)?);
+        SubCommand::Search { query, top } => {
+            with_flock!(commands::search(query, top, &ctx)?);
         }
         SubCommand::Add { name, binary, repo: (owner, repo), version, desc } => {
             let pkg = Package {

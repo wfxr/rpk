@@ -12,9 +12,6 @@ _rpk() {
             ",$1")
                 cmd="rpk"
                 ;;
-            rpk,a)
-                cmd="rpk__add"
-                ;;
             rpk,add)
                 cmd="rpk__add"
                 ;;
@@ -27,44 +24,23 @@ _rpk() {
             rpk,env)
                 cmd="rpk__env"
                 ;;
-            rpk,f)
-                cmd="rpk__find"
-                ;;
-            rpk,fd)
-                cmd="rpk__find"
-                ;;
-            rpk,find)
-                cmd="rpk__find"
-                ;;
             rpk,help)
                 cmd="rpk__help"
                 ;;
             rpk,init)
                 cmd="rpk__init"
                 ;;
-            rpk,l)
-                cmd="rpk__list"
-                ;;
             rpk,list)
                 cmd="rpk__list"
-                ;;
-            rpk,ls)
-                cmd="rpk__list"
-                ;;
-            rpk,r)
-                cmd="rpk__restore"
                 ;;
             rpk,restore)
                 cmd="rpk__restore"
                 ;;
-            rpk,s)
-                cmd="rpk__sync"
+            rpk,search)
+                cmd="rpk__search"
                 ;;
             rpk,sync)
                 cmd="rpk__sync"
-                ;;
-            rpk,u)
-                cmd="rpk__update"
                 ;;
             rpk,update)
                 cmd="rpk__update"
@@ -84,9 +60,6 @@ _rpk() {
             rpk__help,env)
                 cmd="rpk__help__env"
                 ;;
-            rpk__help,find)
-                cmd="rpk__help__find"
-                ;;
             rpk__help,help)
                 cmd="rpk__help__help"
                 ;;
@@ -98,6 +71,9 @@ _rpk() {
                 ;;
             rpk__help,restore)
                 cmd="rpk__help__restore"
+                ;;
+            rpk__help,search)
+                cmd="rpk__help__search"
                 ;;
             rpk__help,sync)
                 cmd="rpk__help__sync"
@@ -115,7 +91,7 @@ _rpk() {
 
     case "${cmd}" in
         rpk)
-            opts="-q -v -h -V --quiet --verbose --color --config-dir --data-dir --cache-dir --bin-dir --help --version init list l ls sync s add a restore r update u find f fd cleanup env completions version help"
+            opts="-q -v -h -V --quiet --verbose --color --config-dir --data-dir --cache-dir --bin-dir --help --version init list sync add restore update search cleanup env completions version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -244,30 +220,8 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__find)
-            opts="-q -v -h --top --quiet --verbose --color --help <QUERY>"
-            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
-                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-                return 0
-            fi
-            case "${prev}" in
-                --top)
-                    COMPREPLY=($(compgen -f "${cur}"))
-                    return 0
-                    ;;
-                --color)
-                    COMPREPLY=($(compgen -W "auto always never" -- "${cur}"))
-                    return 0
-                    ;;
-                *)
-                    COMPREPLY=()
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-            return 0
-            ;;
         rpk__help)
-            opts="init list sync add restore update find cleanup env completions version help"
+            opts="init list sync add restore update search cleanup env completions version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -336,20 +290,6 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__find)
-            opts=""
-            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
-                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-                return 0
-            fi
-            case "${prev}" in
-                *)
-                    COMPREPLY=()
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-            return 0
-            ;;
         rpk__help__help)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
@@ -393,6 +333,20 @@ _rpk() {
             return 0
             ;;
         rpk__help__restore)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        rpk__help__search)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -499,6 +453,28 @@ _rpk() {
                 return 0
             fi
             case "${prev}" in
+                --color)
+                    COMPREPLY=($(compgen -W "auto always never" -- "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        rpk__search)
+            opts="-q -v -h --top --quiet --verbose --color --help <QUERY>"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --top)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
                 --color)
                     COMPREPLY=($(compgen -W "auto always never" -- "${cur}"))
                     return 0

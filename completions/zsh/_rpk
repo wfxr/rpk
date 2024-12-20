@@ -61,28 +61,6 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
-(l)
-_arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help]' \
-'--help[Print help]' \
-&& ret=0
-;;
-(ls)
-_arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help]' \
-'--help[Print help]' \
-&& ret=0
-;;
 (sync)
 _arguments "${_arguments_options[@]}" : \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
@@ -94,34 +72,7 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
-(s)
-_arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help]' \
-'--help[Print help]' \
-&& ret=0
-;;
 (add)
-_arguments "${_arguments_options[@]}" : \
-'--name=[A unique name for the package. Defaults to the repo name]:NAME:_default' \
-'*--binary=[The binaries to install. Defaults to the package name]' \
-'--version=[The version of the package]:VERSION:_default' \
-'--desc=[A description of the package]:DESC:_default' \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help (see more with '\''--help'\'')]' \
-'--help[Print help (see more with '\''--help'\'')]' \
-':repo -- The github repository hosting the package:_default' \
-&& ret=0
-;;
-(a)
 _arguments "${_arguments_options[@]}" : \
 '--name=[A unique name for the package. Defaults to the repo name]:NAME:_default' \
 '*--binary=[The binaries to install. Defaults to the package name]' \
@@ -149,18 +100,6 @@ _arguments "${_arguments_options[@]}" : \
 '::package -- The packages to restore:_default' \
 && ret=0
 ;;
-(r)
-_arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help]' \
-'--help[Print help]' \
-'::package -- The packages to restore:_default' \
-&& ret=0
-;;
 (update)
 _arguments "${_arguments_options[@]}" : \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
@@ -173,45 +112,7 @@ _arguments "${_arguments_options[@]}" : \
 '::package -- The packages to update:_default' \
 && ret=0
 ;;
-(u)
-_arguments "${_arguments_options[@]}" : \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help]' \
-'--help[Print help]' \
-'::package -- The packages to update:_default' \
-&& ret=0
-;;
-(find)
-_arguments "${_arguments_options[@]}" : \
-'--top=[The number of results to display]:NUM:_default' \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help]' \
-'--help[Print help]' \
-':query -- The query to search for:_default' \
-&& ret=0
-;;
-(f)
-_arguments "${_arguments_options[@]}" : \
-'--top=[The number of results to display]:NUM:_default' \
-'--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
-'-q[Suppress any informational output]' \
-'--quiet[Suppress any informational output]' \
-'-v[Use verbose output]' \
-'--verbose[Use verbose output]' \
-'-h[Print help]' \
-'--help[Print help]' \
-':query -- The query to search for:_default' \
-&& ret=0
-;;
-(fd)
+(search)
 _arguments "${_arguments_options[@]}" : \
 '--top=[The number of results to display]:NUM:_default' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
@@ -310,7 +211,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
-(find)
+(search)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -348,19 +249,11 @@ _rpk_commands() {
     local commands; commands=(
 'init:Initialize a configuration file' \
 'list:List all installed packages' \
-'l:List all installed packages' \
-'ls:List all installed packages' \
 'sync:Install any missing packages, re-generating the lock file' \
-'s:Install any missing packages, re-generating the lock file' \
 'add:Add a new plugin to the config file' \
-'a:Add a new plugin to the config file' \
 'restore:Restore packages to the state in the lockfile' \
-'r:Restore packages to the state in the lockfile' \
 'update:Update packages and re-generate the lock file' \
-'u:Update packages and re-generate the lock file' \
-'find:Find packages matching the given query' \
-'f:Find packages matching the given query' \
-'fd:Find packages matching the given query' \
+'search:Search packages matching the given query' \
 'cleanup:Remove packages which are not listed in the lock file' \
 'env:Prints the environment variables for rpk' \
 'completions:Generate completions for the given shell' \
@@ -389,11 +282,6 @@ _rpk__env_commands() {
     local commands; commands=()
     _describe -t commands 'rpk env commands' commands "$@"
 }
-(( $+functions[_rpk__find_commands] )) ||
-_rpk__find_commands() {
-    local commands; commands=()
-    _describe -t commands 'rpk find commands' commands "$@"
-}
 (( $+functions[_rpk__help_commands] )) ||
 _rpk__help_commands() {
     local commands; commands=(
@@ -403,7 +291,7 @@ _rpk__help_commands() {
 'add:Add a new plugin to the config file' \
 'restore:Restore packages to the state in the lockfile' \
 'update:Update packages and re-generate the lock file' \
-'find:Find packages matching the given query' \
+'search:Search packages matching the given query' \
 'cleanup:Remove packages which are not listed in the lock file' \
 'env:Prints the environment variables for rpk' \
 'completions:Generate completions for the given shell' \
@@ -432,11 +320,6 @@ _rpk__help__env_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help env commands' commands "$@"
 }
-(( $+functions[_rpk__help__find_commands] )) ||
-_rpk__help__find_commands() {
-    local commands; commands=()
-    _describe -t commands 'rpk help find commands' commands "$@"
-}
 (( $+functions[_rpk__help__help_commands] )) ||
 _rpk__help__help_commands() {
     local commands; commands=()
@@ -456,6 +339,11 @@ _rpk__help__list_commands() {
 _rpk__help__restore_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help restore commands' commands "$@"
+}
+(( $+functions[_rpk__help__search_commands] )) ||
+_rpk__help__search_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk help search commands' commands "$@"
 }
 (( $+functions[_rpk__help__sync_commands] )) ||
 _rpk__help__sync_commands() {
@@ -486,6 +374,11 @@ _rpk__list_commands() {
 _rpk__restore_commands() {
     local commands; commands=()
     _describe -t commands 'rpk restore commands' commands "$@"
+}
+(( $+functions[_rpk__search_commands] )) ||
+_rpk__search_commands() {
+    local commands; commands=()
+    _describe -t commands 'rpk search commands' commands "$@"
 }
 (( $+functions[_rpk__sync_commands] )) ||
 _rpk__sync_commands() {

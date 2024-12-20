@@ -230,7 +230,7 @@ pub fn cleanup(ctx: &Context, clear_cache: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn find(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> {
+pub fn search(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error> {
     let gh = Github::new(ctx.clone())?;
     let repos = gh.search_repo(&query, top)?;
 

@@ -35,19 +35,11 @@ complete -c rpk -n "__fish_rpk_needs_command" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_needs_command" -s V -l version -d 'Print version'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "init" -d 'Initialize a configuration file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "list" -d 'List all installed packages'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "l" -d 'List all installed packages'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "ls" -d 'List all installed packages'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "sync" -d 'Install any missing packages, re-generating the lock file'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "s" -d 'Install any missing packages, re-generating the lock file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "add" -d 'Add a new plugin to the config file'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "a" -d 'Add a new plugin to the config file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "restore" -d 'Restore packages to the state in the lockfile'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "r" -d 'Restore packages to the state in the lockfile'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "update" -d 'Update packages and re-generate the lock file'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "u" -d 'Update packages and re-generate the lock file'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "find" -d 'Find packages matching the given query'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "f" -d 'Find packages matching the given query'
-complete -c rpk -n "__fish_rpk_needs_command" -f -a "fd" -d 'Find packages matching the given query'
+complete -c rpk -n "__fish_rpk_needs_command" -f -a "search" -d 'Search packages matching the given query'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "cleanup" -d 'Remove packages which are not listed in the lock file'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "env" -d 'Prints the environment variables for rpk'
 complete -c rpk -n "__fish_rpk_needs_command" -f -a "completions" -d 'Generate completions for the given shell'
@@ -62,22 +54,10 @@ complete -c rpk -n "__fish_rpk_using_subcommand list" -l color -d 'This flag con
 complete -c rpk -n "__fish_rpk_using_subcommand list" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand list" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand list" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand l" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand l" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand l" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand l" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand ls" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand ls" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand ls" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand ls" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand sync" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand s" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand s" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand s" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand s" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l name -d 'A unique name for the package. Defaults to the repo name' -r
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l binary -d 'The binaries to install. Defaults to the package name' -r
 complete -c rpk -n "__fish_rpk_using_subcommand add" -l version -d 'The version of the package' -r
@@ -86,45 +66,19 @@ complete -c rpk -n "__fish_rpk_using_subcommand add" -l color -d 'This flag cont
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand add" -s h -l help -d 'Print help (see more with \'--help\')'
-complete -c rpk -n "__fish_rpk_using_subcommand a" -l name -d 'A unique name for the package. Defaults to the repo name' -r
-complete -c rpk -n "__fish_rpk_using_subcommand a" -l binary -d 'The binaries to install. Defaults to the package name' -r
-complete -c rpk -n "__fish_rpk_using_subcommand a" -l version -d 'The version of the package' -r
-complete -c rpk -n "__fish_rpk_using_subcommand a" -l desc -d 'A description of the package' -r
-complete -c rpk -n "__fish_rpk_using_subcommand a" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand a" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand a" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand a" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c rpk -n "__fish_rpk_using_subcommand restore" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand restore" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand restore" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand restore" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand r" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand r" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand r" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand r" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand update" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand update" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand update" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand update" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand u" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand u" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand u" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand u" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand find" -l top -d 'The number of results to display' -r
-complete -c rpk -n "__fish_rpk_using_subcommand find" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand find" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand find" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand find" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand f" -l top -d 'The number of results to display' -r
-complete -c rpk -n "__fish_rpk_using_subcommand f" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand f" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand f" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand f" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand fd" -l top -d 'The number of results to display' -r
-complete -c rpk -n "__fish_rpk_using_subcommand fd" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
-complete -c rpk -n "__fish_rpk_using_subcommand fd" -s q -l quiet -d 'Suppress any informational output'
-complete -c rpk -n "__fish_rpk_using_subcommand fd" -s v -l verbose -d 'Use verbose output'
-complete -c rpk -n "__fish_rpk_using_subcommand fd" -s h -l help -d 'Print help'
+complete -c rpk -n "__fish_rpk_using_subcommand search" -l top -d 'The number of results to display' -r
+complete -c rpk -n "__fish_rpk_using_subcommand search" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
+complete -c rpk -n "__fish_rpk_using_subcommand search" -s q -l quiet -d 'Suppress any informational output'
+complete -c rpk -n "__fish_rpk_using_subcommand search" -s v -l verbose -d 'Use verbose output'
+complete -c rpk -n "__fish_rpk_using_subcommand search" -s h -l help -d 'Print help'
 complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -l color -d 'This flag controls when to use colors' -r -f -a "{auto\t'',always\t'',never\t''}"
 complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -l cache -d 'Remove all cached data as well'
 complete -c rpk -n "__fish_rpk_using_subcommand cleanup" -s q -l quiet -d 'Suppress any informational output'
@@ -144,15 +98,15 @@ complete -c rpk -n "__fish_rpk_using_subcommand version" -l color -d 'This flag 
 complete -c rpk -n "__fish_rpk_using_subcommand version" -s q -l quiet -d 'Suppress any informational output'
 complete -c rpk -n "__fish_rpk_using_subcommand version" -s v -l verbose -d 'Use verbose output'
 complete -c rpk -n "__fish_rpk_using_subcommand version" -s h -l help -d 'Print help'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "init" -d 'Initialize a configuration file'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "list" -d 'List all installed packages'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "sync" -d 'Install any missing packages, re-generating the lock file'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "add" -d 'Add a new plugin to the config file'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "restore" -d 'Restore packages to the state in the lockfile'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "update" -d 'Update packages and re-generate the lock file'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "find" -d 'Find packages matching the given query'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "cleanup" -d 'Remove packages which are not listed in the lock file'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "env" -d 'Prints the environment variables for rpk'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "completions" -d 'Generate completions for the given shell'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "version" -d 'Prints detailed version information'
-complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update find cleanup env completions version help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "init" -d 'Initialize a configuration file'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "list" -d 'List all installed packages'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "sync" -d 'Install any missing packages, re-generating the lock file'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "add" -d 'Add a new plugin to the config file'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "restore" -d 'Restore packages to the state in the lockfile'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "update" -d 'Update packages and re-generate the lock file'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "search" -d 'Search packages matching the given query'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "cleanup" -d 'Remove packages which are not listed in the lock file'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "env" -d 'Prints the environment variables for rpk'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "completions" -d 'Generate completions for the given shell'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "version" -d 'Prints detailed version information'
+complete -c rpk -n "__fish_rpk_using_subcommand help; and not __fish_seen_subcommand_from init list sync add restore update search cleanup env completions version help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
