@@ -68,7 +68,7 @@ impl Context {
     }
 
     pub fn log_status(&self, prefix: &str, msg: impl fmt::Display) {
-        if self.verbosity >= Verbosity::Verbose {
+        if self.verbosity >= Verbosity::Normal {
             self.log_impl(Color::Cyan, prefix, msg);
         }
     }
@@ -80,7 +80,7 @@ impl Context {
     }
 
     pub fn log_warning(&self, prefix: &str, msg: impl fmt::Display) {
-        if self.verbosity >= Verbosity::Verbose {
+        if self.verbosity >= Verbosity::Normal {
             self.log_impl(Color::Yellow, prefix, msg);
         }
     }
