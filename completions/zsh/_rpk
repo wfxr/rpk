@@ -39,8 +39,8 @@ _rpk() {
         case $line[1] in
             (init)
 _arguments "${_arguments_options[@]}" : \
-'-f+[The config file URL to initialize from]:URL: ' \
-'--from=[The config file URL to initialize from]:URL: ' \
+'-f+[The config file URL to initialize from]:URL:_default' \
+'--from=[The config file URL to initialize from]:URL:_default' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
@@ -107,10 +107,10 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (add)
 _arguments "${_arguments_options[@]}" : \
-'--name=[A unique name for the package. Defaults to the repo name]:NAME: ' \
+'--name=[A unique name for the package. Defaults to the repo name]:NAME:_default' \
 '*--binary=[The binaries to install. Defaults to the package name]' \
-'--version=[The version of the package]:VERSION: ' \
-'--desc=[A description of the package]:DESC: ' \
+'--version=[The version of the package]:VERSION:_default' \
+'--desc=[A description of the package]:DESC:_default' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
@@ -118,15 +118,15 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
-':repo -- The github repository hosting the package:' \
+':repo -- The github repository hosting the package:_default' \
 && ret=0
 ;;
 (a)
 _arguments "${_arguments_options[@]}" : \
-'--name=[A unique name for the package. Defaults to the repo name]:NAME: ' \
+'--name=[A unique name for the package. Defaults to the repo name]:NAME:_default' \
 '*--binary=[The binaries to install. Defaults to the package name]' \
-'--version=[The version of the package]:VERSION: ' \
-'--desc=[A description of the package]:DESC: ' \
+'--version=[The version of the package]:VERSION:_default' \
+'--desc=[A description of the package]:DESC:_default' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
@@ -134,7 +134,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
-':repo -- The github repository hosting the package:' \
+':repo -- The github repository hosting the package:_default' \
 && ret=0
 ;;
 (restore)
@@ -146,7 +146,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
-'::package -- The packages to restore:' \
+'::package -- The packages to restore:_default' \
 && ret=0
 ;;
 (r)
@@ -158,7 +158,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
-'::package -- The packages to restore:' \
+'::package -- The packages to restore:_default' \
 && ret=0
 ;;
 (update)
@@ -170,7 +170,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
-'::package -- The packages to update:' \
+'::package -- The packages to update:_default' \
 && ret=0
 ;;
 (u)
@@ -182,12 +182,12 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
-'::package -- The packages to update:' \
+'::package -- The packages to update:_default' \
 && ret=0
 ;;
 (find)
 _arguments "${_arguments_options[@]}" : \
-'--top=[The number of results to display]:NUM: ' \
+'--top=[The number of results to display]:NUM:_default' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
@@ -195,12 +195,12 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
-':query -- The query to search for:' \
+':query -- The query to search for:_default' \
 && ret=0
 ;;
 (f)
 _arguments "${_arguments_options[@]}" : \
-'--top=[The number of results to display]:NUM: ' \
+'--top=[The number of results to display]:NUM:_default' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
@@ -208,12 +208,12 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
-':query -- The query to search for:' \
+':query -- The query to search for:_default' \
 && ret=0
 ;;
 (fd)
 _arguments "${_arguments_options[@]}" : \
-'--top=[The number of results to display]:NUM: ' \
+'--top=[The number of results to display]:NUM:_default' \
 '--color=[This flag controls when to use colors]:WHEN:(auto always never)' \
 '-q[Suppress any informational output]' \
 '--quiet[Suppress any informational output]' \
@@ -221,7 +221,7 @@ _arguments "${_arguments_options[@]}" : \
 '--verbose[Use verbose output]' \
 '-h[Print help]' \
 '--help[Print help]' \
-':query -- The query to search for:' \
+':query -- The query to search for:_default' \
 && ret=0
 ;;
 (cleanup)
