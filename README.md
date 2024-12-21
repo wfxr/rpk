@@ -35,10 +35,10 @@ There are several ways to add a package using `rpk`. The most simple way is to u
 $ rpk add sharkdp/fd
 ```
 
-If you don't remember the exact repo name, you can run `rpk find <keyword>` and install it interactively:
+If you don't remember the exact repo name, you can run `rpk search <keyword>` and install it interactively:
 
 ```
-$ rpk find ripgrep
+$ rpk search ripgrep
 ? Select a package
 > ★ 47026    BurntSushi/ripgrep                    ripgrep recursively searches directories for a regex pattern while respecting your gitignore
   ★ 6478     phiresky/ripgrep-all                  rga: ripgrep, but also search in PDFs, E-Books, Office documents, zip, tar.gz, etc.
