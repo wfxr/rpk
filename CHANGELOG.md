@@ -1,8 +1,9 @@
 
-## [0.2.1-rc.3](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.3) (2024-12-20)
+## [0.2.1-rc.4](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.4) (2024-12-27)
 
 ### 🚀 Features
 
+- Improve binary selection logic - ([c60c3b5](https://github.com/wfxr/rpk/commit/c60c3b5dac04af51df5ee5de4a4923ff2ebc84a9))
 - Fix log level - ([1d64d15](https://github.com/wfxr/rpk/commit/1d64d15b6830306becc3364a454efbd62bb1adc8))
 - Compatibility with old lock files - ([a291e2b](https://github.com/wfxr/rpk/commit/a291e2ba41371bdf73933391ffe4a0d750a2602d))
 - Support multiple binaries in a package - ([bb89c72](https://github.com/wfxr/rpk/commit/bb89c724ca390d3538790c055b33f75fa010a31c))
@@ -12,6 +13,10 @@
 
 - Improve error handling misc - ([f7f7f5d](https://github.com/wfxr/rpk/commit/f7f7f5d81c4feaac64273b0ac745a0d25fdc69e4))
 - Update subcommand names - ([18eae36](https://github.com/wfxr/rpk/commit/18eae36b0b30de46ccb622c1ed2458f986ad33aa))
+
+### 📚 Documentation
+
+- Update README - ([e69bf5e](https://github.com/wfxr/rpk/commit/e69bf5ef233b6cd139638e4f96c8adbd55b54dbd))
 
 ### ⚙️ Miscellaneous Tasks
 
