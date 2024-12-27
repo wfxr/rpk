@@ -176,25 +176,26 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
     for (bin, candidates) in &bins_candiates {
         let link = ctx.bin_dir.join(bin);
 
-        let target = candidates
+        let (path, meta) = candidates
             .iter()
-            .next()
+            .filter_map(|c| Some((c, fs::metadata(c).ok()?)))
+            .max_by_key(|(_, meta)| meta.len())
             .ok_or_else(|| anyhow!("no binary {} found in archive", bin))?;
 
-        let mut perms = fs::metadata(target)?.permissions();
+        let mut perms = meta.permissions();
         perms.set_mode(perms.mode() | 0o111);
-        fs::set_permissions(target, perms)?;
+        fs::set_permissions(path, perms)?;
 
-        symlink_force(target, &link)?;
-        debug!("link built: '{}' -> '{}'", link.display(), target.display());
+        symlink_force(path, &link)?;
+        debug!("link built: '{}' -> '{}'", link.display(), path.display());
 
         if candidates.len() > 1 {
             ctx.log_warning(
                 "Warning",
                 format!(
-                    "{} candidate binaries found in archive, using the first one: '{}'",
+                    "{} candidate binaries found in archive, using the largest one: '{}'",
                     candidates.len(),
-                    target.shorten()?
+                    path.shorten()?
                 ),
             );
         }
