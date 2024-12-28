@@ -1,6 +1,12 @@
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{
+    builder::{
+        styling::{AnsiColor, Effects},
+        Styles,
+    },
+    Parser,
+};
 use clap_complete::Shell;
 use url::Url;
 
@@ -16,6 +22,14 @@ pub const ENV_BIN_DIR: &str = "RPK_BIN_DIR";
 #[clap(author, about)]
 #[clap(version = util::CRATE_VERSION)]
 #[clap(long_version = util::CRATE_LONG_VERSION)]
+#[clap(
+    styles(Styles::styled()
+        .header(AnsiColor::Yellow.on_default() | Effects::BOLD)
+        .usage(AnsiColor::Yellow.on_default() | Effects::BOLD)
+        .literal(AnsiColor::Green.on_default() | Effects::BOLD)
+        .placeholder(AnsiColor::Cyan.on_default())
+    )
+)]
 pub struct Opt {
     /// Suppress any informational output.
     #[clap(long, short, global = true)]
