@@ -1,8 +1,9 @@
 
-## [0.2.1-rc.4](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1-rc.4) (2024-12-27)
+## [0.2.1](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1) (2024-12-28)
 
 ### 🚀 Features
 
+- Colored help message - ([533445e](https://github.com/wfxr/rpk/commit/533445e39b930ffb8e30f96ed243e59603a56118))
 - Improve binary selection logic - ([c60c3b5](https://github.com/wfxr/rpk/commit/c60c3b5dac04af51df5ee5de4a4923ff2ebc84a9))
 - Fix log level - ([1d64d15](https://github.com/wfxr/rpk/commit/1d64d15b6830306becc3364a454efbd62bb1adc8))
 - Compatibility with old lock files - ([a291e2b](https://github.com/wfxr/rpk/commit/a291e2ba41371bdf73933391ffe4a0d750a2602d))
