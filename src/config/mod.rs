@@ -66,7 +66,11 @@ impl Source {
 impl fmt::Display for Package {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { name, bins, version, source, desc: _ } = self;
-        write!(f, "{name}@{version} ", version = version.as_deref().unwrap_or("latest"),)?;
+        write!(
+            f,
+            "{name}@{version} ",
+            version = version.as_deref().unwrap_or("latest"),
+        )?;
 
         match &bins[..] {
             [] => {}

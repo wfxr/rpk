@@ -8,7 +8,12 @@ use crate::{
     provider::{Github, Provider},
 };
 
-pub fn sync_package(ctx: &Context, pkg: &Package, lpkg: Option<&LockedPackage>, update: bool) -> Result<LockedPackage> {
+pub fn sync_package(
+    ctx: &Context,
+    pkg: &Package,
+    lpkg: Option<&LockedPackage>,
+    update: bool,
+) -> Result<LockedPackage> {
     match (&pkg.version, lpkg) {
         // If the package is already installed and the version matches, do nothing.
         (Some(version), Some(lpkg)) if version == &lpkg.version => {
@@ -27,7 +32,10 @@ pub fn sync_package(ctx: &Context, pkg: &Package, lpkg: Option<&LockedPackage>, 
 
             match lpkg {
                 Some(old) if old != &new => {
-                    ctx.log_status("Updated", format!("{}@{} => {}", pkg.name, old.version, new.version));
+                    ctx.log_status(
+                        "Updated",
+                        format!("{}@{} => {}", pkg.name, old.version, new.version),
+                    );
                 }
                 _ => {
                     ctx.log_status("Checked", format!("{}@{}", pkg.name, new.version));
@@ -60,7 +68,10 @@ pub fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Re
         })
         .collect::<Result<_>>()?;
 
-    lcfg.pkgs = new_lpkgs.into_iter().map(|lpkg| (lpkg.name.clone(), lpkg)).collect();
+    lcfg.pkgs = new_lpkgs
+        .into_iter()
+        .map(|lpkg| (lpkg.name.clone(), lpkg))
+        .collect();
     Ok(())
 }
 

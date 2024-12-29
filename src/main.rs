@@ -83,7 +83,11 @@ fn try_main() -> anyhow::Result<()> {
         SubCommand::Add { name, binary, repo: (owner, repo), version, desc } => {
             let pkg = Package {
                 name: name.unwrap_or_else(|| repo.clone()),
-                bins: if binary.is_empty() { vec![repo.clone()] } else { binary },
+                bins: if binary.is_empty() {
+                    vec![repo.clone()]
+                } else {
+                    binary
+                },
                 source: Source::Github { repo: format!("{}/{}", owner, repo) },
                 version,
                 desc,
@@ -119,7 +123,12 @@ fn try_main() -> anyhow::Result<()> {
                         let path = generate_to(shell, cmd, cmd.get_name().to_string(), dir)?;
                         ctx.log_status("Generated", path.shorten()?);
                     }
-                    None => generate(shell, cmd, cmd.get_name().to_string(), &mut std::io::stdout()),
+                    None => generate(
+                        shell,
+                        cmd,
+                        cmd.get_name().to_string(),
+                        &mut std::io::stdout(),
+                    ),
                 }
             }
         }
@@ -135,7 +144,11 @@ fn main() {
     yansi::whenever(Condition::TTY_AND_COLOR);
 
     tracing_subscriber::fmt()
-        .event_format(tracing_subscriber::fmt::format().with_file(true).with_line_number(true))
+        .event_format(
+            tracing_subscriber::fmt::format()
+                .with_file(true)
+                .with_line_number(true),
+        )
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
@@ -150,8 +163,12 @@ fn acquire_flock(ctx: &Context) -> anyhow::Result<fmutex::Guard> {
     match fmutex::try_lock(path).with_context(|| format!("failed to open `{}`", path.display()))? {
         Some(g) => Ok(g),
         None => {
-            ctx.log_warning("Blocking", format!("waiting for file lock on {}", path.shorten()?));
-            fmutex::lock(path).with_context(|| format!("failed to acquire file lock `{}`", path.display()))
+            ctx.log_warning(
+                "Blocking",
+                format!("waiting for file lock on {}", path.shorten()?),
+            );
+            fmutex::lock(path)
+                .with_context(|| format!("failed to acquire file lock `{}`", path.display()))
         }
     }
 }

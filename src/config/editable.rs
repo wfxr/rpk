@@ -66,6 +66,9 @@ impl EditableConfig {
     }
 
     pub fn contains(&mut self, name: &str) -> bool {
-        self.doc.get("pkgs").and_then(|pkgs| pkgs.get(name)).is_some()
+        self.doc
+            .get("pkgs")
+            .and_then(|pkgs| pkgs.get(name))
+            .is_some()
     }
 }

@@ -204,7 +204,11 @@ pub fn cleanup(ctx: &Context, clear_cache: bool) -> Result<()> {
                 }
             },
             2 => {
-                let mut parts = entry.path().components().map(|c| c.as_os_str().to_str()).rev();
+                let mut parts = entry
+                    .path()
+                    .components()
+                    .map(|c| c.as_os_str().to_str())
+                    .rev();
                 match (parts.next(), parts.next()) {
                     (Some(Some(version)), Some(Some(name))) => match lcfg.pkgs.get(name) {
                         Some(lpkg) if lpkg.version == version => {
@@ -250,7 +254,10 @@ pub fn search(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error
             Some(RepoItem {
                 name:           repo.name,
                 desc:           repo.description.unwrap_or_default().emojify(),
-                stars:          repo.stargazers_count.map(|x| format!("★ {x}")).unwrap_or_default(),
+                stars:          repo
+                    .stargazers_count
+                    .map(|x| format!("★ {x}"))
+                    .unwrap_or_default(),
                 stars_width:    stars_width.clone(),
                 fullname:       repo.full_name?,
                 fullname_width: fullname_width.clone(),
@@ -282,7 +289,11 @@ pub fn search(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error
         .prompt()?;
 
     let bins: Vec<_> = bins.split(' ').map(str::trim).map(str::to_owned).collect();
-    let bins = if bins.is_empty() { vec![name.clone()] } else { bins };
+    let bins = if bins.is_empty() {
+        vec![name.clone()]
+    } else {
+        bins
+    };
 
     let pkg = Package {
         name,
@@ -315,6 +326,8 @@ impl std::fmt::Display for RepoItem {
         let Self { stars, fullname, desc, .. } = self;
         let stars_width = self.stars_width.load(Ordering::Relaxed);
         let fullname_width = self.fullname_width.load(Ordering::Relaxed);
-        f.write_fmt(format_args!("{stars:stars_width$}  {fullname:fullname_width$}  {desc}",))
+        f.write_fmt(format_args!(
+            "{stars:stars_width$}  {fullname:fullname_width$}  {desc}",
+        ))
     }
 }

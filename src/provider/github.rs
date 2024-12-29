@@ -28,7 +28,9 @@ pub struct Github {
 
 impl Github {
     pub fn new(ctx: Context) -> Result<Self> {
-        let token = env::var("GITHUB_TOKEN").or_else(|_| env::var("RPK_GITHUB_TOKEN")).ok();
+        let token = env::var("GITHUB_TOKEN")
+            .or_else(|_| env::var("RPK_GITHUB_TOKEN"))
+            .ok();
 
         let agent = ureq::AgentBuilder::new()
             .user_agent("rpk")
@@ -55,11 +57,15 @@ impl Github {
         match version {
             Some(version) => self
                 .client
-                .get(&format!("https://api.github.com/repos/{repo}/releases/tags/{version}",))
+                .get(&format!(
+                    "https://api.github.com/repos/{repo}/releases/tags/{version}",
+                ))
                 .call(),
             None => self
                 .client
-                .get(&format!("https://api.github.com/repos/{repo}/releases/latest"))
+                .get(&format!(
+                    "https://api.github.com/repos/{repo}/releases/latest"
+                ))
                 .call(),
         }
         .context(format!(
@@ -80,7 +86,8 @@ impl Github {
     }
 
     pub fn parse_repo<'a>(&self, repo: &'a str) -> Result<(&'a str, &'a str)> {
-        repo.split_once('/').context(format!("Invalid repo: `{repo}`"))
+        repo.split_once('/')
+            .context(format!("Invalid repo: `{repo}`"))
     }
 
     pub fn download_asset(&self, name: &str, url: Url) -> Result<()> {
@@ -100,10 +107,14 @@ impl Provider for Github {
         };
 
         let release = self.get_release(repo, pkg.version.as_deref())?;
-        ctx.log_verbose_status("Fetched", format!("{repo}@{version}", version = release.tag_name));
+        ctx.log_verbose_status(
+            "Fetched",
+            format!("{repo}@{version}", version = release.tag_name),
+        );
 
         let asset = filter_assets(&release)?;
-        let asset = asset.ok_or_else(|| anyhow!("No matching asset found for {repo}@{}", release.tag_name))?;
+        let asset = asset
+            .ok_or_else(|| anyhow!("No matching asset found for {repo}@{}", release.tag_name))?;
         ctx.log_verbose_status("Filtered", &asset.name);
 
         let path = ctx.cache_dir.join(&asset.name);
@@ -137,7 +148,10 @@ impl Provider for Github {
 
         // skip download if the asset already exists
         if path.exists() {
-            ctx.log_verbose_status("Skipped", format!("Asset already exists: {}", lpkg.filename));
+            ctx.log_verbose_status(
+                "Skipped",
+                format!("Asset already exists: {}", lpkg.filename),
+            );
             return Ok(());
         }
 
@@ -149,7 +163,9 @@ impl Provider for Github {
         let download_url = match lpkg.download_url.as_ref() {
             Some(url) => url.clone(),
             None => {
-                let (owner, repo) = repo.split_once('/').ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
+                let (owner, repo) = repo
+                    .split_once('/')
+                    .ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
                 let release = self.get_release(repo, Some(version))?;
                 ctx.log_verbose_status("Fetched", format!("{owner}/{repo}@{version}"));
                 let asset = release
@@ -210,7 +226,8 @@ fn filter_assets(release: &Release) -> anyhow::Result<Option<&Asset>> {
             match ARCH {
                 "x86_64" => is_x86_64(&asset.name),
                 "x86" => is_x86(&asset.name),
-                "aarch64" => is_aarch64(&asset.name) || is_macos(&asset.name) && is_x86_64(&asset.name),
+                "aarch64" =>
+                    is_aarch64(&asset.name) || is_macos(&asset.name) && is_x86_64(&asset.name),
                 "arm" => is_arm(&asset.name),
                 _ => {
                     warn!("unsupported ARCH: {ARCH}", ARCH = ARCH);

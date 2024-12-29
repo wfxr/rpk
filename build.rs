@@ -12,7 +12,10 @@ use anyhow::{bail, Context, Result};
 fn format_error_msg(cmd: &process::Command, output: &process::Output) -> String {
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
-    let mut msg = format!("subprocess didn't exit successfully `{:?}` ({})", cmd, output.status);
+    let mut msg = format!(
+        "subprocess didn't exit successfully `{:?}` ({})",
+        cmd, output.status
+    );
     if !stdout.trim().is_empty() {
         msg.push_str("\n--- stdout\n");
         msg.push_str(&stdout);
@@ -81,9 +84,17 @@ fn print_git_envs() -> Result<()> {
     if !dir.join(".git").exists() {
         return Ok(());
     }
-    print_git_env(&dir, "GIT_COMMIT_DATE", "git log -1 --date=short --format=%cd")?;
+    print_git_env(
+        &dir,
+        "GIT_COMMIT_DATE",
+        "git log -1 --date=short --format=%cd",
+    )?;
     print_git_env(&dir, "GIT_COMMIT_HASH", "git rev-parse HEAD")?;
-    print_git_env(&dir, "GIT_COMMIT_SHORT_HASH", "git rev-parse --short=9 HEAD")?;
+    print_git_env(
+        &dir,
+        "GIT_COMMIT_SHORT_HASH",
+        "git rev-parse --short=9 HEAD",
+    )?;
     Ok(())
 }
 
@@ -94,7 +105,10 @@ fn print_rustc_envs() -> Result<()> {
         .arg("--version")
         .output_text()?;
     let mut lines = text.lines();
-    println!("cargo:rustc-env=RUSTC_VERSION_SUMMARY={}", lines.next().unwrap());
+    println!(
+        "cargo:rustc-env=RUSTC_VERSION_SUMMARY={}",
+        lines.next().unwrap()
+    );
     for line in lines {
         let (key, value) = line.split_once(": ").unwrap();
         println!(

@@ -90,7 +90,10 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
                 None => &mut &file,
             };
 
-            io::copy(&mut io::BufReader::new(decoder), &mut io::BufWriter::new(install_file))?;
+            io::copy(
+                &mut io::BufReader::new(decoder),
+                &mut io::BufWriter::new(install_file),
+            )?;
         }
         ArchiveKind::Zip => {
             let mut archive = ZipArchive::new(file)?;
@@ -131,7 +134,8 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         }
     };
 
-    let mut bins_candiates: HashMap<_, _> = lpkg.bins.iter().map(|bin| (bin, HashSet::new())).collect();
+    let mut bins_candiates: HashMap<_, _> =
+        lpkg.bins.iter().map(|bin| (bin, HashSet::new())).collect();
 
     // Some archives contain only a single directory, move its contents to the install directory
     let files: Vec<_> = fs::read_dir(&install_dir)?.try_collect()?;

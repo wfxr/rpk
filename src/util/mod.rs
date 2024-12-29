@@ -68,8 +68,9 @@ impl Emojify for str {
     }
 }
 
-static HOME: LazyLock<PathBuf> =
-    LazyLock::new(|| home::home_dir().expect("failed to determine the current user's home directory"));
+static HOME: LazyLock<PathBuf> = LazyLock::new(|| {
+    home::home_dir().expect("failed to determine the current user's home directory")
+});
 
 pub trait Shorten {
     fn shorten(&self) -> Result<String>;

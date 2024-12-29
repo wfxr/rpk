@@ -33,14 +33,22 @@ pub const CRATE_VERSION: &str = {
     ) {
         (true, true, true) => CRATE_RELEASE,
         (false, false, false) => {
-            constcat::concat!(CRATE_RELEASE, " (", GIT_COMMIT_SHORT_HASH, " ", GIT_COMMIT_DATE, ")",)
+            constcat::concat!(
+                CRATE_RELEASE,
+                " (",
+                GIT_COMMIT_SHORT_HASH,
+                " ",
+                GIT_COMMIT_DATE,
+                ")",
+            )
         }
         _ => panic!("unexpected git information"),
     }
 };
 
 /// The version with extra Git and Rustc information if available.
-pub const CRATE_LONG_VERSION: &str = constcat::concat!(CRATE_VERSION, "\n", env!("RUSTC_VERSION_SUMMARY"));
+pub const CRATE_LONG_VERSION: &str =
+    constcat::concat!(CRATE_VERSION, "\n", env!("RUSTC_VERSION_SUMMARY"));
 
 /// The very verbose version.
 pub const CRATE_VERBOSE_VERSION: &str = constcat::concat!(

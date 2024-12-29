@@ -26,8 +26,8 @@ impl TempFile {
         let temp_path = dir.join(&temp_name);
         rm_rf(&temp_path)?;
 
-        let temp_file =
-            File::create(&temp_path).with_context(|| format!("failed to create temporary file: {:?}", temp_path))?;
+        let temp_file = File::create(&temp_path)
+            .with_context(|| format!("failed to create temporary file: {:?}", temp_path))?;
         Ok(Self { temp_file, temp_path, orig_path })
     }
 

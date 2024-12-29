@@ -92,7 +92,11 @@ impl Context {
     }
 
     fn log_impl(&self, color: Color, prefix: &str, msg: impl fmt::Display) {
-        eprintln!("{} {}", Paint::new(format!("{prefix: >12}")).fg(color).bold(), msg);
+        eprintln!(
+            "{} {}",
+            Paint::new(format!("{prefix: >12}")).fg(color).bold(),
+            msg
+        );
     }
 }
 
