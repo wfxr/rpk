@@ -57,7 +57,7 @@ impl Context {
         }
     }
 
-    pub fn log_verbose_header(&self, prefix: &str, msg: impl fmt::Display) {
+    pub fn log_header_v(&self, prefix: &str, msg: impl fmt::Display) {
         if self.verbosity >= Verbosity::Verbose {
             self.log_header_impl(prefix, msg);
         }
@@ -73,7 +73,7 @@ impl Context {
         }
     }
 
-    pub fn log_verbose_status(&self, prefix: &str, msg: impl fmt::Display) {
+    pub fn log_status_v(&self, prefix: &str, msg: impl fmt::Display) {
         if self.verbosity >= Verbosity::Verbose {
             self.log_impl(Color::Cyan, prefix, msg);
         }
@@ -85,7 +85,7 @@ impl Context {
         }
     }
 
-    pub fn log_verbose_warning(&self, prefix: &str, msg: impl fmt::Display) {
+    pub fn log_warning_v(&self, prefix: &str, msg: impl fmt::Display) {
         if self.verbosity >= Verbosity::Verbose {
             self.log_impl(Color::Yellow, prefix, msg);
         }

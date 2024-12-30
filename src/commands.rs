@@ -57,7 +57,7 @@ pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
 
 pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
     let lcfg = LockedConfig::load(ctx)?;
-    ctx.log_verbose_header("Loaded", ctx.lock_file.shorten()?);
+    ctx.log_header_v("Loaded", ctx.lock_file.shorten()?);
 
     #[derive(Debug, Tabled)]
     #[tabled(rename_all = "UPPERCASE")]
@@ -89,7 +89,7 @@ pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
 
 pub fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
     let mut ecfg = EditableConfig::load(ctx)?;
-    ctx.log_verbose_header("Loaded", ctx.config_file.shorten()?);
+    ctx.log_header_v("Loaded", ctx.config_file.shorten()?);
 
     if ecfg.contains(&pkg.name) {
         bail!("package {} already exists", pkg.name.blue());
@@ -105,28 +105,28 @@ pub fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
 
     ecfg.save()?;
     lcfg.save()?;
-    ctx.log_verbose_header("Locked", ctx.lock_file.shorten()?);
+    ctx.log_header_v("Locked", ctx.lock_file.shorten()?);
 
     Ok(())
 }
 
 pub fn sync(ctx: &Context) -> Result<(), anyhow::Error> {
     let cfg = Config::load(ctx)?;
-    ctx.log_verbose_header("Loaded", ctx.config_file.shorten()?);
+    ctx.log_header_v("Loaded", ctx.config_file.shorten()?);
     let mut lcfg = LockedConfig::load(ctx)?;
-    ctx.log_verbose_header("Loaded", ctx.lock_file.shorten()?);
+    ctx.log_header_v("Loaded", ctx.lock_file.shorten()?);
 
     sync_packages(ctx, &cfg, &mut lcfg)?;
 
     lcfg.save()?;
-    ctx.log_verbose_header("Locked", ctx.lock_file.shorten()?);
+    ctx.log_header_v("Locked", ctx.lock_file.shorten()?);
 
     Ok(())
 }
 
 pub fn restore(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Error> {
     let lcfg = LockedConfig::load(ctx)?;
-    ctx.log_verbose_header("Loaded", ctx.lock_file.shorten()?);
+    ctx.log_header_v("Loaded", ctx.lock_file.shorten()?);
 
     match package {
         Some(pkg) => {
@@ -144,7 +144,7 @@ pub fn restore(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Err
 
 pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Error> {
     let cfg = Config::load(ctx)?;
-    ctx.log_verbose_header("Loaded", ctx.config_file.shorten()?);
+    ctx.log_header_v("Loaded", ctx.config_file.shorten()?);
     match package {
         Some(package) => {
             let pkg = cfg
@@ -163,11 +163,11 @@ pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Erro
             // Update the package in the lock file.
             lcfg.upsert(new_lpkg);
             lcfg.save()?;
-            ctx.log_verbose_header("Locked", ctx.lock_file.shorten()?);
+            ctx.log_header_v("Locked", ctx.lock_file.shorten()?);
         }
         None => {
             let mut lcfg = LockedConfig::load(ctx)?;
-            ctx.log_verbose_header("Loaded", ctx.lock_file.shorten()?);
+            ctx.log_header_v("Loaded", ctx.lock_file.shorten()?);
 
             for lpkg in lcfg
                 .pkgs
@@ -182,7 +182,7 @@ pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Erro
             }
 
             lcfg.save()?;
-            ctx.log_verbose_header("Locked", ctx.lock_file.shorten()?);
+            ctx.log_header_v("Locked", ctx.lock_file.shorten()?);
         }
     };
     Ok(())

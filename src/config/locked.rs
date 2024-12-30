@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fs, str};
+use std::{collections::BTreeMap, fs, path::PathBuf, str};
 
 use anyhow::{Context as _, Result};
 use serde::{Deserialize, Serialize};
@@ -34,7 +34,7 @@ pub struct LockedPackage {
     pub source:       Source,
     pub desc:         Option<String>,
     pub filename:     String,
-    pub download_url: Option<Url>,
+    pub download_url: Url,
 }
 
 impl LockedConfig {
@@ -75,5 +75,20 @@ impl LockedConfig {
             "locked package must have at least one binary"
         );
         self.pkgs.insert(lpkg.name.clone(), lpkg);
+    }
+}
+
+impl LockedPackage {
+    /// Get the asset path for this package.
+    pub fn asset_path(&self, ctx: &Context) -> PathBuf {
+        ctx.cache_dir
+            .join(&self.name)
+            .join(&self.version)
+            .join(&self.filename)
+    }
+
+    /// Get the install directory for this package.
+    pub fn install_dir(&self, ctx: &Context) -> PathBuf {
+        ctx.data_dir.join(&self.name).join(&self.version)
     }
 }

@@ -26,22 +26,24 @@ pub fn sync_package(
         }
         _ => {
             let provider = Github::new(ctx.clone())?;
-            let new = provider.download(ctx, pkg)?;
+            let new_lpkg = provider.lock(pkg)?;
 
-            install_package(ctx, &new)?;
+            provider.download(&new_lpkg)?;
+
+            install_package(ctx, &new_lpkg)?;
 
             match lpkg {
-                Some(old) if old != &new => {
+                Some(old_lpkg) if old_lpkg != &new_lpkg => {
                     ctx.log_status(
                         "Updated",
-                        format!("{}@{} => {}", pkg.name, old.version, new.version),
+                        format!("{}@{} => {}", pkg.name, old_lpkg.version, new_lpkg.version),
                     );
                 }
                 _ => {
-                    ctx.log_status("Checked", format!("{}@{}", pkg.name, new.version));
+                    ctx.log_status("Checked", format!("{}@{}", pkg.name, new_lpkg.version));
                 }
             };
-            Ok(new)
+            Ok(new_lpkg)
         }
     }
 }
@@ -49,7 +51,7 @@ pub fn sync_package(
 pub fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
     let provider = Github::new(ctx.clone())?;
 
-    provider.download_locked(ctx, lpkg)?;
+    provider.download(lpkg)?;
 
     install_package(ctx, lpkg)?;
     ctx.log_status("Checked", format!("{}@{}", lpkg.name, lpkg.version));

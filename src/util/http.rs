@@ -22,11 +22,11 @@ impl Middleware for BearerAuthMiddleware {
 }
 
 pub trait UreqExt {
-    fn download(&self, url: Url, path: impl AsRef<Path>) -> anyhow::Result<()>;
+    fn download(&self, url: &Url, path: impl AsRef<Path>) -> anyhow::Result<()>;
 }
 
 impl UreqExt for ureq::Agent {
-    fn download(&self, url: Url, path: impl AsRef<Path>) -> anyhow::Result<()> {
+    fn download(&self, url: &Url, path: impl AsRef<Path>) -> anyhow::Result<()> {
         let mut reader = self.get(url.as_str()).call()?.into_reader();
         let mut tmp_file = TempFile::new_force(path.as_ref())?;
         {

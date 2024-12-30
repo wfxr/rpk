@@ -1,7 +1,7 @@
 use std::{
     self,
     collections::{HashMap, HashSet},
-    fs::{self},
+    fs,
     io::{self, Read},
     os::unix::fs::PermissionsExt,
     path::Path,
@@ -62,18 +62,18 @@ pub fn detect_archive(path: impl AsRef<Path>) -> anyhow::Result<ArchiveKind> {
 }
 
 pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()> {
-    let file = &ctx.cache_dir.join(&lpkg.filename);
-    let install_dir = ctx.data_dir.join(&lpkg.name).join(&lpkg.version);
+    let asset_file = &lpkg.asset_path(ctx);
+    let install_dir = &lpkg.install_dir(ctx);
 
-    let archive = detect_archive(file)?;
-    let file = std::fs::File::open(file)?;
+    let archive = detect_archive(asset_file)?;
+    let asset_file = fs::File::open(asset_file)?;
 
-    if let Err(e) = fs::remove_dir_all(&install_dir) {
+    if let Err(e) = fs::remove_dir_all(install_dir) {
         if e.kind() != io::ErrorKind::NotFound {
             bail!("failed to remove existing install directory: {}", e);
         }
     }
-    mkdir_p(&install_dir)?;
+    mkdir_p(install_dir)?;
 
     match archive {
         ArchiveKind::Plain(compression) => {
@@ -86,8 +86,8 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
 
             trace!("installing binary to: {}", install_path.display());
             let decoder: &mut dyn Read = match compression {
-                Some(Compression::Gzip) => &mut GzDecoder::new(file),
-                None => &mut &file,
+                Some(Compression::Gzip) => &mut GzDecoder::new(asset_file),
+                None => &mut &asset_file,
             };
 
             io::copy(
@@ -96,7 +96,7 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
             )?;
         }
         ArchiveKind::Zip => {
-            let mut archive = ZipArchive::new(file)?;
+            let mut archive = ZipArchive::new(asset_file)?;
 
             for i in 0..archive.len() {
                 let mut file = archive.by_index(i)?;
@@ -126,11 +126,11 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         }
         ArchiveKind::Tar(compression) => {
             let mut archive: TarArchive<Box<dyn Read>> = TarArchive::new(match compression {
-                Some(Compression::Gzip) => Box::new(GzDecoder::new(file)),
-                None => Box::new(file),
+                Some(Compression::Gzip) => Box::new(GzDecoder::new(asset_file)),
+                None => Box::new(asset_file),
             });
 
-            archive.unpack(&install_dir)?;
+            archive.unpack(install_dir)?;
         }
     };
 
@@ -138,7 +138,7 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         lpkg.bins.iter().map(|bin| (bin, HashSet::new())).collect();
 
     // Some archives contain only a single directory, move its contents to the install directory
-    let files: Vec<_> = fs::read_dir(&install_dir)?.try_collect()?;
+    let files: Vec<_> = fs::read_dir(install_dir)?.try_collect()?;
 
     match &files[..] {
         [] => bail!("no files found in archive {}", lpkg.filename),
@@ -161,7 +161,7 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         _ => (),
     }
 
-    for entry in WalkDir::new(&install_dir)
+    for entry in WalkDir::new(install_dir)
         .into_iter()
         .filter_ok(|entry| entry.path().is_file())
     {
@@ -171,7 +171,7 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
         if let Some(candidates) = bins_candiates.get_mut(&file_name) {
             trace!(
                 "found bin candidate: {}",
-                entry.path().strip_prefix(&install_dir)?.display()
+                entry.path().strip_prefix(install_dir)?.display()
             );
             candidates.insert(entry.path().to_owned());
         }

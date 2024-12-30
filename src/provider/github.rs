@@ -4,13 +4,13 @@ use std::{
         self,
         consts::{ARCH, OS},
     },
+    fs,
 };
 
 use anyhow::{anyhow, Context as _, Result};
 use models::{Asset, Release, RepoSearchResult, Repository};
 use tracing::{debug, info, trace, warn};
 use ureq::Agent;
-use url::Url;
 
 use crate::{
     config::{LockedPackage, Package, Source},
@@ -90,24 +90,35 @@ impl Github {
             .context(format!("Invalid repo: `{repo}`"))
     }
 
-    pub fn download_asset(&self, name: &str, url: Url) -> Result<()> {
-        self.ctx.log_verbose_status("Downloading", &url);
+    pub fn download_asset(&self, lpkg: &LockedPackage) -> Result<()> {
+        // skip download if the asset already exists
+        if lpkg.asset_path(&self.ctx).exists() {
+            self.ctx.log_status_v(
+                "Skipped",
+                format!("Asset already exists: {}", lpkg.filename),
+            );
+            return Ok(());
+        }
+
+        self.ctx.log_status_v("Downloading", &lpkg.download_url);
+        let cache_dir = self.ctx.cache_dir.join(&lpkg.name).join(&lpkg.version);
+        fs::create_dir_all(&cache_dir).context("failed to create cache directory")?;
         self.client
-            .download(url, self.ctx.cache_dir.join(name))
+            .download(&lpkg.download_url, cache_dir.join(&lpkg.filename))
             .context("failed to download asset")?;
-        self.ctx.log_status("Downloaded", name);
+        self.ctx.log_status("Downloaded", &lpkg.filename);
         Ok(())
     }
 }
 
 impl Provider for Github {
-    fn download(&self, ctx: &Context, pkg: &Package) -> Result<LockedPackage> {
+    fn lock(&self, pkg: &Package) -> Result<LockedPackage> {
         let repo = match &pkg.source {
             Source::Github { repo } => repo,
         };
 
         let release = self.get_release(repo, pkg.version.as_deref())?;
-        ctx.log_verbose_status(
+        self.ctx.log_status_v(
             "Fetched",
             format!("{repo}@{version}", version = release.tag_name),
         );
@@ -115,16 +126,7 @@ impl Provider for Github {
         let asset = filter_assets(&release)?;
         let asset = asset
             .ok_or_else(|| anyhow!("No matching asset found for {repo}@{}", release.tag_name))?;
-        ctx.log_verbose_status("Filtered", &asset.name);
-
-        let path = ctx.cache_dir.join(&asset.name);
-
-        // skip download if the asset already exists
-        if path.exists() {
-            ctx.log_verbose_status("Skipped", format!("Asset already exists: {}", asset.name));
-        } else {
-            self.download_asset(&asset.name, asset.browser_download_url.clone())?;
-        }
+        self.ctx.log_status_v("Filtered", &asset.name);
 
         // get description from the release if not provided
         let desc = match &pkg.desc {
@@ -139,47 +141,12 @@ impl Provider for Github {
             source:       pkg.source.clone(),
             desc:         desc.map(|desc| desc.trim().to_string()),
             filename:     asset.name.clone(),
-            download_url: asset.browser_download_url.clone().into(),
+            download_url: asset.browser_download_url.clone(),
         })
     }
 
-    fn download_locked(&self, ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
-        let path = ctx.cache_dir.join(&lpkg.filename);
-
-        // skip download if the asset already exists
-        if path.exists() {
-            ctx.log_verbose_status(
-                "Skipped",
-                format!("Asset already exists: {}", lpkg.filename),
-            );
-            return Ok(());
-        }
-
-        let repo = match &lpkg.source {
-            Source::Github { repo } => repo,
-        };
-        let version = &lpkg.version;
-
-        let download_url = match lpkg.download_url.as_ref() {
-            Some(url) => url.clone(),
-            None => {
-                let (owner, repo) = repo
-                    .split_once('/')
-                    .ok_or_else(|| anyhow::anyhow!("Invalid repo"))?;
-                let release = self.get_release(repo, Some(version))?;
-                ctx.log_verbose_status("Fetched", format!("{owner}/{repo}@{version}"));
-                let asset = release
-                    .assets
-                    .iter()
-                    .find(|asset| asset.name == lpkg.filename)
-                    .ok_or_else(|| anyhow::anyhow!("Asset not found"))?;
-                asset.browser_download_url.clone()
-            }
-        };
-
-        self.download_asset(&lpkg.filename, download_url)?;
-
-        Ok(())
+    fn download(&self, lpkg: &LockedPackage) -> Result<()> {
+        self.download_asset(lpkg)
     }
 }
 
