@@ -1,5 +1,19 @@
 
-## [0.2.1](https://github.com/wfxr/rpk/compare/v0.2.0..0.2.1) (2024-12-28)
+## [0.2.2-rc.1](https://github.com/wfxr/rpk/compare/v0.2.1..0.2.2-rc.1) (2024-12-30)
+
+### 🚀 Features
+
+- Update implies sync when no package is specified - ([058e54e](https://github.com/wfxr/rpk/commit/058e54eb329a3124c05263944caa8e1a14a045ba))
+
+### 🚜 Refactor
+
+- Improve asset caching and installing logic - ([dbd9a13](https://github.com/wfxr/rpk/commit/dbd9a1377c995089dc0ae20cfa2ea833d8cefccd))
+
+### 🎨 Styling
+
+- Cargo fmt - ([4cce26d](https://github.com/wfxr/rpk/commit/4cce26d207c5f6d52b808b5a3d6e70cbdf80bba8))
+
+## [0.2.1](https://github.com/wfxr/rpk/compare/v0.2.0..v0.2.1) (2024-12-28)
 
 ### 🚀 Features
 

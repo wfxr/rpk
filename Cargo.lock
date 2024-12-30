@@ -1177,7 +1177,7 @@ dependencies = [
 
 [[package]]
 name = "rpk"
-version = "0.2.1"
+version = "0.2.2-rc.1"
 dependencies = [
  "anyhow",
  "clap",
