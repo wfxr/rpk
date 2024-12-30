@@ -60,13 +60,18 @@ pub fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
 }
 
 /// Install all necessary packages, and returns a [`LockedConfig`].
-pub fn sync_packages(ctx: &Context, cfg: &Config, lcfg: &mut LockedConfig) -> Result<()> {
+pub fn sync_packages(
+    ctx: &Context,
+    cfg: &Config,
+    lcfg: &mut LockedConfig,
+    update: bool,
+) -> Result<()> {
     let new_lpkgs: Vec<_> = cfg
         .pkgs
         .par_iter()
         .map(|(name, pkg)| {
             let old_lpkg = lcfg.pkgs.get(name);
-            sync_package(ctx, pkg, old_lpkg, false)
+            sync_package(ctx, pkg, old_lpkg, update)
         })
         .collect::<Result<_>>()?;
 

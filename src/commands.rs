@@ -10,7 +10,6 @@ use std::{
 use anyhow::{bail, Context as _, Result};
 use inquire::{Select, Text};
 use itertools::Itertools;
-use rayon::prelude::*;
 use tabled::{
     settings::{object::Rows, Color, Padding, Style},
     Table,
@@ -52,7 +51,7 @@ pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
     }
 
     ctx.log_header("Initialized", ctx.config_file.shorten()?);
-    sync(ctx)
+    sync(ctx, false)
 }
 
 pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
@@ -110,13 +109,13 @@ pub fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
     Ok(())
 }
 
-pub fn sync(ctx: &Context) -> Result<(), anyhow::Error> {
+pub fn sync(ctx: &Context, update: bool) -> Result<(), anyhow::Error> {
     let cfg = Config::load(ctx)?;
     ctx.log_header_v("Loaded", ctx.config_file.shorten()?);
     let mut lcfg = LockedConfig::load(ctx)?;
     ctx.log_header_v("Loaded", ctx.lock_file.shorten()?);
 
-    sync_packages(ctx, &cfg, &mut lcfg)?;
+    sync_packages(ctx, &cfg, &mut lcfg, update)?;
 
     lcfg.save()?;
     ctx.log_header_v("Locked", ctx.lock_file.shorten()?);
@@ -143,10 +142,11 @@ pub fn restore(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Err
 }
 
 pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Error> {
-    let cfg = Config::load(ctx)?;
-    ctx.log_header_v("Loaded", ctx.config_file.shorten()?);
     match package {
         Some(package) => {
+            let cfg = Config::load(ctx)?;
+            ctx.log_header_v("Loaded", ctx.config_file.shorten()?);
+
             let pkg = cfg
                 .pkgs
                 .values()
@@ -164,28 +164,10 @@ pub fn update(ctx: &Context, package: Option<String>) -> Result<(), anyhow::Erro
             lcfg.upsert(new_lpkg);
             lcfg.save()?;
             ctx.log_header_v("Locked", ctx.lock_file.shorten()?);
+            Ok(())
         }
-        None => {
-            let mut lcfg = LockedConfig::load(ctx)?;
-            ctx.log_header_v("Loaded", ctx.lock_file.shorten()?);
-
-            for lpkg in lcfg
-                .pkgs
-                .clone()
-                .into_par_iter()
-                .filter_map(|(_, lpkg)| cfg.pkgs.get(&lpkg.name).map(|pkg| (pkg, lpkg)))
-                .map(|(pkg, old_lpkg)| sync_package(ctx, pkg, Some(&old_lpkg), true))
-                .collect::<Result<Vec<_>>>()?
-                .into_iter()
-            {
-                lcfg.upsert(lpkg);
-            }
-
-            lcfg.save()?;
-            ctx.log_header_v("Locked", ctx.lock_file.shorten()?);
-        }
-    };
-    Ok(())
+        None => sync(ctx, true),
+    }
 }
 
 pub fn cleanup(ctx: &Context, clear_cache: bool) -> Result<()> {

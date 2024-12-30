@@ -69,7 +69,7 @@ fn try_main() -> anyhow::Result<()> {
             with_flock!(commands::list(&ctx)?);
         }
         SubCommand::Sync => {
-            with_flock!(commands::sync(&ctx)?);
+            with_flock!(commands::sync(&ctx, false)?);
         }
         SubCommand::Update { package } => {
             with_flock!(commands::update(&ctx, package)?);
