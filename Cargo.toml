@@ -33,7 +33,7 @@ url = { version = "2", features = ["serde"] }
 xdg = "2"
 toml_edit = "0.22"
 inquire = "0.7"
-itertools = "0.13"
+itertools = "0.14"
 walkdir = "2"
 tabled = "0.17"
 emojis = "0"
