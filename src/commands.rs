@@ -286,6 +286,7 @@ pub fn search(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error
             false => Some(answer.desc.emojify()),
             true => None,
         },
+        enabled: true.into(),
     };
 
     debug!("selected: {:?}", pkg);

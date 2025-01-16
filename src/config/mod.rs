@@ -31,8 +31,9 @@ pub struct Config {
 pub struct Package {
     #[serde(skip)]
     pub name:    String,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
+    #[serde(default = "BoolExpr::default")]
+    pub enabled: BoolExpr,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub bins:    Vec<String>,
     pub version: Option<String>,
     #[serde(flatten)]
@@ -45,6 +46,39 @@ pub struct Package {
 #[serde(rename_all = "snake_case")]
 pub enum Source {
     Github { repo: String },
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[serde(untagged)]
+pub enum BoolExpr {
+    Bool(bool),
+    Command(String),
+}
+
+impl BoolExpr {
+    pub fn eval(&self) -> bool {
+        match self {
+            Self::Bool(b) => *b,
+            Self::Command(cmd) => std::process::Command::new("sh")
+                .arg("-c")
+                .arg(cmd)
+                .output()
+                .is_ok_and(|o| o.status.success()),
+        }
+    }
+}
+
+impl Default for BoolExpr {
+    fn default() -> Self {
+        Self::Bool(true)
+    }
+}
+
+impl From<bool> for BoolExpr {
+    fn from(b: bool) -> Self {
+        Self::Bool(b)
+    }
 }
 
 impl fmt::Display for Source {
@@ -65,7 +99,7 @@ impl Source {
 
 impl fmt::Display for Package {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let Self { name, bins, version, source, desc: _ } = self;
+        let Self { name, bins, version, source, desc: _, enabled: _ } = self;
         write!(
             f,
             "{name}@{version} ",
@@ -149,6 +183,7 @@ impl Config {
             }
         }
 
+        cfg.pkgs.retain(|_, pkg| pkg.enabled.eval());
         Ok(cfg)
     }
 
@@ -160,17 +195,5 @@ impl Config {
         fs::write(&ctx.config_file, default)
             .with_context(|| format!("failed to init {}", ctx.config_file.display()))?;
         Ok(toml::from_str(default)?)
-    }
-}
-
-impl From<LockedPackage> for Package {
-    fn from(val: LockedPackage) -> Self {
-        Package {
-            name:    val.name,
-            bins:    val.bins,
-            version: val.version.into(),
-            source:  val.source,
-            desc:    val.desc,
-        }
     }
 }

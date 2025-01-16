@@ -91,6 +91,7 @@ fn try_main() -> anyhow::Result<()> {
                 source: Source::Github { repo: format!("{}/{}", owner, repo) },
                 version,
                 desc,
+                enabled: true.into(),
             };
             with_flock!(commands::add(&ctx, pkg)?);
         }
