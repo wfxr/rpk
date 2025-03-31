@@ -13,7 +13,7 @@ use anyhow::Context as _;
 use clap::{CommandFactory as _, Parser as _, ValueEnum};
 use clap_complete::{generate, generate_to, Shell};
 use cli::{Opt, SubCommand, ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR};
-use config::{Package, Source};
+use config::{GitHubSource, GitReference, GithubSourceType, Package, RawPackage, Source};
 use context::{log_error, Context};
 use tracing_subscriber::EnvFilter;
 use util::{mkdir_p, Shorten as _, CRATE_NAME};
@@ -81,19 +81,22 @@ fn try_main() -> anyhow::Result<()> {
             with_flock!(commands::search(query, top, &ctx)?);
         }
         SubCommand::Add { name, binary, repo: (owner, repo), version, desc } => {
-            let pkg = Package {
+            let rpkg = RawPackage {
                 name: name.unwrap_or_else(|| repo.clone()),
                 bins: if binary.is_empty() {
                     vec![repo.clone()]
                 } else {
                     binary
                 },
-                source: Source::Github { repo: format!("{}/{}", owner, repo) },
-                version,
                 desc,
-                enabled: true.into(),
+                github: Some(GitHubSource { owner, repo, source: GithubSourceType::Release }),
+                reference: version.map(GitReference::Tag),
+                git: None,
+                gist: None,
+                remote: None,
+                enabled: Default::default(),
             };
-            with_flock!(commands::add(&ctx, pkg)?);
+            with_flock!(commands::add(&ctx, rpkg)?);
         }
         SubCommand::Cleanup { cache } => {
             with_flock!(commands::cleanup(&ctx, cache)?);

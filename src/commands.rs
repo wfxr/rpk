@@ -22,7 +22,17 @@ use yansi::Paint;
 
 use crate::{
     commands,
-    config::{Config, EditableConfig, LockedConfig, Package, Source},
+    config::{
+        Config,
+        EditableConfig,
+        GitHubSource,
+        GithubSourceType::Release,
+        LockedConfig,
+        Package,
+        RawConfig,
+        RawPackage,
+        Source,
+    },
     context::Context,
     manager::{restore_package, restore_packages, sync_package, sync_packages},
     provider::Github,
@@ -42,7 +52,7 @@ pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
             let body = ureq::get(url.as_str()).call()?.into_string()?;
             debug!("fetched config file: {}", body);
             // Parse and validate the downloaded config file.
-            toml::from_str::<Config>(&body)?;
+            toml::from_str::<RawConfig>(&body)?;
             fs::write(&ctx.config_file, body)?;
         }
         None => {
@@ -71,9 +81,9 @@ pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
         .into_values()
         .sorted_by(|a, b| a.name.cmp(&b.name))
         .map(|lpkg| Item {
+            version:     lpkg.version().unwrap_or("latest").to_owned(),
             pkg:         lpkg.name,
-            version:     lpkg.version,
-            description: lpkg.desc.map(|s| s.emojify()).unwrap_or_default(),
+            description: lpkg.desc.emojify(),
         });
 
     let mut table = Table::new(items);
@@ -86,18 +96,19 @@ pub fn list(ctx: &Context) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn add(ctx: &Context, mut pkg: Package) -> Result<()> {
+pub fn add(ctx: &Context, mut rpkg: RawPackage) -> Result<()> {
     let mut ecfg = EditableConfig::load(ctx)?;
     ctx.log_header_v("Loaded", ctx.config_file.shorten()?);
 
-    if ecfg.contains(&pkg.name) {
-        bail!("package {} already exists", pkg.name.blue());
+    if ecfg.contains(&rpkg.name) {
+        bail!("package {} already exists", rpkg.name.blue());
     }
 
+    let pkg = rpkg.clone().try_into()?;
     let lpkg = sync_package(ctx, &pkg, None, false)?;
-    pkg.desc = lpkg.desc.clone();
+    rpkg.desc = lpkg.desc.clone();
 
-    ecfg.upsert(&pkg)?;
+    ecfg.upsert(&rpkg)?;
 
     let mut lcfg = LockedConfig::load(ctx)?;
     lcfg.upsert(lpkg);
@@ -193,7 +204,7 @@ pub fn cleanup(ctx: &Context, clear_cache: bool) -> Result<()> {
                     .rev();
                 match (parts.next(), parts.next()) {
                     (Some(Some(version)), Some(Some(name))) => match lcfg.pkgs.get(name) {
-                        Some(lpkg) if lpkg.version == version => {
+                        Some(lpkg) if lpkg.version().unwrap_or("latest") == version => {
                             continue;
                         }
                         _ => {
@@ -277,16 +288,25 @@ pub fn search(query: String, top: u8, ctx: &Context) -> Result<(), anyhow::Error
         bins
     };
 
-    let pkg = Package {
+    let (owner, repo) = answer
+        .fullname
+        .split_once('/')
+        .with_context(|| format!("invalid repo name: {}", answer.fullname))?;
+
+    let pkg = RawPackage {
         name,
         bins,
-        source: Source::Github { repo: answer.fullname },
-        version: None,
-        desc: match answer.desc.is_empty() {
-            false => Some(answer.desc.emojify()),
-            true => None,
-        },
+        desc: answer.desc.emojify(),
         enabled: true.into(),
+        github: Some(GitHubSource {
+            owner:  owner.to_owned(),
+            repo:   repo.to_owned(),
+            source: Release,
+        }),
+        reference: None,
+        git: None,
+        gist: None,
+        remote: None,
     };
 
     debug!("selected: {:?}", pkg);

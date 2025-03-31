@@ -26,13 +26,17 @@ pub struct LockedConfig {
 #[serde(rename_all = "lowercase")]
 pub struct LockedPackage {
     #[serde(skip)]
-    pub name:         String,
+    pub name: String,
+
     #[serde(default)]
-    pub bins:         Vec<String>,
-    pub version:      String,
+    pub bins: Vec<String>,
+
     #[serde(flatten)]
-    pub source:       Source,
-    pub desc:         Option<String>,
+    pub source: Source,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub desc: String,
+
     pub filename:     String,
     pub download_url: Url,
 }
@@ -83,12 +87,19 @@ impl LockedPackage {
     pub fn asset_path(&self, ctx: &Context) -> PathBuf {
         ctx.cache_dir
             .join(&self.name)
-            .join(&self.version)
+            .join(&self.version().unwrap_or("latest"))
             .join(&self.filename)
     }
 
     /// Get the install directory for this package.
     pub fn install_dir(&self, ctx: &Context) -> PathBuf {
-        ctx.data_dir.join(&self.name).join(&self.version)
+        // TODO: This should be reconsidered when we support more sources.
+        ctx.data_dir
+            .join(&self.name)
+            .join(&self.version().unwrap_or("latest"))
+    }
+
+    pub fn version(&self) -> Option<&str> {
+        self.source.version()
     }
 }

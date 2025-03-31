@@ -88,3 +88,13 @@ where
         s.ok_or_else(|| anyhow::anyhow!("failed to convert path to string: {:?}", self.as_ref()))
     }
 }
+
+#[macro_export]
+macro_rules! regex {
+    ($init:expr) => {{
+        use regex::Regex;
+        use std::sync::LazyLock;
+        static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new($init).unwrap());
+        LazyLock::force(&RE)
+    }};
+}

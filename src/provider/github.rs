@@ -7,13 +7,13 @@ use std::{
     fs,
 };
 
-use anyhow::{anyhow, Context as _, Result};
-use models::{Asset, Release, RepoSearchResult, Repository};
+use anyhow::{bail, Context as _, Result};
+use models::{Asset, Release, RepoSearchResult};
 use tracing::{debug, info, trace, warn};
 use ureq::Agent;
 
 use crate::{
-    config::{LockedPackage, Package, Source},
+    config::{LockedPackage, Package, Repository, Source},
     context::Context,
     util::http::{BearerAuthMiddleware, UreqExt as _},
 };
@@ -40,7 +40,7 @@ impl Github {
         Ok(Github { client: agent, ctx })
     }
 
-    pub fn search_repo(&self, query: &str, size: impl Into<u8>) -> Result<Vec<Repository>> {
+    pub fn search_repo(&self, query: &str, size: impl Into<u8>) -> Result<Vec<models::Repository>> {
         let res: RepoSearchResult = self
             .client
             .get("https://api.github.com/search/repositories")
@@ -53,7 +53,7 @@ impl Github {
         Ok(res.items)
     }
 
-    pub fn get_release(&self, repo: &str, version: Option<&str>) -> Result<Release> {
+    pub fn get_release(&self, repo: &Repository, version: Option<&str>) -> Result<Release> {
         match version {
             Some(version) => self
                 .client
@@ -68,26 +68,28 @@ impl Github {
                 ))
                 .call(),
         }
-        .context(format!(
-            "failed to get release: `{repo}@{version}`",
-            version = version.unwrap_or("latest")
-        ))?
+        .with_context(|| {
+            format!(
+                "failed to get release: `{repo}@{version}`",
+                version = version.unwrap_or("latest")
+            )
+        })?
         .into_json()
         .map_err(Into::into)
     }
 
-    pub fn get_repo(&self, repo: &str) -> Result<Repository> {
+    pub fn get_repo(&self, repo: &Repository) -> Result<models::Repository> {
         self.client
             .get(&format!("https://api.github.com/repos/{}", repo))
             .call()
-            .context(format!("failed to get repo: `{repo}`"))?
+            .with_context(|| format!("failed to get repo: `{repo}`"))?
             .into_json()
             .map_err(Into::into)
     }
 
     pub fn parse_repo<'a>(&self, repo: &'a str) -> Result<(&'a str, &'a str)> {
         repo.split_once('/')
-            .context(format!("Invalid repo: `{repo}`"))
+            .with_context(|| format!("Invalid repo: `{repo}`"))
     }
 
     pub fn download_asset(&self, lpkg: &LockedPackage) -> Result<()> {
@@ -101,7 +103,11 @@ impl Github {
         }
 
         self.ctx.log_status_v("Downloading", &lpkg.download_url);
-        let cache_dir = self.ctx.cache_dir.join(&lpkg.name).join(&lpkg.version);
+        let cache_dir = self
+            .ctx
+            .cache_dir
+            .join(&lpkg.name)
+            .join(&lpkg.version().unwrap_or("latest"));
         fs::create_dir_all(&cache_dir).context("failed to create cache directory")?;
         self.client
             .download(&lpkg.download_url, cache_dir.join(&lpkg.filename))
@@ -113,34 +119,35 @@ impl Github {
 
 impl Provider for Github {
     fn lock(&self, pkg: &Package) -> Result<LockedPackage> {
-        let repo = match &pkg.source {
-            Source::Github { repo } => repo,
+        let (repo, tag) = match &pkg.source {
+            Source::Release { repo, tag } => (repo, tag.as_deref()),
+            _ => bail!("unsupported source: {:?}", pkg.source),
         };
 
-        let release = self.get_release(repo, pkg.version.as_deref())?;
-        self.ctx.log_status_v(
-            "Fetched",
-            format!("{repo}@{version}", version = release.tag_name),
-        );
+        let release = self.get_release(repo, tag)?;
+        let tag = release.tag_name.clone();
+        self.ctx.log_status_v("Fetched", format!("{repo}@{tag}"));
 
-        let asset = filter_assets(&release)?;
-        let asset = asset
-            .ok_or_else(|| anyhow!("No matching asset found for {repo}@{}", release.tag_name))?;
+        let asset = filter_assets(&release)?
+            .with_context(|| format!("No matching asset found for {repo}@{}", tag))?;
         self.ctx.log_status_v("Filtered", &asset.name);
 
         // get description from the release if not provided
-        let desc = match &pkg.desc {
-            Some(desc) => desc.clone().into(),
-            None => self.get_repo(repo).ok().and_then(|repo| repo.description),
+        let desc = if !pkg.desc.is_empty() {
+            pkg.desc.trim().to_string()
+        } else {
+            self.get_repo(repo)?
+                .description
+                .map(|s| s.trim().to_string())
+                .unwrap_or_default()
         };
 
         Ok(LockedPackage {
-            name:         pkg.name.clone(),
-            bins:         pkg.bins.clone(),
-            version:      release.tag_name.clone(),
-            source:       pkg.source.clone(),
-            desc:         desc.map(|desc| desc.trim().to_string()),
-            filename:     asset.name.clone(),
+            name: pkg.name.clone(),
+            bins: pkg.bins.clone(),
+            source: Source::Release { repo: repo.clone(), tag: Some(tag) },
+            desc,
+            filename: asset.name.clone(),
             download_url: asset.browser_download_url.clone(),
         })
     }

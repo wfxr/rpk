@@ -14,14 +14,13 @@ pub fn sync_package(
     lpkg: Option<&LockedPackage>,
     update: bool,
 ) -> Result<LockedPackage> {
-    match (&pkg.version, lpkg) {
+    match lpkg {
         // If the package is already installed and the version matches, do nothing.
-        (Some(version), Some(lpkg)) if version == &lpkg.version => {
-            ctx.log_status("Checked", format!("{}@{}", pkg.name, lpkg.version));
-            Ok(lpkg.clone())
-        }
-        (None, Some(lpkg)) if !update => {
-            ctx.log_status("Checked", format!("{}@{}", pkg.name, lpkg.version));
+        Some(lpkg) if pkg.source == lpkg.source || !update => {
+            ctx.log_status("Checked", match lpkg.version() {
+                Some(v) => format!("{}@{}", pkg.name, v),
+                None => pkg.name.clone(),
+            });
             Ok(lpkg.clone())
         }
         _ => {
@@ -32,15 +31,18 @@ pub fn sync_package(
 
             install_package(ctx, &new_lpkg)?;
 
+            let new_ver = new_lpkg.version().unwrap_or("latest");
             match lpkg {
                 Some(old_lpkg) if old_lpkg != &new_lpkg => {
-                    ctx.log_status(
-                        "Updated",
-                        format!("{}@{} => {}", pkg.name, old_lpkg.version, new_lpkg.version),
-                    );
+                    let old_ver = old_lpkg.version();
+
+                    ctx.log_status("Updated", match old_ver {
+                        Some(old_ver) => format!("{}@{} => {}", pkg.name, old_ver, new_ver),
+                        None => format!("{} => {}", pkg.name, new_ver),
+                    });
                 }
                 _ => {
-                    ctx.log_status("Checked", format!("{}@{}", pkg.name, new_lpkg.version));
+                    ctx.log_status("Checked", format!("{}@{}", pkg.name, new_ver));
                 }
             };
             Ok(new_lpkg)
@@ -54,7 +56,10 @@ pub fn restore_package(ctx: &Context, lpkg: &LockedPackage) -> Result<()> {
     provider.download(lpkg)?;
 
     install_package(ctx, lpkg)?;
-    ctx.log_status("Checked", format!("{}@{}", lpkg.name, lpkg.version));
+    ctx.log_status(
+        "Checked",
+        format!("{}@{}", lpkg.name, lpkg.version().unwrap_or("latest")),
+    );
 
     Ok(())
 }

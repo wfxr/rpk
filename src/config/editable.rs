@@ -3,7 +3,7 @@ use std::fs;
 
 use crate::{context::Context, util::not_found_err};
 
-use super::Package;
+use super::{raw::RawPackage, Package};
 
 pub struct EditableConfig {
     ctx: Context,
@@ -40,9 +40,8 @@ impl EditableConfig {
             .with_context(|| format!("failed to write {}", self.ctx.config_file.display()))
     }
 
-    pub fn upsert(&mut self, pkg: &Package) -> Result<()> {
+    pub fn upsert(&mut self, pkg: &RawPackage) -> Result<()> {
         let name = &pkg.name;
-        let is_default_source = pkg.source.is_default();
         let pkg = toml::to_string_pretty(pkg)
             .context("failed to serialize package")?
             .parse::<toml_edit::DocumentMut>()
@@ -52,9 +51,6 @@ impl EditableConfig {
             item @ toml_edit::Item::None => {
                 let mut table = toml_edit::table();
                 for (k, v) in pkg.as_table().iter() {
-                    if k == "source" && is_default_source {
-                        continue;
-                    }
                     table[k] = v.clone();
                 }
                 *item = table;

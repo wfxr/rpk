@@ -98,8 +98,8 @@ pub enum SubCommand {
         version: Option<String>,
 
         /// A description of the package.
-        #[clap(long, value_name = "DESC", long)]
-        desc: Option<String>,
+        #[clap(long, value_name = "DESC", long, default_value = "")]
+        desc: String,
     },
 
     /// Restore packages to the state in the lockfile.
