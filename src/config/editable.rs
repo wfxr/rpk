@@ -3,7 +3,7 @@ use std::fs;
 
 use crate::{context::Context, util::not_found_err};
 
-use super::{raw::RawPackage, Package};
+use super::raw::RawPackage;
 
 pub struct EditableConfig {
     ctx: Context,

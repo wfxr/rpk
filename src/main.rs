@@ -13,7 +13,7 @@ use anyhow::Context as _;
 use clap::{CommandFactory as _, Parser as _, ValueEnum};
 use clap_complete::{generate, generate_to, Shell};
 use cli::{Opt, SubCommand, ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR};
-use config::{GitHubSource, GitReference, GithubSourceType, Package, RawPackage, Source};
+use config::{GitHubSource, GitReference, GithubSourceType, RawPackage};
 use context::{log_error, Context};
 use tracing_subscriber::EnvFilter;
 use util::{mkdir_p, Shorten as _, CRATE_NAME};

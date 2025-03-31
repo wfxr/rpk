@@ -337,27 +337,27 @@ impl TryInto<Package> for RawPackage {
     }
 }
 
-impl Into<RawPackage> for Package {
-    fn into(self) -> RawPackage {
-        let mut pkg = RawPackage::default();
+impl From<Package> for RawPackage {
+    fn from(pkg: Package) -> Self {
+        let mut rpkg = RawPackage::default();
 
-        match self.source {
+        match pkg.source {
             Source::Git { url, reference } => {
-                pkg.git = Some(url);
-                pkg.reference = reference;
+                rpkg.git = Some(url);
+                rpkg.reference = reference;
             }
-            Source::Remote { url } => pkg.remote = Some(url),
+            Source::Remote { url } => rpkg.remote = Some(url),
             Source::Release { repo, tag } => {
-                pkg.github = Some(GitHubSource {
+                rpkg.github = Some(GitHubSource {
                     owner:  repo.owner,
                     repo:   repo.name,
                     source: GithubSourceType::Release,
                 });
-                pkg.reference = tag.map(GitReference::Tag);
+                rpkg.reference = tag.map(GitReference::Tag);
             }
         }
 
-        pkg
+        rpkg
     }
 }
 

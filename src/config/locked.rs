@@ -87,7 +87,7 @@ impl LockedPackage {
     pub fn asset_path(&self, ctx: &Context) -> PathBuf {
         ctx.cache_dir
             .join(&self.name)
-            .join(&self.version().unwrap_or("latest"))
+            .join(self.version().unwrap_or("latest"))
             .join(&self.filename)
     }
 
@@ -96,7 +96,7 @@ impl LockedPackage {
         // TODO: This should be reconsidered when we support more sources.
         ctx.data_dir
             .join(&self.name)
-            .join(&self.version().unwrap_or("latest"))
+            .join(self.version().unwrap_or("latest"))
     }
 
     pub fn version(&self) -> Option<&str> {

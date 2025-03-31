@@ -7,20 +7,15 @@ pub use locked::{LockedConfig, LockedPackage};
 pub use raw::{GitHubSource, GithubSourceType, RawConfig, RawPackage};
 use url::Url;
 
-use std::{collections::BTreeMap, fmt, fs, str};
+use std::{collections::BTreeMap, fmt, str};
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::Result;
 use serde::{
-    de::{Error, MapAccess, Visitor},
     Deserialize,
-    Deserializer,
     Serialize,
 };
 
-use crate::{
-    context::Context,
-    util::{load_toml, not_found_err, remove_file_if_exists},
-};
+use crate::context::Context;
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -93,7 +88,7 @@ impl AsRef<str> for GitReference {
 impl Config {
     /// Load the configuration from the given path.
     pub fn load(ctx: &Context) -> Result<Self> {
-        let raw_cfg = RawConfig::load(&ctx)?;
+        let raw_cfg = RawConfig::load(ctx)?;
 
         let pkgs = raw_cfg
             .pkgs

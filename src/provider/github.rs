@@ -107,7 +107,7 @@ impl Github {
             .ctx
             .cache_dir
             .join(&lpkg.name)
-            .join(&lpkg.version().unwrap_or("latest"));
+            .join(lpkg.version().unwrap_or("latest"));
         fs::create_dir_all(&cache_dir).context("failed to create cache directory")?;
         self.client
             .download(&lpkg.download_url, cache_dir.join(&lpkg.filename))
