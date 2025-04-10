@@ -10,10 +10,7 @@ use url::Url;
 use std::{collections::BTreeMap, fmt, str};
 
 use anyhow::Result;
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 use crate::context::Context;
 
@@ -45,13 +42,19 @@ impl fmt::Display for Repository {
 
 /// The source for a [`Package`].
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "source")]
+#[serde(rename_all = "lowercase")]
 pub enum Source {
     /// A clonable Git repository.
     Git { url: Url, reference: Option<GitReference> },
     /// A remote file.
     Remote { url: Url },
     /// A release from a GitHub repository.
-    Release { repo: Repository, tag: Option<String> },
+    Release {
+        #[serde(flatten)]
+        repo: Repository,
+        tag:  Option<String>,
+    },
 }
 
 impl Source {

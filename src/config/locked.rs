@@ -22,7 +22,6 @@ pub struct LockedConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(tag = "source")]
 #[serde(rename_all = "lowercase")]
 pub struct LockedPackage {
     #[serde(skip)]
