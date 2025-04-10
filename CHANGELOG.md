@@ -1,8 +1,9 @@
 
-## [0.2.2-rc.1](https://github.com/wfxr/rpk/compare/v0.2.1..0.2.2-rc.1) (2024-12-30)
+## [0.2.2](https://github.com/wfxr/rpk/compare/v0.2.1..0.2.2) (2025-04-10)
 
 ### 🚀 Features
 
+- Add `enabled` field to packages - ([4efbe0d](https://github.com/wfxr/rpk/commit/4efbe0df010d9eff0b0b1448b3416c3e3406df71))
 - Update implies sync when no package is specified - ([058e54e](https://github.com/wfxr/rpk/commit/058e54eb329a3124c05263944caa8e1a14a045ba))
 
 ### 🚜 Refactor
@@ -12,6 +13,10 @@
 ### 🎨 Styling
 
 - Cargo fmt - ([4cce26d](https://github.com/wfxr/rpk/commit/4cce26d207c5f6d52b808b5a3d6e70cbdf80bba8))
+
+### ⚙️ Miscellaneous Tasks
+
+- Update pre-commit hooks to v5.0.0 - ([578d4ab](https://github.com/wfxr/rpk/commit/578d4ab7cbc6f6041baabcbe368926d0465e8aba))
 
 ## [0.2.1](https://github.com/wfxr/rpk/compare/v0.2.0..v0.2.1) (2024-12-28)
 
