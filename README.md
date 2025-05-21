@@ -18,7 +18,7 @@ You can port the configuration from remote at the same time by specifying the `-
 ```bash
 # Useful when you want to quickly install `rpk` and restore packages on a new environment (like container).
 curl -fsSL https://raw.githubusercontent.com/wfxr/rpk/main/scripts/install \
-    | bash -s -- --to ~/bin --init https://raw.githubusercontent.com/wfxr/rpk/main/demo/packages.toml
+    | bash -s -- --to /usr/local/bin --init https://raw.githubusercontent.com/wfxr/rpk/main/demo/packages.toml
 ```
 
 ### Usage
