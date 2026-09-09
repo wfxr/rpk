@@ -35,7 +35,7 @@ pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
     }
 
     remove_file_if_exists(&ctx.lock_file)
-        .with_context(|| format!("failed to remove lock file {}", &ctx.lock_file.display(),))?;
+        .with_context(|| format!("failed to remove lock file {}", ctx.lock_file.display()))?;
 
     match from {
         Some(url) => {
