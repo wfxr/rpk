@@ -1,4 +1,4 @@
-use anyhow::{bail, Context as _, Result};
+use anyhow::{Context as _, Result, bail};
 use std::fs;
 
 use crate::{context::Context, util::not_found_err};

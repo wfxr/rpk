@@ -8,10 +8,10 @@ use std::{collections::BTreeMap, fmt, fs, str};
 
 use anyhow::{Context as _, Result};
 use serde::{
-    de::{Error, MapAccess, Visitor},
     Deserialize,
     Deserializer,
     Serialize,
+    de::{Error, MapAccess, Visitor},
 };
 
 use crate::{

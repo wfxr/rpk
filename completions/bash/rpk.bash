@@ -1,88 +1,92 @@
 _rpk() {
     local i cur prev opts cmd
     COMPREPLY=()
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+        cur="$2"
+    else
+        cur="${COMP_WORDS[COMP_CWORD]}"
+    fi
+    prev="$3"
     cmd=""
     opts=""
 
-    for i in ${COMP_WORDS[@]}
+    for i in "${COMP_WORDS[@]:0:COMP_CWORD}"
     do
         case "${cmd},${i}" in
             ",$1")
                 cmd="rpk"
                 ;;
             rpk,add)
-                cmd="rpk__add"
+                cmd="rpk__subcmd__add"
                 ;;
             rpk,cleanup)
-                cmd="rpk__cleanup"
+                cmd="rpk__subcmd__cleanup"
                 ;;
             rpk,completions)
-                cmd="rpk__completions"
+                cmd="rpk__subcmd__completions"
                 ;;
             rpk,env)
-                cmd="rpk__env"
+                cmd="rpk__subcmd__env"
                 ;;
             rpk,help)
-                cmd="rpk__help"
+                cmd="rpk__subcmd__help"
                 ;;
             rpk,init)
-                cmd="rpk__init"
+                cmd="rpk__subcmd__init"
                 ;;
             rpk,list)
-                cmd="rpk__list"
+                cmd="rpk__subcmd__list"
                 ;;
             rpk,restore)
-                cmd="rpk__restore"
+                cmd="rpk__subcmd__restore"
                 ;;
             rpk,search)
-                cmd="rpk__search"
+                cmd="rpk__subcmd__search"
                 ;;
             rpk,sync)
-                cmd="rpk__sync"
+                cmd="rpk__subcmd__sync"
                 ;;
             rpk,update)
-                cmd="rpk__update"
+                cmd="rpk__subcmd__update"
                 ;;
             rpk,version)
-                cmd="rpk__version"
+                cmd="rpk__subcmd__version"
                 ;;
-            rpk__help,add)
-                cmd="rpk__help__add"
+            rpk__subcmd__help,add)
+                cmd="rpk__subcmd__help__subcmd__add"
                 ;;
-            rpk__help,cleanup)
-                cmd="rpk__help__cleanup"
+            rpk__subcmd__help,cleanup)
+                cmd="rpk__subcmd__help__subcmd__cleanup"
                 ;;
-            rpk__help,completions)
-                cmd="rpk__help__completions"
+            rpk__subcmd__help,completions)
+                cmd="rpk__subcmd__help__subcmd__completions"
                 ;;
-            rpk__help,env)
-                cmd="rpk__help__env"
+            rpk__subcmd__help,env)
+                cmd="rpk__subcmd__help__subcmd__env"
                 ;;
-            rpk__help,help)
-                cmd="rpk__help__help"
+            rpk__subcmd__help,help)
+                cmd="rpk__subcmd__help__subcmd__help"
                 ;;
-            rpk__help,init)
-                cmd="rpk__help__init"
+            rpk__subcmd__help,init)
+                cmd="rpk__subcmd__help__subcmd__init"
                 ;;
-            rpk__help,list)
-                cmd="rpk__help__list"
+            rpk__subcmd__help,list)
+                cmd="rpk__subcmd__help__subcmd__list"
                 ;;
-            rpk__help,restore)
-                cmd="rpk__help__restore"
+            rpk__subcmd__help,restore)
+                cmd="rpk__subcmd__help__subcmd__restore"
                 ;;
-            rpk__help,search)
-                cmd="rpk__help__search"
+            rpk__subcmd__help,search)
+                cmd="rpk__subcmd__help__subcmd__search"
                 ;;
-            rpk__help,sync)
-                cmd="rpk__help__sync"
+            rpk__subcmd__help,sync)
+                cmd="rpk__subcmd__help__subcmd__sync"
                 ;;
-            rpk__help,update)
-                cmd="rpk__help__update"
+            rpk__subcmd__help,update)
+                cmd="rpk__subcmd__help__subcmd__update"
                 ;;
-            rpk__help,version)
-                cmd="rpk__help__version"
+            rpk__subcmd__help,version)
+                cmd="rpk__subcmd__help__subcmd__version"
                 ;;
             *)
                 ;;
@@ -120,8 +124,8 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__add)
-            opts="-q -v -h --name --binary --version --desc --quiet --verbose --help <REPO>"
+        rpk__subcmd__add)
+            opts="-q -v -h --name --binary --version --desc --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -150,7 +154,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__cleanup)
+        rpk__subcmd__cleanup)
             opts="-q -v -h --cache --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -164,7 +168,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__completions)
+        rpk__subcmd__completions)
             opts="-d -l -q -v -h --dir --list --quiet --verbose --help bash elvish fish powershell zsh"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -186,7 +190,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__env)
+        rpk__subcmd__env)
             opts="-q -v -h --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -200,7 +204,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help)
+        rpk__subcmd__help)
             opts="init list sync add restore update search cleanup env completions version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -214,7 +218,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__add)
+        rpk__subcmd__help__subcmd__add)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -228,7 +232,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__cleanup)
+        rpk__subcmd__help__subcmd__cleanup)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -242,7 +246,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__completions)
+        rpk__subcmd__help__subcmd__completions)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -256,7 +260,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__env)
+        rpk__subcmd__help__subcmd__env)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -270,7 +274,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__help)
+        rpk__subcmd__help__subcmd__help)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -284,7 +288,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__init)
+        rpk__subcmd__help__subcmd__init)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -298,7 +302,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__list)
+        rpk__subcmd__help__subcmd__list)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -312,7 +316,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__restore)
+        rpk__subcmd__help__subcmd__restore)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -326,7 +330,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__search)
+        rpk__subcmd__help__subcmd__search)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -340,7 +344,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__sync)
+        rpk__subcmd__help__subcmd__sync)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -354,7 +358,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__update)
+        rpk__subcmd__help__subcmd__update)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -368,7 +372,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__help__version)
+        rpk__subcmd__help__subcmd__version)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -382,7 +386,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__init)
+        rpk__subcmd__init)
             opts="-f -q -v -h --from --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -404,7 +408,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__list)
+        rpk__subcmd__list)
             opts="-q -v -h --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -418,8 +422,8 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__restore)
-            opts="-q -v -h --quiet --verbose --help [PKG]"
+        rpk__subcmd__restore)
+            opts="-q -v -h --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -432,8 +436,8 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__search)
-            opts="-q -v -h --top --quiet --verbose --help <QUERY>"
+        rpk__subcmd__search)
+            opts="-q -v -h --top --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -450,7 +454,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__sync)
+        rpk__subcmd__sync)
             opts="-q -v -h --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
@@ -464,8 +468,8 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__update)
-            opts="-q -v -h --quiet --verbose --help [PKG]"
+        rpk__subcmd__update)
+            opts="-q -v -h --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -478,7 +482,7 @@ _rpk() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        rpk__version)
+        rpk__subcmd__version)
             opts="-q -v -h --quiet --verbose --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )

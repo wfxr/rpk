@@ -18,7 +18,7 @@ use zip::ZipArchive;
 use crate::{
     config::LockedPackage,
     context::Context,
-    util::{mkdir_p, symlink_force, Shorten},
+    util::{Shorten, mkdir_p, symlink_force},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -68,10 +68,10 @@ pub fn install_package(ctx: &Context, lpkg: &LockedPackage) -> anyhow::Result<()
     let archive = detect_archive(asset_file)?;
     let asset_file = fs::File::open(asset_file)?;
 
-    if let Err(e) = fs::remove_dir_all(install_dir) {
-        if e.kind() != io::ErrorKind::NotFound {
-            bail!("failed to remove existing install directory: {}", e);
-        }
+    if let Err(e) = fs::remove_dir_all(install_dir)
+        && e.kind() != io::ErrorKind::NotFound
+    {
+        bail!("failed to remove existing install directory: {}", e);
     }
     mkdir_p(install_dir)?;
 

@@ -4,10 +4,10 @@ use std::{
 };
 
 use ureq::{
-    http::{header::AUTHORIZATION, Request, Response},
-    middleware::{Middleware, MiddlewareNext},
     Body,
     SendBody,
+    http::{Request, Response, header::AUTHORIZATION},
+    middleware::{Middleware, MiddlewareNext},
 };
 use url::Url;
 

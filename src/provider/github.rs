@@ -7,7 +7,7 @@ use std::{
     fs,
 };
 
-use anyhow::{anyhow, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow};
 use models::{Asset, Release, RepoSearchResult, Repository};
 use tracing::{debug, info, trace, warn};
 use ureq::Agent;

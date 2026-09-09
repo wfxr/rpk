@@ -11,12 +11,12 @@ use std::process;
 
 use anyhow::Context as _;
 use clap::{CommandFactory as _, Parser as _, ValueEnum};
-use clap_complete::{generate, generate_to, Shell};
-use cli::{Opt, SubCommand, ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR};
+use clap_complete::{Shell, generate, generate_to};
+use cli::{ENV_BIN_DIR, ENV_CACHE_DIR, ENV_CONFIG_DIR, ENV_DATA_DIR, Opt, SubCommand};
 use config::{Package, Source};
-use context::{log_error, Context};
+use context::{Context, log_error};
 use tracing_subscriber::EnvFilter;
-use util::{mkdir_p, Shorten as _, CRATE_NAME};
+use util::{CRATE_NAME, Shorten as _, mkdir_p};
 use yansi::Condition;
 
 fn try_main() -> anyhow::Result<()> {

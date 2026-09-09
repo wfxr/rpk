@@ -2,18 +2,18 @@ use std::{
     fs,
     process,
     sync::{
-        atomic::{AtomicUsize, Ordering},
         Arc,
+        atomic::{AtomicUsize, Ordering},
     },
 };
 
-use anyhow::{bail, Context as _, Result};
+use anyhow::{Context as _, Result, bail};
 use inquire::{Select, Text};
 use itertools::Itertools;
 use tabled::{
-    settings::{object::Rows, Color, Padding, Style},
     Table,
     Tabled,
+    settings::{Color, Padding, Style, object::Rows},
 };
 use tracing::debug;
 use url::Url;
@@ -26,7 +26,7 @@ use crate::{
     context::Context,
     manager::{restore_package, restore_packages, sync_package, sync_packages},
     provider::Github,
-    util::{remove_file_if_exists, rm_rf, Emojify, Shorten as _},
+    util::{Emojify, Shorten as _, remove_file_if_exists, rm_rf},
 };
 
 pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {

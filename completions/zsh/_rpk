@@ -71,7 +71,7 @@ _arguments "${_arguments_options[@]}" : \
 (add)
 _arguments "${_arguments_options[@]}" : \
 '--name=[A unique name for the package. Defaults to the repo name]:NAME:_default' \
-'*--binary=[The binaries to install. Defaults to the package name]' \
+'*--binary=[The binaries to install. Defaults to the package name]::BIN:_default' \
 '--version=[The version of the package]:VERSION:_default' \
 '--desc=[A description of the package]:DESC:_default' \
 '-q[Suppress any informational output]' \
@@ -165,7 +165,7 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (help)
 _arguments "${_arguments_options[@]}" : \
-":: :_rpk__help_commands" \
+":: :_rpk__subcmd__help_commands" \
 "*::: :->help" \
 && ret=0
 
@@ -250,28 +250,28 @@ _rpk_commands() {
     )
     _describe -t commands 'rpk commands' commands "$@"
 }
-(( $+functions[_rpk__add_commands] )) ||
-_rpk__add_commands() {
+(( $+functions[_rpk__subcmd__add_commands] )) ||
+_rpk__subcmd__add_commands() {
     local commands; commands=()
     _describe -t commands 'rpk add commands' commands "$@"
 }
-(( $+functions[_rpk__cleanup_commands] )) ||
-_rpk__cleanup_commands() {
+(( $+functions[_rpk__subcmd__cleanup_commands] )) ||
+_rpk__subcmd__cleanup_commands() {
     local commands; commands=()
     _describe -t commands 'rpk cleanup commands' commands "$@"
 }
-(( $+functions[_rpk__completions_commands] )) ||
-_rpk__completions_commands() {
+(( $+functions[_rpk__subcmd__completions_commands] )) ||
+_rpk__subcmd__completions_commands() {
     local commands; commands=()
     _describe -t commands 'rpk completions commands' commands "$@"
 }
-(( $+functions[_rpk__env_commands] )) ||
-_rpk__env_commands() {
+(( $+functions[_rpk__subcmd__env_commands] )) ||
+_rpk__subcmd__env_commands() {
     local commands; commands=()
     _describe -t commands 'rpk env commands' commands "$@"
 }
-(( $+functions[_rpk__help_commands] )) ||
-_rpk__help_commands() {
+(( $+functions[_rpk__subcmd__help_commands] )) ||
+_rpk__subcmd__help_commands() {
     local commands; commands=(
 'init:Initialize a configuration file' \
 'list:List all installed packages' \
@@ -288,98 +288,98 @@ _rpk__help_commands() {
     )
     _describe -t commands 'rpk help commands' commands "$@"
 }
-(( $+functions[_rpk__help__add_commands] )) ||
-_rpk__help__add_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__add_commands] )) ||
+_rpk__subcmd__help__subcmd__add_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help add commands' commands "$@"
 }
-(( $+functions[_rpk__help__cleanup_commands] )) ||
-_rpk__help__cleanup_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__cleanup_commands] )) ||
+_rpk__subcmd__help__subcmd__cleanup_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help cleanup commands' commands "$@"
 }
-(( $+functions[_rpk__help__completions_commands] )) ||
-_rpk__help__completions_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__completions_commands] )) ||
+_rpk__subcmd__help__subcmd__completions_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help completions commands' commands "$@"
 }
-(( $+functions[_rpk__help__env_commands] )) ||
-_rpk__help__env_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__env_commands] )) ||
+_rpk__subcmd__help__subcmd__env_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help env commands' commands "$@"
 }
-(( $+functions[_rpk__help__help_commands] )) ||
-_rpk__help__help_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__help_commands] )) ||
+_rpk__subcmd__help__subcmd__help_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help help commands' commands "$@"
 }
-(( $+functions[_rpk__help__init_commands] )) ||
-_rpk__help__init_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__init_commands] )) ||
+_rpk__subcmd__help__subcmd__init_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help init commands' commands "$@"
 }
-(( $+functions[_rpk__help__list_commands] )) ||
-_rpk__help__list_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__list_commands] )) ||
+_rpk__subcmd__help__subcmd__list_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help list commands' commands "$@"
 }
-(( $+functions[_rpk__help__restore_commands] )) ||
-_rpk__help__restore_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__restore_commands] )) ||
+_rpk__subcmd__help__subcmd__restore_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help restore commands' commands "$@"
 }
-(( $+functions[_rpk__help__search_commands] )) ||
-_rpk__help__search_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__search_commands] )) ||
+_rpk__subcmd__help__subcmd__search_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help search commands' commands "$@"
 }
-(( $+functions[_rpk__help__sync_commands] )) ||
-_rpk__help__sync_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__sync_commands] )) ||
+_rpk__subcmd__help__subcmd__sync_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help sync commands' commands "$@"
 }
-(( $+functions[_rpk__help__update_commands] )) ||
-_rpk__help__update_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__update_commands] )) ||
+_rpk__subcmd__help__subcmd__update_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help update commands' commands "$@"
 }
-(( $+functions[_rpk__help__version_commands] )) ||
-_rpk__help__version_commands() {
+(( $+functions[_rpk__subcmd__help__subcmd__version_commands] )) ||
+_rpk__subcmd__help__subcmd__version_commands() {
     local commands; commands=()
     _describe -t commands 'rpk help version commands' commands "$@"
 }
-(( $+functions[_rpk__init_commands] )) ||
-_rpk__init_commands() {
+(( $+functions[_rpk__subcmd__init_commands] )) ||
+_rpk__subcmd__init_commands() {
     local commands; commands=()
     _describe -t commands 'rpk init commands' commands "$@"
 }
-(( $+functions[_rpk__list_commands] )) ||
-_rpk__list_commands() {
+(( $+functions[_rpk__subcmd__list_commands] )) ||
+_rpk__subcmd__list_commands() {
     local commands; commands=()
     _describe -t commands 'rpk list commands' commands "$@"
 }
-(( $+functions[_rpk__restore_commands] )) ||
-_rpk__restore_commands() {
+(( $+functions[_rpk__subcmd__restore_commands] )) ||
+_rpk__subcmd__restore_commands() {
     local commands; commands=()
     _describe -t commands 'rpk restore commands' commands "$@"
 }
-(( $+functions[_rpk__search_commands] )) ||
-_rpk__search_commands() {
+(( $+functions[_rpk__subcmd__search_commands] )) ||
+_rpk__subcmd__search_commands() {
     local commands; commands=()
     _describe -t commands 'rpk search commands' commands "$@"
 }
-(( $+functions[_rpk__sync_commands] )) ||
-_rpk__sync_commands() {
+(( $+functions[_rpk__subcmd__sync_commands] )) ||
+_rpk__subcmd__sync_commands() {
     local commands; commands=()
     _describe -t commands 'rpk sync commands' commands "$@"
 }
-(( $+functions[_rpk__update_commands] )) ||
-_rpk__update_commands() {
+(( $+functions[_rpk__subcmd__update_commands] )) ||
+_rpk__subcmd__update_commands() {
     local commands; commands=()
     _describe -t commands 'rpk update commands' commands "$@"
 }
-(( $+functions[_rpk__version_commands] )) ||
-_rpk__version_commands() {
+(( $+functions[_rpk__subcmd__version_commands] )) ||
+_rpk__subcmd__version_commands() {
     local commands; commands=()
     _describe -t commands 'rpk version commands' commands "$@"
 }

@@ -5,7 +5,7 @@ use std::{
     process,
 };
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 
 /// Nicely format an error message for when the subprocess didn't exit
 /// successfully.

@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use clap::{
-    builder::{
-        styling::{AnsiColor, Effects},
-        Styles,
-    },
     Parser,
+    builder::{
+        Styles,
+        styling::{AnsiColor, Effects},
+    },
 };
 use clap_complete::Shell;
 use url::Url;

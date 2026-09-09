@@ -18,7 +18,7 @@ jobs:
     name: Extract crate metadata
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Extract crate information
         id: crate_metadata
         run: |
@@ -43,7 +43,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: cargo fmt -- --check
 
   build:
@@ -69,7 +69,7 @@ jobs:
       RPK_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install prerequisites
         shell: bash
@@ -300,13 +300,13 @@ jobs:
           fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 
       - name: "Artifact upload: tarball"
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.package.outputs.PKG_NAME }}
           path: ${{ steps.package.outputs.PKG_PATH }}
 
       - name: "Artifact upload: Debian package"
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v7
         if: steps.debian-package.outputs.DPKG_NAME
         with:
           name: ${{ steps.debian-package.outputs.DPKG_NAME }}
@@ -320,7 +320,7 @@ jobs:
           echo "IS_RELEASE=${IS_RELEASE}" >> $GITHUB_OUTPUT
 
       - name: Publish archives and packages
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         if: steps.is-release.outputs.IS_RELEASE
         with:
           files: |

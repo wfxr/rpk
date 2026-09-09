@@ -13,10 +13,10 @@ pub fn symlink_force(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> anyhow::Re
     let src = src.as_ref();
     let dst = dst.as_ref();
 
-    if let Err(e) = fs::remove_file(dst) {
-        if e.kind() != io::ErrorKind::NotFound {
-            return Err(e.into());
-        }
+    if let Err(e) = fs::remove_file(dst)
+        && e.kind() != io::ErrorKind::NotFound
+    {
+        return Err(e.into());
     }
 
     unix::fs::symlink(src, dst).map_err(Into::into)
