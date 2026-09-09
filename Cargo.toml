@@ -19,28 +19,28 @@ anyhow = "1"
 flate2 = "1"
 serde = { version = "1", features = ["derive"] }
 tar = "0.4"
-toml = "0.8"
+toml = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 yansi = { version = "1", features = ["detect-env", "detect-tty"] }
-zip = "2"
+zip = "8"
 clap = { version = "4", features = ["wrap_help", "derive", "env", "color"] }
 clap_complete = { version = "4" }
 home = "0.5"
-constcat = "0.5"
+constcat = "0.6"
 indexmap = { version = "2", features = ["rayon", "serde"] }
 url = { version = "2", features = ["serde"] }
-xdg = "2"
-toml_edit = "0.22"
-inquire = "0.7"
-itertools = "0.14"
+xdg = "3"
+toml_edit = "0.25"
+inquire = "0.9"
+itertools = "0.15"
 walkdir = "2"
-tabled = "0.17"
+tabled = "0.22"
 emojis = "0"
-ureq = { version = "2", features = ["proxy-from-env", "json", "socks-proxy"] }
+ureq = { version = "3", features = ["json", "socks-proxy"] }
 serde_json = "1"
 rayon = "1"
-fmutex = "0.1"
+fmutex = "0.3"
 
 [build-dependencies]
 anyhow = "1"

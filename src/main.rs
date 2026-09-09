@@ -25,18 +25,26 @@ fn try_main() -> anyhow::Result<()> {
 
     let Opt { bin_dir, data_dir, cache_dir, config_dir, command, .. } = opt;
 
-    let xdg_dirs = xdg::BaseDirectories::with_prefix(CRATE_NAME)?;
+    let xdg_dirs = xdg::BaseDirectories::with_prefix(CRATE_NAME);
 
-    let config_dir = config_dir.unwrap_or_else(|| xdg_dirs.get_config_home());
+    let config_dir = config_dir
+        .or_else(|| xdg_dirs.get_config_home())
+        .context("could not determine config directory")?;
     mkdir_p(&config_dir).context("failed to create config dir")?;
 
-    let cache_dir = cache_dir.unwrap_or_else(|| xdg_dirs.get_cache_home());
+    let cache_dir = cache_dir
+        .or_else(|| xdg_dirs.get_cache_home())
+        .context("could not determine cache directory")?;
     mkdir_p(&cache_dir).context("failed to create cache dir")?;
 
-    let data_dir = data_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("packages"));
+    let data_dir = data_dir
+        .or_else(|| xdg_dirs.get_data_home().map(|dir| dir.join("packages")))
+        .context("could not determine data directory")?;
     mkdir_p(&data_dir).context("failed to create data dir")?;
 
-    let bin_dir = bin_dir.unwrap_or_else(|| xdg_dirs.get_data_home().join("bin"));
+    let bin_dir = bin_dir
+        .or_else(|| xdg_dirs.get_data_home().map(|dir| dir.join("bin")))
+        .context("could not determine binary directory")?;
     mkdir_p(&bin_dir).context("failed to create binary dir")?;
 
     let config_file = config_dir.join("packages.toml");
@@ -159,16 +167,18 @@ fn main() {
     }
 }
 
-fn acquire_flock(ctx: &Context) -> anyhow::Result<fmutex::Guard> {
+fn acquire_flock(ctx: &Context) -> anyhow::Result<fmutex::Guard<'static>> {
     let path = &ctx.config_dir;
-    match fmutex::try_lock(path).with_context(|| format!("failed to open `{}`", path.display()))? {
+    match fmutex::try_lock_exclusive_path(path)
+        .with_context(|| format!("failed to open `{}`", path.display()))?
+    {
         Some(g) => Ok(g),
         None => {
             ctx.log_warning(
                 "Blocking",
                 format!("waiting for file lock on {}", path.shorten()?),
             );
-            fmutex::lock(path)
+            fmutex::lock_exclusive_path(path)
                 .with_context(|| format!("failed to acquire file lock `{}`", path.display()))
         }
     }

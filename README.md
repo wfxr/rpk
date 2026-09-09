@@ -21,6 +21,16 @@ curl -fsSL https://raw.githubusercontent.com/wfxr/rpk/main/scripts/install \
     | bash -s -- --to /usr/local/bin --init https://raw.githubusercontent.com/wfxr/rpk/main/demo/packages.toml
 ```
 
+### GitHub authentication
+
+Unauthenticated GitHub API requests have a lower rate limit and may fail with HTTP 403. Set a personal access token to increase the limit:
+
+```bash
+export RPK_GITHUB_TOKEN='YOUR_GITHUB_TOKEN'
+```
+
+`GITHUB_TOKEN` is also supported and takes precedence when both variables are set. See [GitHub API rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api) for details.
+
 ### Usage
 
 To access the packages installed by rpk, you need to run the following command or add it to your shell rc file:

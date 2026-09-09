@@ -39,7 +39,10 @@ pub fn init(ctx: &Context, from: Option<Url>) -> Result<()> {
 
     match from {
         Some(url) => {
-            let body = ureq::get(url.as_str()).call()?.into_string()?;
+            let body = ureq::get(url.as_str())
+                .call()?
+                .body_mut()
+                .read_to_string()?;
             debug!("fetched config file: {}", body);
             // Parse and validate the downloaded config file.
             toml::from_str::<Config>(&body)?;

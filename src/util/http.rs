@@ -1,9 +1,14 @@
 use std::{
-    io::{BufWriter, Write},
+    io::{BufWriter, Read, Write},
     path::Path,
 };
 
-use ureq::{Middleware, MiddlewareNext, Request, Response};
+use ureq::{
+    http::{header::AUTHORIZATION, Request, Response},
+    middleware::{Middleware, MiddlewareNext},
+    Body,
+    SendBody,
+};
 use url::Url;
 
 use super::temp::TempFile;
@@ -11,13 +16,20 @@ use super::temp::TempFile;
 pub struct BearerAuthMiddleware(pub Option<String>);
 
 impl Middleware for BearerAuthMiddleware {
-    fn handle(&self, request: Request, next: MiddlewareNext) -> Result<Response, ureq::Error> {
-        let req = match &self.0 {
-            Some(token) => request.set("Authorization", format!("Bearer {}", token).as_str()),
-            None => request,
-        };
+    fn handle(
+        &self,
+        mut request: Request<SendBody>,
+        next: MiddlewareNext,
+    ) -> Result<Response<Body>, ureq::Error> {
+        if let Some(token) = &self.0 {
+            let mut value = format!("Bearer {token}")
+                .parse::<ureq::http::HeaderValue>()
+                .map_err(ureq::http::Error::from)?;
+            value.set_sensitive(true);
+            request.headers_mut().insert(AUTHORIZATION, value);
+        }
 
-        next.handle(req)
+        next.handle(request)
     }
 }
 
@@ -27,7 +39,7 @@ pub trait UreqExt {
 
 impl UreqExt for ureq::Agent {
     fn download(&self, url: &Url, path: impl AsRef<Path>) -> anyhow::Result<()> {
-        let mut reader = self.get(url.as_str()).call()?.into_reader();
+        let mut reader = self.get(url.as_str()).call()?.into_body().into_reader();
         let mut tmp_file = TempFile::new_force(path.as_ref())?;
         {
             let mut writer = BufWriter::new(tmp_file.file());
@@ -49,6 +61,6 @@ impl UreqExt for ureq::Agent {
 }
 
 pub fn http_get(url: Url) -> anyhow::Result<String> {
-    let resp = ureq::get(url.as_str()).call()?;
-    Ok(resp.into_string()?)
+    let mut resp = ureq::get(url.as_str()).call()?;
+    Ok(resp.body_mut().read_to_string()?)
 }

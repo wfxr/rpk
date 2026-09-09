@@ -32,10 +32,11 @@ impl Github {
             .or_else(|_| env::var("RPK_GITHUB_TOKEN"))
             .ok();
 
-        let agent = ureq::AgentBuilder::new()
+        let agent = Agent::config_builder()
             .user_agent("rpk")
             .middleware(BearerAuthMiddleware(token))
-            .build();
+            .build()
+            .into();
 
         Ok(Github { client: agent, ctx })
     }
@@ -45,10 +46,11 @@ impl Github {
             .client
             .get("https://api.github.com/search/repositories")
             .query("q", query)
-            .query("per_page", &size.into().to_string())
+            .query("per_page", size.into().to_string())
             .call()
             .context("failed to search repo")?
-            .into_json()?;
+            .body_mut()
+            .read_json()?;
 
         Ok(res.items)
     }
@@ -72,7 +74,8 @@ impl Github {
             "failed to get release: `{repo}@{version}`",
             version = version.unwrap_or("latest")
         ))?
-        .into_json()
+        .body_mut()
+        .read_json()
         .map_err(Into::into)
     }
 
@@ -81,7 +84,8 @@ impl Github {
             .get(&format!("https://api.github.com/repos/{}", repo))
             .call()
             .context(format!("failed to get repo: `{repo}`"))?
-            .into_json()
+            .body_mut()
+            .read_json()
             .map_err(Into::into)
     }
 
