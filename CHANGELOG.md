@@ -1,4 +1,22 @@
 
+## [0.2.3](https://github.com/wfxr/rpk/compare/v0.2.2..v0.2.3) (2026-09-09)
+
+### 🐛 Bug Fixes
+
+- Unblock CI for the updated Rust nightly - ([421eaf4](https://github.com/wfxr/rpk/commit/421eaf4d8835859d1e0e31fe77b5b6c68c1afbcc))
+- Replace retired Intel macOS CI runner - ([e9c614d](https://github.com/wfxr/rpk/commit/e9c614d276642aeae1153494ab7f0f286e068764))
+- Restore compatibility with upgraded dependencies - ([8639240](https://github.com/wfxr/rpk/commit/8639240b3bf2b39cfd506798ac018c928b9e6119))
+
+### 📚 Documentation
+
+- Update README - ([9f4bc8e](https://github.com/wfxr/rpk/commit/9f4bc8e3f57620baf3b4a6ec1262f510f7dd0055))
+
+### ⚙️ Miscellaneous Tasks
+
+- Modernize Rust edition and CI tooling - ([2afcee4](https://github.com/wfxr/rpk/commit/2afcee4400f0824853c73d5a4a78b8382bd57114))
+- Migrate pre-commit hooks to prek - ([f4adf21](https://github.com/wfxr/rpk/commit/f4adf217c836c01d88b7c55432d2c3e7e8db7afc))
+
+
 ## [0.2.2](https://github.com/wfxr/rpk/compare/v0.2.1..0.2.2) (2025-04-10)
 
 ### 🚀 Features
