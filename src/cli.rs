@@ -98,7 +98,7 @@ pub enum SubCommand {
         version: Option<String>,
 
         /// A description of the package.
-        #[clap(long, value_name = "DESC", long)]
+        #[clap(long, value_name = "DESC")]
         desc: Option<String>,
     },
 
