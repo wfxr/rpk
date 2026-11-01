@@ -23,7 +23,7 @@ toml = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 yansi = { version = "1", features = ["detect-env", "detect-tty"] }
-zip = "8"
+zip = "9"
 clap = { version = "4", features = ["wrap_help", "derive", "env", "color"] }
 clap_complete = { version = "4" }
 home = "0.5"
